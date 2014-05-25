@@ -22,7 +22,6 @@ public:
     ShutdownFlag aboutToShutdown();
     
 private slots:
-    void triggerAction();
 };
 
 } // namespace Internal

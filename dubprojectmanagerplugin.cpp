@@ -2,13 +2,7 @@
 #include "dubprojectmanagerconstants.h"
 
 #include "dubmanager.h"
-
-#include <coreplugin/icore.h>
-#include <coreplugin/icontext.h>
-#include <coreplugin/actionmanager/actionmanager.h>
-#include <coreplugin/actionmanager/command.h>
-#include <coreplugin/actionmanager/actioncontainer.h>
-#include <coreplugin/coreconstants.h>
+#include "duboptionspage.h"
 
 #include <QAction>
 #include <QMessageBox>
@@ -37,16 +31,7 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
     
-    QAction *action = new QAction(tr("DubProjectManager action"), this);
-    Core::Command *cmd = Core::ActionManager::registerAction(action, Constants::ACTION_ID,
-                                                             Core::Context(Core::Constants::C_GLOBAL));
-    cmd->setDefaultKeySequence(QKeySequence(tr("Ctrl+Alt+Meta+A")));
-    connect(action, SIGNAL(triggered()), this, SLOT(triggerAction()));
-    
-    Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
-    menu->menu()->setTitle(tr("DubProjectManager"));
-    menu->addAction(cmd);
-    Core::ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
+    addAutoReleasedObject(new DubOptionsPage);
     
     return true;
 }
@@ -64,13 +49,6 @@ ExtensionSystem::IPlugin::ShutdownFlag DubProjectManagerPlugin::aboutToShutdown(
     // Disconnect from signals that are not needed during shutdown
     // Hide UI (if you add UI that is not in the main window directly)
     return SynchronousShutdown;
-}
-
-void DubProjectManagerPlugin::triggerAction()
-{
-    QMessageBox::information(Core::ICore::mainWindow(),
-                             tr("Action triggered"),
-                             tr("This is an action from DubProjectManager."));
 }
 
 Q_EXPORT_PLUGIN2(DubProjectManager, DubProjectManagerPlugin)

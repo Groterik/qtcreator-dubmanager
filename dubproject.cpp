@@ -1,18 +1,36 @@
 #include "dubproject.h"
 
+#include "dubprojectmanagerconstants.h"
+
 #include "dubmanager.h"
 #include "dubfile.h"
 #include "dubprojectnode.h"
 
 #include "dubexception.h"
 
+#include <projectexplorer/projectexplorerconstants.h>
+#include <coreplugin/icontext.h>
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QFileSystemWatcher>
 
 DubProject::DubProject(DubManager *manager, const QString &filename)
-    : m_manager(manager), m_filename(filename)
+    : m_manager(manager),
+      m_filename(filename),
+      m_rootNode(new DubProjectNode(filename))
 {
+    setId(DubProjectManager::Constants::DUBPROJECT_ID);
+    setProjectContext(Core::Context(DubProjectManager::Constants::PROJECTCONTEXT));
+    setProjectLanguages(Core::Context(ProjectExplorer::Constants::LANG_CXX));
+
+    m_projectName = QFileInfo(filename).absoluteDir().dirName();
+
+    m_file = new DubFile(filename, this);
+    m_watcher = new QFileSystemWatcher(this);
+
+    connect(m_watcher, SIGNAL(fileChanged(QString)), this, SLOT(dubFileChanged(QString)));
 }
 
 DubProject::~DubProject()
@@ -22,11 +40,6 @@ DubProject::~DubProject()
 QString DubProject::displayName() const
 {
     return m_projectName;
-}
-
-Core::Id DubProject::id() const
-{
-    return Core::Id(m_projectName);
 }
 
 Core::IDocument *DubProject::document() const
@@ -79,4 +92,48 @@ void DubProject::parseConfig()
             directories.push_back(p.toString());
         }
     }
+
+    m_files = scanDirectories(directories);
+    m_rootNode->setDisplayName(m_projectName);
+
+    // build tree
+    m_rootNode->removeFileNodes(m_rootNode->fileNodes());
+    m_rootNode->removeFolderNodes(m_rootNode->subFolderNodes());
+    foreach (const QString& filename, m_files) {
+        m_rootNode->addFilePath(filename);
+    }
+    mergeProjectNode(m_rootNode);
+
+
+
+}
+
+QStringList DubProject::scanDirectories(QStringList directories)
+{
+    QStringList result;
+    foreach (const QString& dirname, directories) {
+        QDir dir(dirname);
+        QDirIterator iterator(dir.absolutePath(), QDirIterator::Subdirectories);
+        while (iterator.hasNext()) {
+            iterator.next();
+            if (!iterator.fileInfo().isDir()) {
+                QString filename = iterator.fileName();
+                if (filename.endsWith(".d") || filename.endsWith(".di")) {
+                    result.push_back(filename);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+void DubProject::dubFileChanged(const QString &filename)
+{
+    Q_UNUSED(filename);
+    parseConfig();
+}
+
+void DubProject::buildTree(DubProjectNode *root, const QStringList &files)
+{
+
 }

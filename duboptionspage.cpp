@@ -55,7 +55,9 @@ DubOptionsWidget::DubOptionsWidget(QWidget *parent)
 
     m_pathChooser = new Utils::PathChooser(this);
     m_pathChooser->setExpectedKind(Utils::PathChooser::ExistingCommand);
+#if (QT_CREATOR_MAJOR_VERSION == 3)
     m_pathChooser->setHistoryCompleter(QLatin1String("Dub.Command.History"));
+#endif
     formLayout->addRow(tr("Executable:"), m_pathChooser);
 }
 

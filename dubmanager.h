@@ -3,13 +3,15 @@
 
 #include <projectexplorer/iprojectmanager.h>
 
+class DubOptionsPage;
+
 class DubManager : public ProjectExplorer::IProjectManager
 {
     Q_OBJECT
 public:
 
     // TODO: make settings page
-    explicit DubManager(QObject *parent = 0);
+    explicit DubManager(DubOptionsPage* page);
 
     // pure ProjectExplorer::IProjectManager
     virtual QString mimeType() const;
@@ -20,6 +22,9 @@ public:
 signals:
     
 public slots:
+
+private:
+    DubOptionsPage *optionsPage;
     
 };
 

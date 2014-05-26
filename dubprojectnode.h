@@ -25,11 +25,12 @@ public:
     // others
 
     bool addFilePath(const QString& path);
+    void clear();
     
 signals:
     
 public slots:
-    
+
 };
 
 bool mergeProjectNode(ProjectExplorer::FolderNode *root);

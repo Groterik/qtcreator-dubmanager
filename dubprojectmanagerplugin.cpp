@@ -4,6 +4,9 @@
 #include "dubmanager.h"
 #include "duboptionspage.h"
 
+#include <coreplugin/mimedatabase.h>
+#include <coreplugin/icore.h>
+
 #include <QAction>
 #include <QMessageBox>
 #include <QMainWindow>
@@ -27,11 +30,15 @@ DubProjectManagerPlugin::~DubProjectManagerPlugin()
 bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *errorString)
 {
     // Register objects in the plugin manager's object pool
+    if (!Core::MimeDatabase::addMimeTypes(QLatin1String(":resources/DubProject.mimetypes.xml"), errorString))
+        return false;
     
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
     
-    addAutoReleasedObject(new DubOptionsPage);
+    DubOptionsPage *optionsPage = new DubOptionsPage;
+    addAutoReleasedObject(optionsPage);
+    addAutoReleasedObject(new DubManager(optionsPage));
     
     return true;
 }

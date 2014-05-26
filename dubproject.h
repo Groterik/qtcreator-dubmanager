@@ -24,13 +24,12 @@ public:
 
     virtual ProjectExplorer::ProjectNode *rootProjectNode() const;
 
-    virtual QStringList files(FilesMode fileMode) const = 0;
+    virtual QStringList files(FilesMode fileMode) const;
 
     // others
 
     void parseConfig();
-
-    static QStringList scanDirectories(QStringList directories);
+    const QString buildDirectory() const;
 
     
 signals:
@@ -41,8 +40,7 @@ private slots:
     void dubFileChanged(const QString &filename);
 
 private:
-
-    static void buildTree(DubProjectNode *root, const QStringList &files);
+    static QStringList scanDirectories(QStringList directories);
 
     DubManager* m_manager;
     QString m_filename;
@@ -52,6 +50,7 @@ private:
     QString m_projectName;
     DubProjectNode *m_rootNode;
     QFileSystemWatcher* m_watcher;
+    QString m_buildDirectory;
     
 };
 

@@ -53,6 +53,12 @@ bool DubProjectNode::addFilePath(const QString &path)
     return true;
 }
 
+void DubProjectNode::clear()
+{
+    this->removeFileNodes(this->fileNodes());
+    this->removeFolderNodes(this->subFolderNodes());
+}
+
 bool lessNodesByPath(ProjectExplorer::Node *a, ProjectExplorer::Node *b)
 {
     return a->path() < b->path();

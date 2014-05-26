@@ -57,6 +57,12 @@ ProjectExplorer::ProjectNode *DubProject::rootProjectNode() const
     return m_rootNode;
 }
 
+QStringList DubProject::files(ProjectExplorer::Project::FilesMode fileMode) const
+{
+    Q_UNUSED(fileMode);
+    return m_files;
+}
+
 void DubProject::parseConfig()
 {
     QFile file(m_filename);
@@ -97,15 +103,16 @@ void DubProject::parseConfig()
     m_rootNode->setDisplayName(m_projectName);
 
     // build tree
-    m_rootNode->removeFileNodes(m_rootNode->fileNodes());
-    m_rootNode->removeFolderNodes(m_rootNode->subFolderNodes());
+    m_rootNode->clear();
     foreach (const QString& filename, m_files) {
         m_rootNode->addFilePath(filename);
     }
     mergeProjectNode(m_rootNode);
+}
 
-
-
+const QString DubProject::buildDirectory() const
+{
+    return m_buildDirectory;
 }
 
 QStringList DubProject::scanDirectories(QStringList directories)
@@ -131,9 +138,4 @@ void DubProject::dubFileChanged(const QString &filename)
 {
     Q_UNUSED(filename);
     parseConfig();
-}
-
-void DubProject::buildTree(DubProjectNode *root, const QStringList &files)
-{
-
 }

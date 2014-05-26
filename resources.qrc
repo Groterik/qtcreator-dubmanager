@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>DubProject.mimetypes.xml</file>
+    </qresource>
+</RCC>

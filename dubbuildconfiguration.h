@@ -56,7 +56,6 @@ public:
     virtual QList<ProjectExplorer::BuildInfo *> availableBuilds(const ProjectExplorer::Target *parent) const;
 
     virtual int priority(const ProjectExplorer::Kit *k, const QString &projectPath) const;
-    // List of build information that can be used to initially set up a new build configuration.
     virtual QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k, const QString &projectPath) const;
 
     virtual ProjectExplorer::BuildConfiguration *create(ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const;

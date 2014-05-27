@@ -1,6 +1,9 @@
 #include "dubbuildconfiguration.h"
 #include "dubproject.h"
 
+#include <projectexplorer/buildinfo.h>
+#include <projectexplorer/kit.h>
+
 
 DubBuildConfiguration::DubBuildConfiguration(DubProject *project, ProjectExplorer::Target *target, BuildConfiguration *source) :
     ProjectExplorer::BuildConfiguration(target, source),
@@ -65,12 +68,18 @@ int DubBuildConfigurationFactory::priority(const ProjectExplorer::Kit *k, const 
 
 QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableSetups(const ProjectExplorer::Kit *k, const QString &projectPath) const
 {
-
+    ProjectExplorer::BuildInfo *info = new ProjectExplorer::BuildInfo(this);
+    info->buildDirectory = Utils::FileName::fromString(projectPath);
+    info->displayName = "Dub";
+    info->kitId = k->id();
+    info->supportsShadowBuild = true;
+    info->typeName = "DubManager";
+    return QList<ProjectExplorer::BuildInfo*>() << info;
 }
 
 ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::create(ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const
 {
-
+//    DubBuildConfiguration* result = new DubBuildConfiguration()
 }
 
 bool DubBuildConfigurationFactory::canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const

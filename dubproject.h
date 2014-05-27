@@ -40,7 +40,7 @@ private slots:
     void dubFileChanged(const QString &filename);
 
 private:
-    static QStringList scanDirectories(QStringList directories);
+    static QStringList scanDirectories(QStringList directories, const QString &root);
 
     DubManager* m_manager;
     QString m_filename;

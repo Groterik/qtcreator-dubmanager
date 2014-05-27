@@ -36,7 +36,6 @@ bool DubProjectNode::addFilePath(const QString &path)
 {
     QString relativePath = QDir(QFileInfo(this->path()).path()).relativeFilePath(path);
     QStringList subpaths = relativePath.split(QLatin1Char('/'), QString::SkipEmptyParts);
-    QString filename = subpaths.last();
     subpaths.pop_back();
 
     // simply add all structure to node
@@ -48,7 +47,7 @@ bool DubProjectNode::addFilePath(const QString &path)
         node->addFolderNodes(list);
         node = added;
     }
-    node->addFiles(QStringList(filename));
+    node->addFileNodes(QList<ProjectExplorer::FileNode*>() << new ProjectExplorer::FileNode(path, ProjectExplorer::SourceType, false));
 
     return true;
 }

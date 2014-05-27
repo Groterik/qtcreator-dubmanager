@@ -1,27 +1,21 @@
 #include "dubbuildconfiguration.h"
 #include "dubproject.h"
 
+#include <projectexplorer/target.h>
 #include <projectexplorer/buildinfo.h>
 #include <projectexplorer/kit.h>
 
 
-DubBuildConfiguration::DubBuildConfiguration(DubProject *project, ProjectExplorer::Target *target, BuildConfiguration *source) :
-    ProjectExplorer::BuildConfiguration(target, source),
-    m_project(project)
+DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source) :
+    ProjectExplorer::BuildConfiguration(target, source)
 {
     Q_UNUSED(target);
     cloneSteps(source);
 }
 
-DubBuildConfiguration::DubBuildConfiguration(DubProject* project, ProjectExplorer::Target *target, const Core::Id id)
-    : ProjectExplorer::BuildConfiguration(target, id),
-      m_project(project)
+DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, const Core::Id id)
+    : ProjectExplorer::BuildConfiguration(target, id)
 {
-}
-
-QString DubBuildConfiguration::buildDirectory() const
-{
-    return m_project->buildDirectory();
 }
 
 ProjectExplorer::NamedWidget *DubBuildConfiguration::createConfigWidget()
@@ -55,8 +49,7 @@ int DubBuildConfigurationFactory::priority(const ProjectExplorer::Target *parent
 
 QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableBuilds(const ProjectExplorer::Target *parent) const
 {
-    Q_UNUSED(parent);
-    return QList<ProjectExplorer::BuildInfo*>();
+    return availableSetups(parent->kit(), parent->project()->projectDirectory());
 }
 
 int DubBuildConfigurationFactory::priority(const ProjectExplorer::Kit *k, const QString &projectPath) const
@@ -79,25 +72,25 @@ QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableSetup
 
 ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::create(ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const
 {
-//    DubBuildConfiguration* result = new DubBuildConfiguration()
+    return new DubBuildConfiguration(parent, info->kitId);
 }
 
 bool DubBuildConfigurationFactory::canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const
 {
-
+    return false;
 }
 
 ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::restore(ProjectExplorer::Target *parent, const QVariantMap &map)
 {
-
+    return 0;
 }
 
 bool DubBuildConfigurationFactory::canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product) const
 {
-
+    return false;
 }
 
 ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product)
 {
-
+    return 0;
 }

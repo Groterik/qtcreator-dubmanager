@@ -10,12 +10,10 @@ class DubBuildConfiguration : public ProjectExplorer::BuildConfiguration
 {
     Q_OBJECT
 public:
-    DubBuildConfiguration(DubProject* project, ProjectExplorer::Target *target, BuildConfiguration *source);
-    DubBuildConfiguration(DubProject* project, ProjectExplorer::Target *target, const Core::Id id);
+    DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source);
+    DubBuildConfiguration(ProjectExplorer::Target *target, const Core::Id id);
 
     // pure ProjectExplorer::BuildConfiguration
-
-    virtual QString buildDirectory() const;
 
     virtual ProjectExplorer::NamedWidget *createConfigWidget();
 
@@ -28,7 +26,6 @@ signals:
 public slots:
 
 private:
-    DubProject* m_project;
 };
 
 class DubBuildConfigurationWidget : public ProjectExplorer::NamedWidget
@@ -48,7 +45,7 @@ class DubBuildConfigurationFactory : public ProjectExplorer::IBuildConfiguration
 {
     Q_OBJECT
 public:
-    DubBuildConfigurationFactory(QObject *parent);
+    DubBuildConfigurationFactory(QObject *parent = 0);
 
     // pure ProjectExplorer::IBuildConfigurationFactory
 

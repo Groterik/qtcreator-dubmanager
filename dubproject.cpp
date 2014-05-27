@@ -31,6 +31,8 @@ DubProject::DubProject(DubManager *manager, const QString &filename)
     m_watcher = new QFileSystemWatcher(this);
 
     connect(m_watcher, SIGNAL(fileChanged(QString)), this, SLOT(dubFileChanged(QString)));
+
+    parseConfig();
 }
 
 DubProject::~DubProject()
@@ -77,14 +79,14 @@ void DubProject::parseConfig()
 
     QJsonObject root = doc.object();
     QJsonValue name = root.value(QString::fromUtf8("name"));
-    if (name.isNull() || !name.isString()) {
+    if (name.isNull() || name.isUndefined() || !name.isString()) {
         throw DubException(tr("Failed to parse project name in config"));
     }
     m_projectName = name.toString();
 
     QJsonValue sourcePaths = root.value(QString::fromUtf8("sourcePaths"));
     QList<QString> directories;
-    if (sourcePaths.isNull()) {
+    if (sourcePaths.isNull() || sourcePaths.isUndefined()) {
         directories.push_back(QString::fromUtf8("source"));
         directories.push_back(QString::fromUtf8("src"));
     } else if (!sourcePaths.isArray()) {
@@ -99,7 +101,7 @@ void DubProject::parseConfig()
         }
     }
 
-    m_files = scanDirectories(directories);
+    m_files = scanDirectories(directories, m_filename);
     m_rootNode->setDisplayName(m_projectName);
 
     // build tree
@@ -107,7 +109,9 @@ void DubProject::parseConfig()
     foreach (const QString& filename, m_files) {
         m_rootNode->addFilePath(filename);
     }
+    m_rootNode->addFilePath(m_filename);
     mergeProjectNode(m_rootNode);
+
 }
 
 const QString DubProject::buildDirectory() const
@@ -115,16 +119,16 @@ const QString DubProject::buildDirectory() const
     return m_buildDirectory;
 }
 
-QStringList DubProject::scanDirectories(QStringList directories)
+QStringList DubProject::scanDirectories(QStringList directories, const QString& root)
 {
     QStringList result;
     foreach (const QString& dirname, directories) {
-        QDir dir(dirname);
-        QDirIterator iterator(dir.absolutePath(), QDirIterator::Subdirectories);
+        QString absoluteDirname = QFileInfo(root).absoluteDir().absoluteFilePath(dirname);
+        QDirIterator iterator(absoluteDirname, QDirIterator::Subdirectories);
         while (iterator.hasNext()) {
             iterator.next();
             if (!iterator.fileInfo().isDir()) {
-                QString filename = iterator.fileName();
+                QString filename = iterator.filePath();
                 if (filename.endsWith(".d") || filename.endsWith(".di")) {
                     result.push_back(filename);
                 }

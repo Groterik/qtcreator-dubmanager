@@ -12,6 +12,7 @@ class DubBuildConfiguration : public ProjectExplorer::BuildConfiguration
 public:
     DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source);
     DubBuildConfiguration(ProjectExplorer::Target *target, const Core::Id id);
+    DubBuildConfiguration(ProjectExplorer::Target *target, const ProjectExplorer::BuildInfo& info);
 
     // pure ProjectExplorer::BuildConfiguration
 
@@ -62,6 +63,10 @@ public:
     virtual ProjectExplorer::BuildConfiguration *restore(ProjectExplorer::Target *parent, const QVariantMap &map);
     virtual bool canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product) const;
     virtual ProjectExplorer::BuildConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product);
+
+    // others
+
+    bool canHandle(const ProjectExplorer::Target *target) const;
 
 private:
 };

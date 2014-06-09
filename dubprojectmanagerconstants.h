@@ -16,6 +16,9 @@ const char * const C_DUBEDITOR = "DubProject.Context.DubEditor";
 // Project
 const char * const DUBPROJECT_ID = "DubProjectManager.DubProject";
 
+// Buildconfiguration
+const char DUB_BC_ID[] = "DubProjectManager.DubBuildConfiguration";
+
 } // namespace DubProjectManager
 } // namespace Constants
 

@@ -4,6 +4,7 @@
 #include "dubmanager.h"
 #include "duboptionspage.h"
 #include "dubbuildconfiguration.h"
+#include "dubbuildstep.h"
 
 #include <coreplugin/mimedatabase.h>
 #include <coreplugin/icore.h>
@@ -32,7 +33,6 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
 {
     // Register objects in the plugin manager's object pool
     if (!Core::MimeDatabase::addMimeTypes(QLatin1String(":resources/DubProject.mimetypes.xml"), errorString))
-//        Core::MimeDatabase::addMimeType(Core::MimeType().isTopLevel())
         return false;
     
     Q_UNUSED(arguments)
@@ -41,6 +41,7 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
     DubOptionsPage *optionsPage = new DubOptionsPage;
     addAutoReleasedObject(optionsPage);
     addAutoReleasedObject(new DubManager(optionsPage));
+    addAutoReleasedObject(new DubBuildStepFactory);
     addAutoReleasedObject(new DubBuildConfigurationFactory);
     
     return true;

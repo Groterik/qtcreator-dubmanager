@@ -42,10 +42,13 @@ private slots:
 private:
     static QStringList scanDirectories(QStringList directories, const QString &root);
 
+    void setupTargets();
+
     DubManager* m_manager;
     QString m_filename;
     DubFile* m_file;
     QStringList m_files;
+    QStringList m_configurations;
 
     QString m_projectName;
     DubProjectNode *m_rootNode;

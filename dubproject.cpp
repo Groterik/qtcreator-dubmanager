@@ -5,10 +5,16 @@
 #include "dubmanager.h"
 #include "dubfile.h"
 #include "dubprojectnode.h"
+#include "dubbuildconfiguration.h"
 
 #include "dubexception.h"
 
 #include <projectexplorer/projectexplorerconstants.h>
+#include <projectexplorer/buildconfiguration.h>
+#include <projectexplorer/kitmanager.h>
+#include <projectexplorer/kit.h>
+#include <projectexplorer/target.h>
+#include <projectexplorer/buildinfo.h>
 #include <coreplugin/icontext.h>
 
 #include <QJsonDocument>
@@ -33,6 +39,9 @@ DubProject::DubProject(DubManager *manager, const QString &filename)
     connect(m_watcher, SIGNAL(fileChanged(QString)), this, SLOT(dubFileChanged(QString)));
 
     parseConfig();
+
+    setupTargets();
+
 }
 
 DubProject::~DubProject()
@@ -65,8 +74,29 @@ QStringList DubProject::files(ProjectExplorer::Project::FilesMode fileMode) cons
     return m_files;
 }
 
+QStringList extractSources(const QJsonObject& root, const QString& filename)
+{
+    QJsonValue sourcePaths = root.value(QString::fromUtf8("sourcePaths"));
+    QStringList directories;
+    if (!sourcePaths.isNull() && !sourcePaths.isUndefined()) {
+        if (!sourcePaths.isArray()) {
+            throw DubException(QObject::tr("Failed to parse sourcePaths in ") + filename);
+        } else {
+            QJsonArray paths = sourcePaths.toArray();
+            foreach (QJsonValue p, paths) {
+                if (!p.isString()) {
+                    throw DubException(QObject::tr("Failed to parse path in sourcePaths in ") + filename);
+                }
+                directories.push_back(p.toString());
+            }
+        }
+    }
+    return directories;
+}
+
 void DubProject::parseConfig()
 {
+    m_buildDirectory = QFileInfo(m_filename).absoluteDir().absolutePath();
     QFile file(m_filename);
     if (!file.open(QIODevice::ReadOnly)) return;
     QByteArray blob = file.readAll();
@@ -84,21 +114,39 @@ void DubProject::parseConfig()
     }
     m_projectName = name.toString();
 
-    QJsonValue sourcePaths = root.value(QString::fromUtf8("sourcePaths"));
-    QList<QString> directories;
-    if (sourcePaths.isNull() || sourcePaths.isUndefined()) {
-        directories.push_back(QString::fromUtf8("source"));
-        directories.push_back(QString::fromUtf8("src"));
-    } else if (!sourcePaths.isArray()) {
-        throw DubException(tr("Failed to parse sourcePaths in ") + m_filename);
-    } else {
-        QJsonArray paths = sourcePaths.toArray();
-        foreach (QJsonValue p, paths) {
-            if (!p.isString()) {
-                throw DubException(tr("Failed to parse path in sourcePaths in ") + m_filename);
+    QStringList directories = extractSources(root, m_filename);
+
+    QJsonValue configurationsValue = root.value(QString::fromUtf8("configurations"));
+    m_configurations.clear();
+    if (!configurationsValue.isNull() && !configurationsValue.isUndefined()) {
+        if (!configurationsValue.isArray()) {
+            throw DubException(tr("Failed to parse configurations list in ") + m_filename);
+        } else {
+            QJsonArray configurationsArray = configurationsValue.toArray();
+            foreach (QJsonValue p, configurationsArray) {
+                if (!p.isObject()) {
+                    throw DubException(tr("Failed to parse configuration object in ") + m_filename);
+                }
+                else {
+                   QJsonObject configuration = p.toObject();
+                   QJsonValue confName = configuration.value(QString::fromLatin1("name"));
+                   if (confName.isNull() || name.isUndefined() || !name.isString()) {
+                       throw DubException(tr("Failed to parse configuration name in ") + m_filename);
+                   }
+                   m_configurations.push_back(confName.toString());
+                   directories += extractSources(configuration, m_filename);
+                }
             }
-            directories.push_back(p.toString());
         }
+    }
+
+    if (directories.empty()) {
+        directories.push_back(QString::fromLatin1("src"));
+        directories.push_back(QString::fromLatin1("source"));
+    }
+
+    if (m_configurations.empty()) {
+        m_configurations.push_back(QString::fromLatin1("app"));
     }
 
     m_files = scanDirectories(directories, m_filename);
@@ -136,6 +184,21 @@ QStringList DubProject::scanDirectories(QStringList directories, const QString& 
         }
     }
     return result;
+}
+
+void DubProject::setupTargets()
+{
+    ProjectExplorer::Kit* defaultKit = ProjectExplorer::KitManager::defaultKit();
+    ProjectExplorer::IBuildConfigurationFactory* factory = ProjectExplorer::IBuildConfigurationFactory::find(defaultKit, m_filename);
+    QList<const ProjectExplorer::BuildInfo *> infos;
+    ProjectExplorer::BuildInfo *info = new ProjectExplorer::BuildInfo(factory);
+    info->buildDirectory = Utils::FileName::fromString(buildDirectory());
+    info->kitId = defaultKit->id();
+    info->displayName = QString::fromLatin1("all");
+    info->supportsShadowBuild = true;
+    info->typeName = "Dub Manager";
+    infos.push_back(info);
+    this->setup(infos);
 }
 
 void DubProject::dubFileChanged(const QString &filename)

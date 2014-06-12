@@ -5,6 +5,7 @@
 #include "duboptionspage.h"
 #include "dubbuildconfiguration.h"
 #include "dubbuildstep.h"
+#include "dubrunconfiguration.h"
 
 #include <coreplugin/mimedatabase.h>
 #include <coreplugin/icore.h>
@@ -43,6 +44,7 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
     addAutoReleasedObject(new DubManager(optionsPage));
     addAutoReleasedObject(new DubBuildStepFactory);
     addAutoReleasedObject(new DubBuildConfigurationFactory);
+    addAutoReleasedObject(new DubRunConfigurationFactory);
     
     return true;
 }

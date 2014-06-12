@@ -28,7 +28,6 @@ public:
 
     // others
 
-    void parseConfig();
     const QString buildDirectory() const;
 
     
@@ -40,15 +39,25 @@ private slots:
     void dubFileChanged(const QString &filename);
 
 private:
+
+    enum TargetType {
+        EXECUTABLE, LIBRARY, NONE
+    };
+
     static QStringList scanDirectories(QStringList directories, const QString &root);
 
     void setupTargets();
+    void buildSourceTree();
+    void parseConfig();
+    void init();
 
     DubManager* m_manager;
     QString m_filename;
     DubFile* m_file;
     QStringList m_files;
+    QStringList m_directories;
     QStringList m_configurations;
+    TargetType m_type;
 
     QString m_projectName;
     DubProjectNode *m_rootNode;

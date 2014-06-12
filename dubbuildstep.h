@@ -32,6 +32,12 @@ public:
     QString commandString() const;
     QString command() const;
 
+
+    QVariantMap toMap() const;
+
+protected:
+    bool fromMap(const QVariantMap &map);
+
 signals:
 
     void updated();

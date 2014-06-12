@@ -25,6 +25,7 @@ public:
     // others
 
     bool addFilePath(const QString& path);
+    virtual bool addFiles(const QStringList &filePaths, QStringList *notAdded);
     void clear();
     
 signals:
@@ -32,7 +33,5 @@ signals:
 public slots:
 
 };
-
-bool mergeProjectNode(ProjectExplorer::FolderNode *root);
 
 #endif // DUBPROJECTNODE_H

@@ -14,8 +14,10 @@
 
 namespace {
 const char BUILDSTEP_ID[] = "DubProjectManager.BuildStep";
-const char CLEAN_KEY[] = "DubProjectManager.BuildStep.Clean";
-const char BUILD_TARGETS_KEY[] = "DubProjectManager.BuildStep.BuildTargets";
+
+const char PACKAGE_KEY[] = "DubProjectManager.BuildStep.Package";
+const char BUILD_TYPE_KEY[] = "DubProjectManager.BuildStep.BuildType";
+const char CONFIGURATION_KEY[] = "DubProjectManager.BuildStep.Configuration";
 const char ADDITIONAL_ARGUMENTS_KEY[] = "DubProjectManager.BuildStep.AdditionalArguments";
 
 class DubBuildTypes
@@ -45,7 +47,7 @@ private:
 
 const DubBuildTypes defaultTypes;
 
-}
+} // namespace
 
 DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl, const Core::Id id) :
     ProjectExplorer::AbstractProcessStep(bsl, id)
@@ -140,6 +142,26 @@ QString DubBuildStep::commandString() const
 QString DubBuildStep::command() const
 {
     return QString::fromLatin1("dub");
+}
+
+QVariantMap DubBuildStep::toMap() const
+{
+    QVariantMap map(ProjectExplorer::AbstractProcessStep::toMap());
+    map.insert(QString::fromLatin1(PACKAGE_KEY), m_package);
+    map.insert(QString::fromLatin1(CONFIGURATION_KEY), m_configuration);
+    map.insert(QString::fromLatin1(BUILD_TYPE_KEY), m_buildType);
+    map.insert(QString::fromLatin1(ADDITIONAL_ARGUMENTS_KEY), m_additionalArguments);
+    return map;
+}
+
+bool DubBuildStep::fromMap(const QVariantMap &map)
+{
+    m_package = map.value(QString::fromLatin1(PACKAGE_KEY)).toString();
+    m_configuration = map.value(QString::fromLatin1(CONFIGURATION_KEY)).toString();
+    m_buildType = map.value(QString::fromLatin1(BUILD_TYPE_KEY)).toString();
+    m_additionalArguments = map.value(QString::fromLatin1(ADDITIONAL_ARGUMENTS_KEY)).toString();
+
+    return ProjectExplorer::AbstractProcessStep::fromMap(map);
 }
 
 void DubBuildStep::updateBuildType(const QString &type)

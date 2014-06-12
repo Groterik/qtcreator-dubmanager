@@ -32,6 +32,18 @@ QList<ProjectExplorer::RunConfiguration *> DubProjectNode::runConfigurationsFor(
     return QList<ProjectExplorer::RunConfiguration*>();
 }
 
+class NodeEqualPred
+{
+public:
+    NodeEqualPred(const QString& a) : a(a) {}
+    bool operator()(ProjectExplorer::FolderNode* b)
+    {
+        return a == b->path();
+    }
+private:
+    const QString& a;
+};
+
 bool DubProjectNode::addFilePath(const QString &path)
 {
     QString relativePath = QDir(QFileInfo(this->path()).path()).relativeFilePath(path);
@@ -40,52 +52,45 @@ bool DubProjectNode::addFilePath(const QString &path)
 
     // simply add all structure to node
     ProjectExplorer::FolderNode* node = this;
+    typedef QList<ProjectExplorer::FolderNode *> SubFolders;
     foreach (const QString& s, subpaths) {
-        ProjectExplorer::FolderNode* added = new ProjectExplorer::FolderNode(s);
-        QList<ProjectExplorer::FolderNode*> list;
-        list.push_back(added);
-        node->addFolderNodes(list);
-        node = added;
+        SubFolders nodes = node->subFolderNodes();
+        NodeEqualPred pred(s);
+        SubFolders::iterator it = std::find_if(nodes.begin(), nodes.end(), pred);
+        if (it == nodes.end()) {
+            SubFolders list;
+            ProjectExplorer::FolderNode* added = new ProjectExplorer::FolderNode(s);
+            list.push_back(added);
+            node->addFolderNodes(list);
+            node = added;
+        } else {
+            node = *it;
+        }
     }
     node->addFileNodes(QList<ProjectExplorer::FileNode*>() << new ProjectExplorer::FileNode(path, ProjectExplorer::SourceType, false));
 
     return true;
 }
 
+bool DubProjectNode::addFiles(const QStringList &filePaths, QStringList *notAdded)
+{
+    bool result = true;
+    if (notAdded) {
+        notAdded->clear();
+    }
+    foreach (const QString& filePath, filePaths) {
+        if (!addFilePath(filePath)) {
+            result = false;
+            if (notAdded) {
+                notAdded->push_back(filePath);
+            }
+        }
+    }
+    return result;
+}
+
 void DubProjectNode::clear()
 {
     this->removeFileNodes(this->fileNodes());
     this->removeFolderNodes(this->subFolderNodes());
-}
-
-bool lessNodesByPath(ProjectExplorer::Node *a, ProjectExplorer::Node *b)
-{
-    return a->path() < b->path();
-}
-
-bool mergeProjectNode(ProjectExplorer::FolderNode *root)
-{
-    if (!root) {
-        return false;
-    }
-    QVector<ProjectExplorer::FolderNode*> folders = root->subFolderNodes().toVector();
-    qSort(folders.begin(), folders.end(), lessNodesByPath);
-    for (int i = 1; i < folders.size(); ++i) {
-        ProjectExplorer::FolderNode *curr = folders[i];
-        ProjectExplorer::FolderNode *prev = folders[i - 1];
-        if (prev->path() == curr->path()) {
-            curr->addFolderNodes(prev->subFolderNodes());
-            curr->addFileNodes(prev->fileNodes());
-            prev = 0;
-        }
-    }
-
-    QVector<ProjectExplorer::FolderNode*>::iterator itEnd = std::remove(folders.begin(), folders.end(), static_cast<ProjectExplorer::FolderNode*>(0));
-    folders.resize(std::distance(folders.begin(), itEnd));
-
-    foreach (ProjectExplorer::FolderNode* node, folders) {
-        mergeProjectNode(node);
-    }
-
-    return true;
 }

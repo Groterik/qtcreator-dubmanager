@@ -8,7 +8,7 @@ class DubRunConfiguration : public ProjectExplorer::LocalApplicationRunConfigura
 {
     Q_OBJECT
 public:
-    DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id, const QString &target,
+    DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id, const QString &executable,
                                  const QString &workingDirectory, const QString &title);
     DubRunConfiguration(ProjectExplorer::Target *parent, ProjectExplorer::LocalApplicationRunConfiguration *source);
 
@@ -28,18 +28,19 @@ signals:
 
 public slots:
     void setArguments(const QString &args);
+    void setExecutable(const QString& exec);
     void setWorkingDirectory(const QString& dir);
     void runInTerminal(bool toggled);
-    void runViaDub(bool toggled);
 
 private:
+    void init();
+
     RunMode m_runMode;
     QString m_executable;
     QString m_workingDirectory;
     QString m_title;
     QString m_arguments;
     bool m_terminal;
-    bool m_viadub;
 
 };
 
@@ -52,15 +53,17 @@ class DubRunConfigurationWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit DubRunConfigurationWidget(DubRunConfiguration *cmakeRunConfiguration, QWidget *parent = 0);
+    explicit DubRunConfigurationWidget(DubRunConfiguration *dubRunConfiguration, QWidget *parent = 0);
 
 private slots:
     void environmentWasChanged();
+    void resetWorkingDirectory();
 
 private:
 
     bool m_ignoreChange;
     DubRunConfiguration *m_dubRunConfiguration;
+    Utils::PathChooser *m_executableEdit;
     Utils::PathChooser *m_workingDirectoryEdit;
     Utils::DetailsWidget *m_detailsContainer;
 };

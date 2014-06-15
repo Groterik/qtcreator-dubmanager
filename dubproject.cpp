@@ -6,6 +6,7 @@
 #include "dubfile.h"
 #include "dubprojectnode.h"
 #include "dubbuildconfiguration.h"
+#include "dubrunconfiguration.h"
 
 #include "dubexception.h"
 
@@ -16,6 +17,8 @@
 #include <projectexplorer/target.h>
 #include <projectexplorer/buildinfo.h>
 #include <coreplugin/icontext.h>
+
+#include <qtsupport/customexecutablerunconfiguration.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -173,9 +176,14 @@ void DubProject::init()
     }
 }
 
-const QString DubProject::buildDirectory() const
+const QString &DubProject::buildDirectory() const
 {
     return m_buildDirectory;
+}
+
+QString DubProject::executable() const
+{
+    return m_buildDirectory + "/" + m_projectName;
 }
 
 QStringList DubProject::scanDirectories(QStringList directories, const QString& root)
@@ -210,6 +218,13 @@ void DubProject::setupTargets()
     info->typeName = "Dub Manager";
     infos.push_back(info);
     this->setup(infos);
+
+    foreach (ProjectExplorer::Target* t, this->targets()) {
+        DubRunConfiguration* rc =
+                new DubRunConfiguration(t, DubRunConfigurationFactory::idFromBuildTarget(m_projectName), executable(), buildDirectory(), m_projectName);
+        t->addRunConfiguration(rc);
+        t->updateDefaultRunConfigurations();
+    }
 }
 
 void DubProject::buildSourceTree()

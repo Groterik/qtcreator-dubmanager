@@ -18,22 +18,24 @@ const char RUNCONFIGURATION_ID[] = "DubProjectManager.RunConfiguration";
 }
 
 DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id,
-                                         const QString &/*target*/, const QString &workingDirectory, const QString &title)
+                                         const QString &executable, const QString &workingDirectory, const QString &title)
     : ProjectExplorer::LocalApplicationRunConfiguration(parent, id),
       m_runMode(Gui),
+      m_executable(executable),
       m_workingDirectory(workingDirectory),
       m_title(title)
 {
-    addExtraAspect(new ProjectExplorer::LocalEnvironmentAspect(this));
+    init();
 }
 
 DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, ProjectExplorer::LocalApplicationRunConfiguration *source)
     : ProjectExplorer::LocalApplicationRunConfiguration(parent, source),
       m_runMode(source->runMode()),
+      m_executable(source->executable()),
       m_workingDirectory(source->workingDirectory()),
       m_title(source->displayName())
 {
-
+    init();
 }
 
 QString DubRunConfiguration::executable() const
@@ -66,6 +68,11 @@ void DubRunConfiguration::setArguments(const QString &args)
     m_arguments = args;
 }
 
+void DubRunConfiguration::setExecutable(const QString &exec)
+{
+    m_executable = exec;
+}
+
 void DubRunConfiguration::setWorkingDirectory(const QString &dir)
 {
     m_workingDirectory = dir;
@@ -76,29 +83,45 @@ void DubRunConfiguration::runInTerminal(bool toggled)
     m_terminal = toggled;
 }
 
-void DubRunConfiguration::runViaDub(bool toggled)
+void DubRunConfiguration::init()
 {
-    m_viadub = toggled;
+    setDefaultDisplayName(displayName());
+    setDisplayName(m_title);
+    addExtraAspect(new ProjectExplorer::LocalEnvironmentAspect(this));
 }
 
 
-DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *cmakeRunConfiguration, QWidget *parent)
-    : QWidget(parent)
+DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRunConfiguration, QWidget *parent)
+    : QWidget(parent),
+      m_dubRunConfiguration(dubRunConfiguration)
 {
     QFormLayout *fl = new QFormLayout();
     fl->setMargin(0);
     fl->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
 
+    m_executableEdit = new Utils::PathChooser;
+    m_executableEdit->setExpectedKind(Utils::PathChooser::File);
+    m_executableEdit->setBaseDirectory(m_dubRunConfiguration->workingDirectory());
+    m_executableEdit->setPath(m_dubRunConfiguration->executable());
+    m_executableEdit->setHistoryCompleter(QLatin1String("Dub.RunConfiguration.executable.History"));
+    m_executableEdit->setPromptDialogTitle(tr("Select executable"));
+    connect(m_executableEdit, SIGNAL(changed(QString)),
+            m_dubRunConfiguration, SLOT(setExecutable(QString)));
+    fl->addRow(tr("Executable:"), m_executableEdit);
+
     QLineEdit *argumentsLineEdit = new QLineEdit();
-    argumentsLineEdit->setText(cmakeRunConfiguration->commandLineArguments());
-    connect(argumentsLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setArguments(QString)));
+    argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
+    connect(argumentsLineEdit, SIGNAL(textChanged(QString)), m_dubRunConfiguration, SLOT(setArguments(QString)));
     fl->addRow(tr("Arguments:"), argumentsLineEdit);
 
-    m_workingDirectoryEdit = new Utils::PathChooser();
+    m_workingDirectoryEdit = new Utils::PathChooser;
     m_workingDirectoryEdit->setExpectedKind(Utils::PathChooser::Directory);
     m_workingDirectoryEdit->setBaseDirectory(m_dubRunConfiguration->target()->project()->projectDirectory());
     m_workingDirectoryEdit->setPath(m_dubRunConfiguration->workingDirectory());
     m_workingDirectoryEdit->setHistoryCompleter(QLatin1String("Dub.RunConfiguration.WorkingDirectory.History"));
+    m_workingDirectoryEdit->setPromptDialogTitle(tr("Select Working Directory"));
+    connect(m_workingDirectoryEdit, SIGNAL(changed(QString)),
+            m_dubRunConfiguration, SLOT(setWorkingDirectory(QString)));
 
     ProjectExplorer::EnvironmentAspect *aspect
             = m_dubRunConfiguration->extraAspect<ProjectExplorer::EnvironmentAspect>();
@@ -107,13 +130,10 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *cmakeR
         environmentWasChanged();
     }
 
-    m_workingDirectoryEdit->setPromptDialogTitle(tr("Select Working Directory"));
-    connect(m_workingDirectoryEdit, SIGNAL(changed(QString)),
-            m_dubRunConfiguration, SLOT(setWorkingDirectory(QString)));
-
     QToolButton *resetButton = new QToolButton();
     resetButton->setToolTip(tr("Reset to default."));
     resetButton->setIcon(QIcon(QLatin1String(Core::Constants::ICON_RESET)));
+    connect(resetButton, SIGNAL(clicked()), this, SLOT(resetWorkingDirectory()));
 
     QHBoxLayout *boxlayout = new QHBoxLayout();
     boxlayout->addWidget(m_workingDirectoryEdit);
@@ -125,11 +145,6 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *cmakeR
     fl->addRow(tr("Run in Terminal"), runInTerminal);
     connect(runInTerminal, SIGNAL(toggled(bool)),
             m_dubRunConfiguration, SLOT(runInTerminal(bool)));
-
-    QCheckBox *runViaDub = new QCheckBox;
-    fl->addRow(tr("Run via Dub"), runViaDub);
-    connect(runInTerminal, SIGNAL(toggled(bool)),
-            m_dubRunConfiguration, SLOT(runViaDub(bool)));
 
 
     m_detailsContainer = new Utils::DetailsWidget(this);
@@ -152,6 +167,11 @@ void DubRunConfigurationWidget::environmentWasChanged()
     m_workingDirectoryEdit->setEnvironment(aspect->environment());
 }
 
+void DubRunConfigurationWidget::resetWorkingDirectory()
+{
+    m_workingDirectoryEdit->setPath(m_dubRunConfiguration->workingDirectory());
+}
+
 
 DubRunConfigurationFactory::DubRunConfigurationFactory(QObject *parent)
     : ProjectExplorer::IRunConfigurationFactory(parent)
@@ -166,12 +186,11 @@ DubRunConfigurationFactory::~DubRunConfigurationFactory()
 
 bool DubRunConfigurationFactory::canCreate(ProjectExplorer::Target *parent, const Core::Id id) const
 {
+    Q_UNUSED(id);
     if (!canHandle(parent)) {
         return false;
     }
-    QList<ProjectExplorer::Target*> tmp = parent->project()->targets();
-    Core::Id id2 = tmp.front()->id();
-    return parent->project()->target(id) != 0;
+    return true;
 }
 
 bool DubRunConfigurationFactory::canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const
@@ -208,7 +227,7 @@ QList<Core::Id> DubRunConfigurationFactory::availableCreationIds(ProjectExplorer
     QList<Core::Id> allIds;
     QList<ProjectExplorer::Target *> targets = parent->project()->targets();
     foreach (const ProjectExplorer::Target* t, targets) {
-        allIds << idFromBuildTarget(t->displayName());
+        allIds << idFromBuildTarget(t->project()->displayName());
     }
     return allIds;
 }
@@ -239,8 +258,7 @@ bool DubRunConfigurationFactory::canHandle(ProjectExplorer::Target *target) cons
 ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::doCreate(ProjectExplorer::Target *parent, const Core::Id id)
 {
     const QString title(buildTargetFromId(id));
-    const ProjectExplorer::Target *t = parent->project()->target(id);
-    return new DubRunConfiguration(parent, id, t->displayName(), "", title);
+    return new DubRunConfiguration(parent, id, parent->project()->displayName(), parent->project()->projectDirectory(), title);
 }
 
 ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::doRestore(ProjectExplorer::Target *parent, const QVariantMap &map)

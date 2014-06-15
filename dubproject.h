@@ -28,7 +28,8 @@ public:
 
     // others
 
-    const QString buildDirectory() const;
+    const QString& buildDirectory() const;
+    QString executable() const;
 
     
 signals:

@@ -10,23 +10,36 @@
 #include <projectexplorer/kit.h>
 #include <projectexplorer/kitmanager.h>
 #include <coreplugin/mimedatabase.h>
+#include <coreplugin/coreconstants.h>
+
+#include <QFormLayout>
+#include <QHBoxLayout>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QToolButton>
 
 
 DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source) :
-    ProjectExplorer::BuildConfiguration(target, source)
+    ProjectExplorer::BuildConfiguration(target, source),
+    m_project(qobject_cast<DubProject*>(target->project()))
 {
+    Q_ASSERT(m_project);
     Q_UNUSED(target);
     cloneSteps(source);
 }
 
 DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, const Core::Id id)
-    : ProjectExplorer::BuildConfiguration(target, id)
+    : ProjectExplorer::BuildConfiguration(target, id),
+      m_project(qobject_cast<DubProject*>(target->project()))
 {
+    Q_ASSERT(m_project);
 }
 
 DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, const ProjectExplorer::BuildInfo &info)
-    : ProjectExplorer::BuildConfiguration(target, DubProjectManager::Constants::DUB_BC_ID)
+    : ProjectExplorer::BuildConfiguration(target, DubProjectManager::Constants::DUB_BC_ID),
+      m_project(qobject_cast<DubProject*>(target->project()))
 {
+    Q_ASSERT(m_project);
     setDisplayName(info.displayName);
     setDefaultDisplayName(info.displayName);
     setBuildDirectory(info.buildDirectory);
@@ -48,13 +61,76 @@ ProjectExplorer::BuildConfiguration::BuildType DubBuildConfiguration::buildType(
     return Release;
 }
 
-
-DubBuildConfigurationWidget::DubBuildConfigurationWidget(DubBuildConfiguration* configuration)
-    : configuration(configuration)
+DubProject &DubBuildConfiguration::dubPoject()
 {
-    this->setDisplayName("DubManager");
+    return *m_project;
 }
 
+
+DubBuildConfigurationWidget::DubBuildConfigurationWidget(DubBuildConfiguration* configuration)
+    : m_configuration(configuration)
+{
+    this->setDisplayName("DubManager");
+
+    QFormLayout *fl = new QFormLayout(this);
+    fl->setMargin(0);
+    fl->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+
+    QToolButton *resetButton = new QToolButton();
+    resetButton->setToolTip(tr("Reset to default"));
+    resetButton->setIcon(QIcon(QLatin1String(Core::Constants::ICON_RESET)));
+    connect(resetButton, SIGNAL(clicked()), &(m_configuration->dubPoject()), SLOT(update()));
+
+    m_chooseConfigs = new QCheckBox(tr(" for config "), this);
+    m_configs = new QComboBox(this);
+    m_configs->setDuplicatesEnabled(false);
+    connect(m_chooseConfigs, SIGNAL(toggled(bool)), this, SLOT(chooseConfiguration()));
+    m_configs->setEnabled(false);
+    connect(m_configs, SIGNAL(currentTextChanged(QString)), this, SLOT(chooseConfiguration()));
+
+    QHBoxLayout *hl = new QHBoxLayout;
+    hl->addWidget(m_chooseConfigs);
+    hl->addWidget(m_configs);
+    hl->addWidget(resetButton, 1, Qt::AlignRight);
+
+    fl->addRow(tr("Source tree: "), hl);
+
+    connect(&(m_configuration->dubPoject()), SIGNAL(updated()), this, SLOT(update()));
+    connect(this, SIGNAL(configurationChoosed(QString)), &(m_configuration->dubPoject()), SLOT(setCurrentConfiguration(QString)));
+
+    update();
+
+}
+
+void DubBuildConfigurationWidget::update()
+{
+    QString currentConfig = m_configuration->dubPoject().currentConfiguration();
+    m_configs->clear();
+    m_chooseConfigs->setChecked(false);
+    if (!currentConfig.isEmpty()) {
+        m_configs->addItem(currentConfig);
+    }
+    m_configs->addItems(m_configuration->dubPoject().configurationList());
+    if (currentConfig.isEmpty()) {
+        m_configs->setEnabled(false);
+        m_chooseConfigs->setChecked(false);
+    } else {
+        m_configs->setEnabled(true);
+        m_chooseConfigs->setChecked(true);
+        m_configs->setCurrentText(currentConfig);
+    }
+}
+
+void DubBuildConfigurationWidget::chooseConfiguration()
+{
+    bool enable = m_chooseConfigs->isChecked();
+    m_configs->setEnabled(enable);
+    if (enable) {
+        emit configurationChoosed(m_configs->currentText());
+    } else {
+        emit configurationChoosed(QString());
+    }
+}
 
 DubBuildConfigurationFactory::DubBuildConfigurationFactory(QObject *parent)
     : ProjectExplorer::IBuildConfigurationFactory(parent)

@@ -31,6 +31,7 @@ public slots:
     void setExecutable(const QString& exec);
     void setWorkingDirectory(const QString& dir);
     void runInTerminal(bool toggled);
+    void resetWorkingDirectory();
 
 private:
     void init();
@@ -38,6 +39,7 @@ private:
     RunMode m_runMode;
     QString m_executable;
     QString m_workingDirectory;
+    QString m_defaultWorkingDirectory;
     QString m_title;
     QString m_arguments;
     bool m_terminal;
@@ -49,6 +51,9 @@ class PathChooser;
 class DetailsWidget;
 }
 
+QT_FORWARD_DECLARE_CLASS(QLineEdit)
+QT_FORWARD_DECLARE_CLASS(QCheckBox)
+
 class DubRunConfigurationWidget : public QWidget
 {
     Q_OBJECT
@@ -57,14 +62,16 @@ public:
 
 private slots:
     void environmentWasChanged();
-    void resetWorkingDirectory();
+    void runConfigurationUpdated();
 
 private:
 
     bool m_ignoreChange;
+    QLineEdit *m_argumentsLineEdit;
     DubRunConfiguration *m_dubRunConfiguration;
     Utils::PathChooser *m_executableEdit;
     Utils::PathChooser *m_workingDirectoryEdit;
+    QCheckBox *m_runInTerminal;
     Utils::DetailsWidget *m_detailsContainer;
 };
 

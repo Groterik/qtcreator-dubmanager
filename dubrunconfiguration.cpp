@@ -23,6 +23,7 @@ DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::
       m_runMode(Gui),
       m_executable(executable),
       m_workingDirectory(workingDirectory),
+      m_defaultWorkingDirectory(workingDirectory),
       m_title(title)
 {
     init();
@@ -63,24 +64,35 @@ QWidget *DubRunConfiguration::createConfigurationWidget()
     return new DubRunConfigurationWidget(this);
 }
 
+void DubRunConfiguration::resetWorkingDirectory()
+{
+    m_workingDirectory = m_defaultWorkingDirectory;
+    emit updated();
+}
+
 void DubRunConfiguration::setArguments(const QString &args)
 {
     m_arguments = args;
+    emit updated();
 }
 
 void DubRunConfiguration::setExecutable(const QString &exec)
 {
     m_executable = exec;
+    emit updated();
 }
 
 void DubRunConfiguration::setWorkingDirectory(const QString &dir)
 {
     m_workingDirectory = dir;
+    emit updated();
 }
 
 void DubRunConfiguration::runInTerminal(bool toggled)
 {
     m_terminal = toggled;
+    m_runMode = Console;
+    emit updated();
 }
 
 void DubRunConfiguration::init()
@@ -109,10 +121,10 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRun
             m_dubRunConfiguration, SLOT(setExecutable(QString)));
     fl->addRow(tr("Executable:"), m_executableEdit);
 
-    QLineEdit *argumentsLineEdit = new QLineEdit();
-    argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
-    connect(argumentsLineEdit, SIGNAL(textChanged(QString)), m_dubRunConfiguration, SLOT(setArguments(QString)));
-    fl->addRow(tr("Arguments:"), argumentsLineEdit);
+    m_argumentsLineEdit = new QLineEdit();
+    m_argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
+    connect(m_argumentsLineEdit, SIGNAL(textChanged(QString)), m_dubRunConfiguration, SLOT(setArguments(QString)));
+    fl->addRow(tr("Arguments:"), m_argumentsLineEdit);
 
     m_workingDirectoryEdit = new Utils::PathChooser;
     m_workingDirectoryEdit->setExpectedKind(Utils::PathChooser::Directory);
@@ -133,7 +145,8 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRun
     QToolButton *resetButton = new QToolButton();
     resetButton->setToolTip(tr("Reset to default."));
     resetButton->setIcon(QIcon(QLatin1String(Core::Constants::ICON_RESET)));
-    connect(resetButton, SIGNAL(clicked()), this, SLOT(resetWorkingDirectory()));
+    connect(resetButton, SIGNAL(clicked()),
+            m_dubRunConfiguration, SLOT(resetWorkingDirectory()));
 
     QHBoxLayout *boxlayout = new QHBoxLayout();
     boxlayout->addWidget(m_workingDirectoryEdit);
@@ -141,9 +154,9 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRun
 
     fl->addRow(tr("Working directory:"), boxlayout);
 
-    QCheckBox *runInTerminal = new QCheckBox;
-    fl->addRow(tr("Run in Terminal"), runInTerminal);
-    connect(runInTerminal, SIGNAL(toggled(bool)),
+    m_runInTerminal = new QCheckBox;
+    fl->addRow(tr("Run in Terminal"), m_runInTerminal);
+    connect(m_runInTerminal, SIGNAL(toggled(bool)),
             m_dubRunConfiguration, SLOT(runInTerminal(bool)));
 
 
@@ -157,6 +170,8 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRun
     QVBoxLayout *vbx = new QVBoxLayout(this);
     vbx->setMargin(0);
     vbx->addWidget(m_detailsContainer);
+
+    connect(m_dubRunConfiguration, SIGNAL(updated()), this, SLOT(runConfigurationUpdated()));
 }
 
 void DubRunConfigurationWidget::environmentWasChanged()
@@ -167,9 +182,12 @@ void DubRunConfigurationWidget::environmentWasChanged()
     m_workingDirectoryEdit->setEnvironment(aspect->environment());
 }
 
-void DubRunConfigurationWidget::resetWorkingDirectory()
+void DubRunConfigurationWidget::runConfigurationUpdated()
 {
     m_workingDirectoryEdit->setPath(m_dubRunConfiguration->workingDirectory());
+    m_executableEdit->setPath(m_dubRunConfiguration->executable());
+    m_argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
+    m_runInTerminal->setChecked(m_dubRunConfiguration->runMode() != DubRunConfiguration::Gui);
 }
 
 

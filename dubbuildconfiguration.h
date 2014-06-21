@@ -21,21 +21,35 @@ public:
     virtual BuildType buildType() const;
 
     // others
+
+    DubProject &dubPoject();
     
 signals:
     
 public slots:
 
 private:
+    DubProject *m_project;
 };
+
+QT_FORWARD_DECLARE_CLASS(QCheckBox)
+QT_FORWARD_DECLARE_CLASS(QComboBox)
 
 class DubBuildConfigurationWidget : public ProjectExplorer::NamedWidget
 {
     Q_OBJECT
 public:
     explicit DubBuildConfigurationWidget(DubBuildConfiguration *configuration);
+signals:
+    void configurationChoosed(QString conf);
+public slots:
+    void update();
+private slots:
+    void chooseConfiguration();
 private:
-    DubBuildConfiguration* configuration;
+    DubBuildConfiguration* m_configuration;
+    QCheckBox *m_chooseConfigs;
+    QComboBox *m_configs;
 };
 
 namespace ProjectExplorer {

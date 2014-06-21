@@ -19,51 +19,24 @@ const char PACKAGE_KEY[] = "DubProjectManager.BuildStep.Package";
 const char BUILD_TYPE_KEY[] = "DubProjectManager.BuildStep.BuildType";
 const char CONFIGURATION_KEY[] = "DubProjectManager.BuildStep.Configuration";
 const char ADDITIONAL_ARGUMENTS_KEY[] = "DubProjectManager.BuildStep.AdditionalArguments";
-
-class DubBuildTypes
-{
-public:
-    DubBuildTypes() {
-        defaultTypes.push_back(QString::fromLatin1("plain"));
-        defaultTypes.push_back(QString::fromLatin1("debug"));
-        defaultTypes.push_back(QString::fromLatin1("release"));
-        defaultTypes.push_back(QString::fromLatin1("unittest"));
-        defaultTypes.push_back(QString::fromLatin1("docs"));
-        defaultTypes.push_back(QString::fromLatin1("ddox"));
-        defaultTypes.push_back(QString::fromLatin1("profile"));
-        defaultTypes.push_back(QString::fromLatin1("cov"));
-        defaultTypes.push_back(QString::fromLatin1("unittest-cov"));
-    }
-
-    const QString& defaultType() const {
-        return defaultTypes.front();
-    }
-    const QStringList defaultTypesList() const {
-        return defaultTypes;
-    }
-private:
-    QStringList defaultTypes;
-};
-
-const DubBuildTypes defaultTypes;
-
 } // namespace
 
 DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl, const Core::Id id) :
     ProjectExplorer::AbstractProcessStep(bsl, id)
 {
+    construct();
 }
 
-DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl, const QString &configurationName)
+DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl)
     : ProjectExplorer::AbstractProcessStep(bsl, BUILDSTEP_ID)
 {
+    construct();
     setDisplayName(tr("Dub"));
-    m_configuration = configurationName;
-    m_buildType = defaultTypes.defaultType();
 }
 
 bool DubBuildStep::init()
 {
+
     ProjectExplorer::BuildConfiguration *bc = buildConfiguration();
     if (!bc)
         bc = target()->activeBuildConfiguration();
@@ -113,14 +86,23 @@ void DubBuildStep::updatePackage(const QString &package)
     emit updated();
 }
 
+void DubBuildStep::construct()
+{
+    Q_ASSERT(buildConfiguration()->target()->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID);
+    m_project = qobject_cast<DubProject*>(buildConfiguration()->target()->project());
+
+    m_buildType = m_project->buildTypesList().front();
+    m_configuration = m_project->configurationList().front();
+}
+
 QString DubBuildStep::generateArguments() const
 {
     QString result = "build " + m_package;
     if (!m_configuration.isEmpty()) {
-        result += QString::fromLatin1(" --config=") + m_configuration;
+        result += QLatin1String(" --config=\"") + m_configuration + QLatin1String("\"");
     }
-    result += QString::fromLatin1(" --build=") + m_buildType;
-    result += QString::fromLatin1(" ") + m_additionalArguments;
+    result += QLatin1String(" --build=") + m_buildType;
+    result += QLatin1String(" ") + m_additionalArguments;
     return result;
 }
 
@@ -152,6 +134,11 @@ QVariantMap DubBuildStep::toMap() const
     map.insert(QString::fromLatin1(BUILD_TYPE_KEY), m_buildType);
     map.insert(QString::fromLatin1(ADDITIONAL_ARGUMENTS_KEY), m_additionalArguments);
     return map;
+}
+
+const DubProject *DubBuildStep::dubProject() const
+{
+    return m_project;
 }
 
 bool DubBuildStep::fromMap(const QVariantMap &map)
@@ -195,13 +182,14 @@ DubBuildStepConfigWidget::DubBuildStepConfigWidget(DubBuildStep *step)
     connect(m_additionalArguments, SIGNAL(textChanged(QString)), m_step, SLOT(updateAdditionalArguments(QString)));
 
     m_buildTargetsList = new QComboBox(this);
-    m_buildTargetsList->addItems(defaultTypes.defaultTypesList());
-    m_buildTargetsList->setCurrentText(defaultTypes.defaultType());
     connect(m_buildTargetsList, SIGNAL(currentTextChanged(QString)), m_step, SLOT(updateBuildType(QString)));
 
     connect(m_step, SIGNAL(updated()), this, SIGNAL(updateSummary()));
+    connect(m_step->dubProject(), SIGNAL(updated()), this, SLOT(update()));
 
     fl->addRow(tr("Build type:"), m_buildTargetsList);
+
+    update();
 }
 
 QString DubBuildStepConfigWidget::summaryText() const
@@ -212,6 +200,18 @@ QString DubBuildStepConfigWidget::summaryText() const
 QString DubBuildStepConfigWidget::displayName() const
 {
     return QString::fromLatin1("WowDisplayName");
+}
+
+void DubBuildStepConfigWidget::update()
+{
+    QString oldBuildType = m_buildTargetsList->currentText();
+    m_buildTargetsList->clear();
+    const QStringList &list = m_step->dubProject()->buildTypesList();
+    m_buildTargetsList->addItems(list);
+    if (list.contains(oldBuildType)) {
+        m_buildTargetsList->setCurrentText(oldBuildType);
+    }
+
 }
 
 

@@ -6,12 +6,14 @@
 #include <projectexplorer/ioutputparser.h>
 #include <projectexplorer/task.h>
 
+class DubProject;
+
 class DubBuildStep : public ProjectExplorer::AbstractProcessStep
 {
     Q_OBJECT
 public:
     explicit DubBuildStep(ProjectExplorer::BuildStepList *bsl, const Core::Id id);
-    explicit DubBuildStep(ProjectExplorer::BuildStepList *bsl, const QString &configurationName = QString());
+    explicit DubBuildStep(ProjectExplorer::BuildStepList *bsl);
 
     // pure ProjectExplorer::AbstractProcessStep (BuildStep)
 
@@ -35,6 +37,8 @@ public:
 
     QVariantMap toMap() const;
 
+    const DubProject *dubProject() const;
+
 protected:
     bool fromMap(const QVariantMap &map);
 
@@ -50,6 +54,10 @@ public slots:
     void updatePackage(const QString& package);
 
 private:
+    void construct();
+
+    DubProject* m_project;
+
     QString m_package;
     QString m_additionalArguments;
     QString m_buildType;
@@ -93,6 +101,9 @@ public:
     virtual QString displayName() const;
 
     // others
+
+public slots:
+    void update();
 
 private:
     DubBuildStep *m_step;

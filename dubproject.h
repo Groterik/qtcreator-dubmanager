@@ -6,6 +6,7 @@
 class DubManager;
 class DubFile;
 class DubProjectNode;
+class DubConfigParser;
 
 
 QT_FORWARD_DECLARE_CLASS(QFileSystemWatcher)
@@ -31,11 +32,16 @@ public:
     const QString& buildDirectory() const;
     QString executable() const;
 
+    const QStringList &configurationList() const;
+    const QStringList &buildTypesList() const;
+    const QString &currentConfiguration() const;
+
     
 signals:
-    
+    void updated();
 public slots:
-
+    void update();
+    void setCurrentConfiguration(const QString& conf);
 private slots:
     void dubFileChanged(const QString &filename);
 
@@ -45,11 +51,9 @@ private:
         EXECUTABLE, LIBRARY, NONE
     };
 
-    static QStringList scanDirectories(QStringList directories, const QString &root);
-
     void setupTargets();
-    void buildSourceTree();
     void parseConfig();
+    void buildSourceTree(const QString &conf);
     void init();
 
     DubManager* m_manager;
@@ -58,12 +62,14 @@ private:
     QStringList m_files;
     QStringList m_directories;
     QStringList m_configurations;
+    QString m_configuration;
     TargetType m_type;
 
     QString m_projectName;
     DubProjectNode *m_rootNode;
     QFileSystemWatcher* m_watcher;
     QString m_buildDirectory;
+    DubConfigParser *m_parser;
     
 };
 

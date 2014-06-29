@@ -7,6 +7,7 @@ class DubManager;
 class DubFile;
 class DubProjectNode;
 class DubConfigParser;
+class ConfigurationInfo;
 
 
 QT_FORWARD_DECLARE_CLASS(QFileSystemWatcher)
@@ -30,11 +31,12 @@ public:
     // others
 
     const QString& buildDirectory() const;
-    QString executable() const;
 
     const QStringList &configurationList() const;
     const QStringList &buildTypesList() const;
     const QString &currentConfiguration() const;
+
+    const ConfigurationInfo &info(const QString conf);
 
     
 signals:

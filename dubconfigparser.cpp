@@ -7,6 +7,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QDir>
 
 namespace {
 static const QString defaultConfiguration = " [default]";
@@ -57,7 +58,7 @@ const QStringList& DubConfigParser::buildTypesList() const
     return m_buildTypes;
 }
 
-const DubConfigParser::ConfigurationInfo &DubConfigParser::configurationInfo(const QString &conf) const
+const ConfigurationInfo &DubConfigParser::configurationInfo(const QString &conf) const
 {
     StateMap::const_iterator it = m_states.find(conf);
     if (it == m_states.end()) {
@@ -141,9 +142,11 @@ bool DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
 
         QJsonArray srcArray = CheckPresentation(packageRoot.value("files"), QJsonValue::Array).toArray();
         foreach (QJsonValue src, srcArray) {
+            QDir qpath(state.m_path);
             QJsonObject srcObj = CheckPresentation(src, QJsonValue::Object).toObject();
             if (CheckPresentation(srcObj.value("type")).toString() == "source") {
                 state.m_files.push_back(CheckPresentation(srcObj.value("path")).toString());
+                state.m_files.back() = qpath.absoluteFilePath(state.m_files.back());
             }
         }
 
@@ -159,7 +162,7 @@ bool DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
         return false;
     }
     catch (...) {
-        m_errorString = "Unknown error during dub describe parsing";
+        m_errorString = tr("Unknown error during dub describe parsing");
         return false;
     }
     return true;
@@ -193,47 +196,47 @@ bool DubConfigParser::parse()
     return true;
 }
 
-const QStringList &DubConfigParser::ConfigurationInfo::files() const
+const QStringList &ConfigurationInfo::files() const
 {
     return m_files;
 }
 
-const QStringList &DubConfigParser::ConfigurationInfo::directories() const
+const QStringList &ConfigurationInfo::directories() const
 {
     return m_directories;
 }
 
-const QString &DubConfigParser::ConfigurationInfo::path() const
+const QString &ConfigurationInfo::path() const
 {
     return m_path;
 }
 
-const QStringList &DubConfigParser::ConfigurationInfo::importPaths() const
+const QStringList &ConfigurationInfo::importPaths() const
 {
     return m_importPaths;
 }
 
-const QString &DubConfigParser::ConfigurationInfo::targetName() const
+const QString &ConfigurationInfo::targetName() const
 {
     return m_targetName;
 }
 
-const QString &DubConfigParser::ConfigurationInfo::workingDirectory() const
+const QString &ConfigurationInfo::workingDirectory() const
 {
     return m_workingDirectory;
 }
 
-const QString &DubConfigParser::ConfigurationInfo::targetFilename() const
+const QString &ConfigurationInfo::targetFilename() const
 {
     return m_targetFilename;
 }
 
-const QString &DubConfigParser::ConfigurationInfo::targetType() const
+const QString &ConfigurationInfo::targetType() const
 {
     return m_targetType;
 }
 
-const QString &DubConfigParser::ConfigurationInfo::targetPath() const
+const QString &ConfigurationInfo::targetPath() const
 {
     return m_targetPath;
 }

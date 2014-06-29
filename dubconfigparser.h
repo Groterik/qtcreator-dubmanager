@@ -5,6 +5,32 @@
 #include <QStringList>
 #include <QMap>
 
+class ConfigurationInfo
+{
+public:
+    const QStringList &files() const;
+    const QStringList &directories() const;
+    const QString &path() const;
+    const QStringList &importPaths() const;
+    const QString &targetName() const;
+    const QString &workingDirectory() const;
+    const QString &targetFilename() const;
+    const QString &targetType() const;
+    const QString &targetPath() const;
+private:
+    QStringList m_files;
+    QStringList m_directories;
+    QString m_path;
+    QStringList m_importPaths;
+    QString m_targetName;
+    QString m_workingDirectory;
+    QString m_targetFilename;
+    QString m_targetType;
+    QString m_targetPath;
+
+    friend class DubConfigParser;
+};
+
 class DubConfigParser : public QObject
 {
     Q_OBJECT
@@ -12,32 +38,6 @@ public:
     explicit DubConfigParser(const QString& directory, QObject *parent = 0);
 
     bool parse();
-
-    class ConfigurationInfo
-    {
-    public:
-        const QStringList &files() const;
-        const QStringList &directories() const;
-        const QString &path() const;
-        const QStringList &importPaths() const;
-        const QString &targetName() const;
-        const QString &workingDirectory() const;
-        const QString &targetFilename() const;
-        const QString &targetType() const;
-        const QString &targetPath() const;
-    private:
-        QStringList m_files;
-        QStringList m_directories;
-        QString m_path;
-        QStringList m_importPaths;
-        QString m_targetName;
-        QString m_workingDirectory;
-        QString m_targetFilename;
-        QString m_targetType;
-        QString m_targetPath;
-
-        friend class DubConfigParser;
-    };
 
     const ConfigurationInfo& getState(const QString& conf) const;
 

@@ -4,13 +4,14 @@
 #include <projectexplorer/target.h>
 #include <projectexplorer/localapplicationrunconfiguration.h>
 
+class DubProject;
+
 class DubRunConfiguration : public ProjectExplorer::LocalApplicationRunConfiguration
 {
     Q_OBJECT
 public:
-    DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id, const QString &executable,
-                                 const QString &workingDirectory, const QString &title);
-    DubRunConfiguration(ProjectExplorer::Target *parent, ProjectExplorer::LocalApplicationRunConfiguration *source);
+    DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id, DubProject* project);
+    DubRunConfiguration(ProjectExplorer::Target *parent, DubRunConfiguration *source);
 
     // pure ProjectExplorer::LocalApplicationRunConfiguration
 
@@ -23,23 +24,28 @@ public:
 
     // others
 
+    QString configuration() const;
+    QStringList configurationsList() const;
+
 signals:
     void updated();
 
 public slots:
     void setArguments(const QString &args);
-    void setExecutable(const QString& exec);
-    void setWorkingDirectory(const QString& dir);
+    void setConfiguration(const QString& conf);
     void runInTerminal(bool toggled);
-    void resetWorkingDirectory();
+
+    void update();
 
 private:
     void init();
 
+    DubProject* m_project;
+    QString m_configuration;
+
     RunMode m_runMode;
     QString m_executable;
     QString m_workingDirectory;
-    QString m_defaultWorkingDirectory;
     QString m_title;
     QString m_arguments;
     bool m_terminal;
@@ -53,6 +59,7 @@ class DetailsWidget;
 
 QT_FORWARD_DECLARE_CLASS(QLineEdit)
 QT_FORWARD_DECLARE_CLASS(QCheckBox)
+QT_FORWARD_DECLARE_CLASS(QComboBox)
 
 class DubRunConfigurationWidget : public QWidget
 {
@@ -69,7 +76,7 @@ private:
     bool m_ignoreChange;
     QLineEdit *m_argumentsLineEdit;
     DubRunConfiguration *m_dubRunConfiguration;
-    Utils::PathChooser *m_executableEdit;
+    QComboBox *m_configurations;
     Utils::PathChooser *m_workingDirectoryEdit;
     QCheckBox *m_runInTerminal;
     Utils::DetailsWidget *m_detailsContainer;

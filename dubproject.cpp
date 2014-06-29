@@ -80,7 +80,7 @@ QStringList DubProject::files(ProjectExplorer::Project::FilesMode fileMode) cons
 void DubProject::parseConfig()
 {
     m_parser->parse();
-    const DubConfigParser::ConfigurationInfo& s = m_parser->configurationInfo(m_parser->configurationsList().front());
+    const ConfigurationInfo& s = m_parser->configurationInfo(m_parser->configurationsList().front());
     m_files = s.files();
     m_projectName = s.targetName();
     m_rootNode->setDisplayName(m_projectName);
@@ -106,11 +106,6 @@ const QString &DubProject::buildDirectory() const
     return m_buildDirectory;
 }
 
-QString DubProject::executable() const
-{
-    return m_buildDirectory + "/" + m_projectName;
-}
-
 const QStringList &DubProject::configurationList() const
 {
     return m_parser->configurationsList();
@@ -124,6 +119,11 @@ const QStringList &DubProject::buildTypesList() const
 const QString &DubProject::currentConfiguration() const
 {
     return m_configuration;
+}
+
+const ConfigurationInfo &DubProject::info(const QString conf)
+{
+    return m_parser->configurationInfo(conf);
 }
 
 void DubProject::update()
@@ -164,7 +164,7 @@ void DubProject::setupTargets()
 
     foreach (ProjectExplorer::Target* t, this->targets()) {
         DubRunConfiguration* rc =
-                new DubRunConfiguration(t, DubRunConfigurationFactory::idFromBuildTarget(m_projectName), executable(), buildDirectory(), m_projectName);
+                new DubRunConfiguration(t, DubRunConfigurationFactory::idFromBuildTarget(m_projectName), this);
         t->addRunConfiguration(rc);
         t->updateDefaultRunConfigurations();
     }

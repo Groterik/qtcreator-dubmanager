@@ -60,6 +60,7 @@ class DetailsWidget;
 QT_FORWARD_DECLARE_CLASS(QLineEdit)
 QT_FORWARD_DECLARE_CLASS(QCheckBox)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QLabel)
 
 class DubRunConfigurationWidget : public QWidget
 {
@@ -77,7 +78,8 @@ private:
     QLineEdit *m_argumentsLineEdit;
     DubRunConfiguration *m_dubRunConfiguration;
     QComboBox *m_configurations;
-    Utils::PathChooser *m_workingDirectoryEdit;
+    QLabel *m_summary;
+    QLabel *m_workingDirectory;
     QCheckBox *m_runInTerminal;
     Utils::DetailsWidget *m_detailsContainer;
 };

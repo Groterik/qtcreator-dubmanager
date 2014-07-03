@@ -34,7 +34,7 @@ public:
 
     const QStringList &configurationList() const;
     const QStringList &buildTypesList() const;
-    const QString &currentConfiguration() const;
+    const QString &sourceTreeConfiguration() const;
 
     const ConfigurationInfo &info(const QString conf);
 
@@ -43,7 +43,7 @@ signals:
     void updated();
 public slots:
     void update();
-    void setCurrentConfiguration(const QString& conf);
+    void setSourceTreeConfiguration(const QString& conf);
 private slots:
     void dubFileChanged(const QString &filename);
 

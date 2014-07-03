@@ -46,6 +46,8 @@ public:
 
     const ConfigurationInfo& configurationInfo(const QString& conf) const;
 
+    const QString& projectName() const;
+
 signals:
 
 public slots:
@@ -58,6 +60,7 @@ private:
     QString m_errorString;
     QStringList m_configurations;
     QStringList m_buildTypes;
+    QString m_projectName;
 
     typedef QMap<QString, ConfigurationInfo> StateMap;
     StateMap m_states;

@@ -194,7 +194,7 @@ DubBuildStepConfigWidget::DubBuildStepConfigWidget(DubBuildStep *step)
 
 QString DubBuildStepConfigWidget::summaryText() const
 {
-    return QString::fromLatin1("<b>Dub</b>: ") + m_step->commandString();
+    return tr("<b>Dub command</b>: ") + m_step->commandString();
 }
 
 QString DubBuildStepConfigWidget::displayName() const

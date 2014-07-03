@@ -15,6 +15,7 @@
 #include <QToolButton>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLabel>
 
 namespace {
 const char RUNCONFIGURATION_ID[] = "DubProjectManager.RunConfiguration";
@@ -123,6 +124,12 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRun
     fl->setMargin(0);
     fl->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
 
+    m_summary = new QLabel(this);
+    fl->addRow(tr("Command:"), m_summary);
+
+    m_workingDirectory = new QLabel(this);
+    fl->addRow(tr("Working directory:"), m_workingDirectory);
+
     m_configurations = new QComboBox;
     connect(m_configurations, SIGNAL(currentTextChanged(QString)),
             m_dubRunConfiguration, SLOT(setConfiguration(QString)));
@@ -133,33 +140,12 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRun
     connect(m_argumentsLineEdit, SIGNAL(textChanged(QString)), m_dubRunConfiguration, SLOT(setArguments(QString)));
     fl->addRow(tr("Arguments:"), m_argumentsLineEdit);
 
-    m_workingDirectoryEdit = new Utils::PathChooser;
-    m_workingDirectoryEdit->setExpectedKind(Utils::PathChooser::Directory);
-    m_workingDirectoryEdit->setBaseDirectory(m_dubRunConfiguration->target()->project()->projectDirectory());
-    m_workingDirectoryEdit->setPath(m_dubRunConfiguration->workingDirectory());
-    m_workingDirectoryEdit->setHistoryCompleter(QLatin1String("Dub.RunConfiguration.WorkingDirectory.History"));
-    m_workingDirectoryEdit->setPromptDialogTitle(tr("Select Working Directory"));
-    connect(m_workingDirectoryEdit, SIGNAL(changed(QString)),
-            m_dubRunConfiguration, SLOT(setWorkingDirectory(QString)));
-
     ProjectExplorer::EnvironmentAspect *aspect
             = m_dubRunConfiguration->extraAspect<ProjectExplorer::EnvironmentAspect>();
     if (aspect) {
         connect(aspect, SIGNAL(environmentChanged()), this, SLOT(environmentWasChanged()));
         environmentWasChanged();
     }
-
-    QToolButton *resetButton = new QToolButton();
-    resetButton->setToolTip(tr("Reset to default."));
-    resetButton->setIcon(QIcon(QLatin1String(Core::Constants::ICON_RESET)));
-    connect(resetButton, SIGNAL(clicked()),
-            m_dubRunConfiguration, SLOT(resetWorkingDirectory()));
-
-    QHBoxLayout *boxlayout = new QHBoxLayout();
-    boxlayout->addWidget(m_workingDirectoryEdit);
-    boxlayout->addWidget(resetButton);
-
-    fl->addRow(tr("Working directory:"), boxlayout);
 
     m_runInTerminal = new QCheckBox;
     fl->addRow(tr("Run in Terminal"), m_runInTerminal);
@@ -187,17 +173,17 @@ void DubRunConfigurationWidget::environmentWasChanged()
     ProjectExplorer::EnvironmentAspect *aspect
             = m_dubRunConfiguration->extraAspect<ProjectExplorer::EnvironmentAspect>();
     QTC_ASSERT(aspect, return);
-    m_workingDirectoryEdit->setEnvironment(aspect->environment());
 }
 
 void DubRunConfigurationWidget::runConfigurationUpdated()
 {
-    m_workingDirectoryEdit->setPath(m_dubRunConfiguration->workingDirectory());
     m_configurations->clear();
     m_configurations->addItems(m_dubRunConfiguration->configurationsList());
     m_configurations->setCurrentText(m_dubRunConfiguration->configuration());
     m_argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
     m_runInTerminal->setChecked(m_dubRunConfiguration->runMode() != DubRunConfiguration::Gui);
+    m_summary->setText(m_dubRunConfiguration->executable() + " " + m_dubRunConfiguration->commandLineArguments());
+    m_workingDirectory->setText(m_dubRunConfiguration->workingDirectory());
 }
 
 

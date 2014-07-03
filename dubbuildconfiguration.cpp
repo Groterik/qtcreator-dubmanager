@@ -17,6 +17,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QToolButton>
+#include <QPushButton>
 
 
 DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source) :
@@ -68,7 +69,7 @@ DubProject &DubBuildConfiguration::dubPoject()
 
 
 DubBuildConfigurationWidget::DubBuildConfigurationWidget(DubBuildConfiguration* configuration)
-    : m_configuration(configuration)
+    : m_configuration(configuration), m_ccw(" for project ", this)
 {
     this->setDisplayName("DubManager");
 
@@ -77,26 +78,15 @@ DubBuildConfigurationWidget::DubBuildConfigurationWidget(DubBuildConfiguration* 
     fl->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
 
     QToolButton *resetButton = new QToolButton();
-    resetButton->setToolTip(tr("Reset to default"));
+    resetButton->setToolTip(tr("Update project"));
     resetButton->setIcon(QIcon(QLatin1String(Core::Constants::ICON_RESET)));
     connect(resetButton, SIGNAL(clicked()), &(m_configuration->dubPoject()), SLOT(update()));
+    fl->addRow(tr("Update project:"), resetButton);
 
-    m_chooseConfigs = new QCheckBox(tr(" for config "), this);
-    m_configs = new QComboBox(this);
-    m_configs->setDuplicatesEnabled(false);
-    connect(m_chooseConfigs, SIGNAL(toggled(bool)), this, SLOT(chooseConfiguration()));
-    m_configs->setEnabled(false);
-    connect(m_configs, SIGNAL(currentTextChanged(QString)), this, SLOT(chooseConfiguration()));
-
-    QHBoxLayout *hl = new QHBoxLayout;
-    hl->addWidget(m_chooseConfigs);
-    hl->addWidget(m_configs);
-    hl->addWidget(resetButton, 1, Qt::AlignRight);
-
-    fl->addRow(tr("Source tree: "), hl);
+    fl->addRow(tr("Source tree: "), &m_ccw);
 
     connect(&(m_configuration->dubPoject()), SIGNAL(updated()), this, SLOT(update()));
-    connect(this, SIGNAL(configurationChoosed(QString)), &(m_configuration->dubPoject()), SLOT(setCurrentConfiguration(QString)));
+    connect(&m_ccw, SIGNAL(currentTextChanged(QString)), &(m_configuration->dubPoject()), SLOT(setSourceTreeConfiguration(QString)));
 
     update();
 
@@ -104,32 +94,7 @@ DubBuildConfigurationWidget::DubBuildConfigurationWidget(DubBuildConfiguration* 
 
 void DubBuildConfigurationWidget::update()
 {
-    QString currentConfig = m_configuration->dubPoject().currentConfiguration();
-    m_configs->clear();
-    m_chooseConfigs->setChecked(false);
-    if (!currentConfig.isEmpty()) {
-        m_configs->addItem(currentConfig);
-    }
-    m_configs->addItems(m_configuration->dubPoject().configurationList());
-    if (currentConfig.isEmpty()) {
-        m_configs->setEnabled(false);
-        m_chooseConfigs->setChecked(false);
-    } else {
-        m_configs->setEnabled(true);
-        m_chooseConfigs->setChecked(true);
-        m_configs->setCurrentText(currentConfig);
-    }
-}
-
-void DubBuildConfigurationWidget::chooseConfiguration()
-{
-    bool enable = m_chooseConfigs->isChecked();
-    m_configs->setEnabled(enable);
-    if (enable) {
-        emit configurationChoosed(m_configs->currentText());
-    } else {
-        emit configurationChoosed(QString());
-    }
+    m_ccw.setCurrentText(m_configuration->dubPoject().sourceTreeConfiguration(), m_configuration->dubPoject().configurationList());
 }
 
 DubBuildConfigurationFactory::DubBuildConfigurationFactory(QObject *parent)
@@ -207,4 +172,83 @@ bool DubBuildConfigurationFactory::canHandle(const ProjectExplorer::Target *targ
     if (!target->project()->supportsKit(target->kit()))
         return false;
     return target->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID;
+}
+
+CheckedComboBoxWidget::CheckedComboBoxWidget(const QString &label, QWidget *parent)
+    : QWidget(parent)
+{
+    m_check = new QCheckBox(label, this);
+    m_check->setChecked(false);
+
+    m_combo = new QComboBox(this);
+    m_combo->setDuplicatesEnabled(false);
+    m_combo->setEnabled(false);
+
+    m_apply = new QPushButton(tr("Apply"));
+
+    m_cancel = new QPushButton(tr("Cancel"));
+
+    QHBoxLayout *hl = new QHBoxLayout(this);
+    hl->addWidget(m_check);
+    hl->addWidget(m_combo);
+    hl->addWidget(m_apply);
+    hl->addWidget(m_cancel);
+    this->setLayout(hl);
+
+    connect(m_check, SIGNAL(toggled(bool)), this, SLOT(chooseText()));
+    connect(m_combo, SIGNAL(currentTextChanged(QString)), this, SLOT(chooseText()));
+    connect(m_check, SIGNAL(toggled(bool)), m_combo, SLOT(setEnabled(bool)));
+    connect(m_apply, SIGNAL(clicked()), this, SLOT(onApply()));
+    connect(m_cancel, SIGNAL(clicked()), this, SLOT(onCancel()));
+}
+
+void CheckedComboBoxWidget::setLabel(const QString &label)
+{
+    m_check->setText(label);
+}
+
+void CheckedComboBoxWidget::setCurrentText(const QString &text, const QStringList &list)
+{
+    m_combo->clear();
+    m_combo->addItems(list);
+    setCurrentText(text);
+}
+
+QString CheckedComboBoxWidget::currentText() const
+{
+    return m_current;
+}
+
+QString CheckedComboBoxWidget::newText() const
+{
+    return m_check->isChecked() ? m_combo->currentText() : QString();
+}
+
+void CheckedComboBoxWidget::setCurrentText(QString text)
+{
+    m_current = text;
+    if (!text.isEmpty()) {
+        m_combo->setCurrentText(text);
+    }
+    m_check->setChecked(!text.isEmpty());
+    chooseText();
+}
+
+void CheckedComboBoxWidget::chooseText()
+{
+    bool isChanged = (m_current != newText());
+    m_apply->setEnabled(isChanged);
+    m_cancel->setEnabled(isChanged);
+}
+
+void CheckedComboBoxWidget::onApply()
+{
+    QString s = newText();
+    setCurrentText(s);
+    emit currentTextChanged(s);
+}
+
+void CheckedComboBoxWidget::onCancel()
+{
+    setCurrentText(m_current);
 }

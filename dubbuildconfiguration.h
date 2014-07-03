@@ -34,22 +34,43 @@ private:
 
 QT_FORWARD_DECLARE_CLASS(QCheckBox)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QPushButton)
+
+class CheckedComboBoxWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit CheckedComboBoxWidget(const QString &label, QWidget *parent = 0);
+    void setLabel(const QString &label);
+    void setCurrentText(const QString &text, const QStringList& list);
+    QString currentText() const;
+    QString newText() const;
+signals:
+    void currentTextChanged(QString);
+private slots:
+    void chooseText();
+    void onApply();
+    void onCancel();
+private:
+    void setCurrentText(QString text);
+
+    QComboBox *m_combo;
+    QCheckBox *m_check;
+    QPushButton *m_apply;
+    QPushButton *m_cancel;
+    QString m_current;
+};
 
 class DubBuildConfigurationWidget : public ProjectExplorer::NamedWidget
 {
     Q_OBJECT
 public:
     explicit DubBuildConfigurationWidget(DubBuildConfiguration *configuration);
-signals:
-    void configurationChoosed(QString conf);
 public slots:
     void update();
-private slots:
-    void chooseConfiguration();
 private:
     DubBuildConfiguration* m_configuration;
-    QCheckBox *m_chooseConfigs;
-    QComboBox *m_configs;
+    CheckedComboBoxWidget m_ccw;
 };
 
 namespace ProjectExplorer {

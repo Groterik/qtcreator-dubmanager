@@ -82,7 +82,7 @@ void DubProject::parseConfig()
     m_parser->parse();
     const ConfigurationInfo& s = m_parser->configurationInfo(m_parser->configurationsList().front());
     m_files = s.files();
-    m_projectName = s.targetName();
+    m_projectName = m_parser->projectName();
     m_rootNode->setDisplayName(m_projectName);
     m_type = s.targetType() == "executable" ? EXECUTABLE : LIBRARY;
 }
@@ -116,7 +116,7 @@ const QStringList &DubProject::buildTypesList() const
     return m_parser->buildTypesList();
 }
 
-const QString &DubProject::currentConfiguration() const
+const QString &DubProject::sourceTreeConfiguration() const
 {
     return m_configuration;
 }
@@ -141,7 +141,7 @@ void DubProject::update()
     emit updated();
 }
 
-void DubProject::setCurrentConfiguration(const QString &conf)
+void DubProject::setSourceTreeConfiguration(const QString &conf)
 {
     if (conf != m_configuration && (conf.isEmpty() || m_parser->configurationsList().contains(conf))) {
         buildSourceTree(conf);

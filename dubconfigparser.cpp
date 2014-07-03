@@ -67,6 +67,11 @@ const ConfigurationInfo &DubConfigParser::configurationInfo(const QString &conf)
     return *it;
 }
 
+const QString &DubConfigParser::projectName() const
+{
+    return m_projectName;
+}
+
 QStringList DubConfigParser::readList(const QStringList &args)
 {
     m_errorString.clear();
@@ -109,9 +114,12 @@ bool DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
         }
 
         QJsonObject root = doc.object();
-        QJsonValue name = root.value(QString::fromUtf8("mainPackage"));
-        CheckPresentation(name);
-        QString targetName = name.toString();
+        QJsonValue nameValue = root.value(QString::fromUtf8("mainPackage"));
+        CheckPresentation(nameValue);
+        if (!m_projectName.isEmpty() && m_projectName != nameValue.toString()) {
+            throw DubException("main package is mutable");
+        }
+        m_projectName = nameValue.toString();
 
         QJsonValue packages = root.value(QString::fromUtf8("packages"));
         CheckPresentation(packages, QJsonValue::Array);
@@ -125,7 +133,7 @@ bool DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
             QJsonValue targetPackageName = packageObject.value("name");
             CheckPresentation(targetPackageName);
 
-            if (targetPackageName.toString() == targetName) {
+            if (targetPackageName.toString() == m_projectName) {
                 if (!packageRoot.isEmpty()) {
                     throw DubException("main package duplicate");
                 }

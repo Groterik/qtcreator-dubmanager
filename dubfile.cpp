@@ -2,6 +2,8 @@
 
 #include "dubprojectmanagerconstants.h"
 
+using namespace DubProjectManager;
+
 DubFile::DubFile(const QString &filename, DubProject *parent) :
     Core::IDocument(), m_project(parent), m_filename(filename)
 {

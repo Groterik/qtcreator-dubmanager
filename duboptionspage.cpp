@@ -10,6 +10,9 @@
 #include <QFileInfo>
 #include <QFormLayout>
 
+using namespace DubProjectManager;
+
+namespace DubProjectManager {
 class DubValidator
 {
 public:
@@ -27,6 +30,7 @@ private:
     QString m_executable;
     State m_state;
 };
+} // namespace DubProjectManager
 
 void DubValidator::setDubExecutable(const QString &path)
 {
@@ -59,6 +63,11 @@ DubOptionsWidget::DubOptionsWidget(QWidget *parent)
     formLayout->addRow(tr("Executable:"), m_pathChooser);
 }
 
+QString DubOptionsWidget::path() const
+{
+    return m_pathChooser->path();
+}
+
 
 
 DubOptionsPage::DubOptionsPage() :
@@ -75,8 +84,8 @@ DubOptionsPage::DubOptionsPage() :
     m_dubValidatorForUser = new DubValidator;
 
     QSettings *settings = Core::ICore::settings();
-    settings->beginGroup(tr("CMakeSettings"));
-    m_dubValidatorForUser->setDubExecutable(settings->value(QLatin1String("dubExecutable")).toString());
+    settings->beginGroup(tr("DubSettings"));
+    m_dubValidatorForUser->setDubExecutable(executable());
     settings->endGroup();
 
     m_dubValidatorForSystem->setDubExecutable(findDubExecutable());
@@ -97,15 +106,31 @@ QWidget *DubOptionsPage::widget()
 
 void DubOptionsPage::apply()
 {
-
+    if (!widget()) {
+        return;
+    }
+    QSettings *settings = Core::ICore::settings();
+    settings->beginGroup(QLatin1String("DubSettings"));
+    m_dubValidatorForUser->setDubExecutable(m_widget->path());
+    settings->setValue(QLatin1String("dubExecutable"), m_dubValidatorForUser->dubExecutable());
+    settings->endGroup();
 }
 
 void DubOptionsPage::finish()
 {
-
+    delete m_widget;
 }
 
 QString DubOptionsPage::findDubExecutable() const
 {
     return Utils::Environment::systemEnvironment().searchInPath(QLatin1String("dub"));
+}
+
+QString DubOptionsPage::executable()
+{
+    QSettings *settings = Core::ICore::settings();
+    settings->beginGroup(tr("DubSettings"));
+    QString result = settings->value(QLatin1String("dubExecutable"), QLatin1String("dub")).toString();
+    settings->endGroup();
+    return result;
 }

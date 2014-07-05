@@ -1,5 +1,7 @@
 #include "dubexception.h"
 
+using namespace DubProjectManager;
+
 DubException::DubException() throw() :
     QException()
 {

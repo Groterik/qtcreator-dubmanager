@@ -4,6 +4,8 @@
 #include <QException>
 #include <QString>
 
+namespace DubProjectManager {
+
 class DubException : public QException
 {
 public:
@@ -22,5 +24,7 @@ private:
     QString errorString;
     
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBEXCEPTION_H

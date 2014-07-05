@@ -17,6 +17,8 @@
 #include <QComboBox>
 #include <QLabel>
 
+using namespace DubProjectManager;
+
 namespace {
 const char RUNCONFIGURATION_ID[] = "DubProjectManager.RunConfiguration";
 }
@@ -82,7 +84,7 @@ void DubRunConfiguration::setArguments(const QString &args)
 
 void DubRunConfiguration::setConfiguration(const QString &conf)
 {
-    if (m_configuration == conf) return;
+    if (m_configuration == conf || conf.isEmpty()) return;
     m_configuration = conf;
     update();
     emit updated();

@@ -2,6 +2,8 @@
 
 #include <QDir>
 
+using namespace DubProjectManager;
+
 DubProjectNode::DubProjectNode(const QString filename) :
     ProjectExplorer::ProjectNode(filename)
 {

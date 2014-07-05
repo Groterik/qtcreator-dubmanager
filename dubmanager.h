@@ -3,8 +3,9 @@
 
 #include <projectexplorer/iprojectmanager.h>
 
-class DubOptionsPage;
+namespace DubProjectManager {
 
+class DubOptionsPage;
 class DubManager : public ProjectExplorer::IProjectManager
 {
     Q_OBJECT
@@ -27,5 +28,7 @@ private:
     DubOptionsPage *optionsPage;
     
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBMANAGER_H

@@ -3,10 +3,7 @@
 
 #include <projectexplorer/projectnodes.h>
 
-#if (QT_CREATOR_MAJOR_VERSION == 3)
-typedef ProjectExplorer::ProjectAction ProjectAction;
-#else
-#endif
+namespace DubProjectManager {
 
 class DubProjectNode : public ProjectExplorer::ProjectNode
 {
@@ -33,5 +30,7 @@ signals:
 public slots:
 
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBPROJECTNODE_H

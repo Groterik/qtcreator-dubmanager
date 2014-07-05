@@ -1,6 +1,7 @@
 #include "dubconfigparser.h"
 
 #include "dubexception.h"
+#include "duboptionspage.h"
 
 #include <QProcess>
 #include <QTextStream>
@@ -9,12 +10,14 @@
 #include <QJsonArray>
 #include <QDir>
 
+using namespace DubProjectManager;
+
 namespace {
 static const QString defaultConfiguration = " [default]";
 
 void runDubProcess(QProcess& process, const QStringList& args, const QString& directory)
 {
-    process.setProgram("dub");
+    process.setProgram(DubOptionsPage::executable());
     process.setArguments(args);
     process.setWorkingDirectory(directory);
     process.start();
@@ -81,10 +84,12 @@ QStringList DubConfigParser::readList(const QStringList &args)
     QStringList result;
     switch (dub.exitStatus()) {
     case QProcess::NormalExit:
-    {
-        QByteArray array(dub.readAllStandardOutput());
-        result = parseList(array);
-    }
+        if (dub.exitCode() != 0) {
+            m_errorString = dub.readAllStandardError();
+        } else {
+            QByteArray array(dub.readAllStandardOutput());
+            result = parseList(array);
+        }
         break;
     case QProcess::CrashExit:
         m_errorString = dub.readAllStandardError();
@@ -181,7 +186,13 @@ bool DubConfigParser::parse()
     m_errorString.clear();
 
     m_configurations = readList(QStringList() << "build" << "--annotate" << "--print-configs");
+    if (m_configurations.empty()) {
+        return false;
+    }
     m_buildTypes = readList(QStringList() << "build" << "--annotate" << "--print-builds");
+    if (m_buildTypes.empty()) {
+        return false;
+    }
 
     QProcess dub;
     StateMap map;
@@ -202,6 +213,11 @@ bool DubConfigParser::parse()
     }
     m_states.swap(map);
     return true;
+}
+
+const QString &DubConfigParser::errorString() const
+{
+    return m_errorString;
 }
 
 const QStringList &ConfigurationInfo::files() const

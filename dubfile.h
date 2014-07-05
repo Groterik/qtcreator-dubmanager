@@ -3,6 +3,8 @@
 
 #include <coreplugin/idocument.h>
 
+namespace DubProjectManager {
+
 class DubProject;
 
 class DubFile : public Core::IDocument
@@ -36,5 +38,7 @@ private:
     QString m_filename;
     
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBFILE_H

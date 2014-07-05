@@ -5,7 +5,14 @@
 
 #include <QWidget>
 
+namespace Utils {
+class PathChooser;
+}
+
+namespace DubProjectManager {
+
 class DubValidator;
+class DubOptionsWidget;
 
 class DubOptionsPage : public Core::IOptionsPage
 {
@@ -23,22 +30,18 @@ public:
     // others
 
     QString findDubExecutable() const;
+    static QString executable();
 
 signals:
 
 public slots:
 
 private:
-    QWidget* m_widget;
+    DubOptionsWidget* m_widget;
 
     DubValidator *m_dubValidatorForUser;
     DubValidator *m_dubValidatorForSystem;
-
 };
-
-namespace Utils {
-QT_FORWARD_DECLARE_CLASS(PathChooser)
-}
 
 class DubOptionsWidget : public QWidget
 {
@@ -46,10 +49,13 @@ class DubOptionsWidget : public QWidget
 public:
     DubOptionsWidget(QWidget *parent = 0);
     virtual ~DubOptionsWidget() {}
+    QString path() const;
 private slots:
 
 private:
     Utils::PathChooser *m_pathChooser;
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBOPTIONSPAGE_H

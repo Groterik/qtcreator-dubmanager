@@ -3,14 +3,15 @@
 
 #include <projectexplorer/project.h>
 
+QT_FORWARD_DECLARE_CLASS(QFileSystemWatcher)
+
+namespace DubProjectManager {
+
 class DubManager;
 class DubFile;
 class DubProjectNode;
 class DubConfigParser;
 class ConfigurationInfo;
-
-
-QT_FORWARD_DECLARE_CLASS(QFileSystemWatcher)
 
 class DubProject : public ProjectExplorer::Project
 {
@@ -56,6 +57,7 @@ private:
     void setupTargets();
     void parseConfig();
     void buildSourceTree(const QString &conf);
+    void updateSourceTree();
     void init();
 
     DubManager* m_manager;
@@ -74,5 +76,7 @@ private:
     DubConfigParser *m_parser;
     
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBPROJECT_H

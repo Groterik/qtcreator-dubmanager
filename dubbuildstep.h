@@ -6,6 +6,11 @@
 #include <projectexplorer/ioutputparser.h>
 #include <projectexplorer/task.h>
 
+QT_FORWARD_DECLARE_CLASS(QLineEdit)
+QT_FORWARD_DECLARE_CLASS(QComboBox)
+
+namespace DubProjectManager {
+
 class DubProject;
 
 class DubBuildStep : public ProjectExplorer::AbstractProcessStep
@@ -86,9 +91,6 @@ public:
     QString displayNameForId(const Core::Id id) const;
 };
 
-QT_FORWARD_DECLARE_CLASS(QLineEdit)
-QT_FORWARD_DECLARE_CLASS(QComboBox)
-
 class DubBuildStepConfigWidget : public ProjectExplorer::BuildStepConfigWidget
 {
     Q_OBJECT
@@ -130,5 +132,7 @@ private:
 
     static const int MAX_TASKS = 10;
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBBUILDSTEP_H

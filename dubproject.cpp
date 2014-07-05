@@ -18,10 +18,13 @@
 #include <projectexplorer/target.h>
 #include <projectexplorer/buildinfo.h>
 #include <coreplugin/icontext.h>
+#include <coreplugin/messagemanager.h>
 
 #include <qtsupport/customexecutablerunconfiguration.h>
 
 #include <QFileSystemWatcher>
+
+using namespace DubProjectManager;
 
 DubProject::DubProject(DubManager *manager, const QString &filename)
     : m_manager(manager),
@@ -79,7 +82,9 @@ QStringList DubProject::files(ProjectExplorer::Project::FilesMode fileMode) cons
 
 void DubProject::parseConfig()
 {
-    m_parser->parse();
+    if (!m_parser->parse()) {
+        throw DubException(m_parser->errorString());
+    }
     const ConfigurationInfo& s = m_parser->configurationInfo(m_parser->configurationsList().front());
     m_files = s.files();
     m_projectName = m_parser->projectName();
@@ -90,14 +95,14 @@ void DubProject::parseConfig()
 void DubProject::init()
 {
     try {
-        update();
+        updateSourceTree();
         setupTargets();
     }
-    catch (const DubException& /*ex*/) {
-
+    catch (const DubException &ex) {
+        Core::MessageManager::write(ex.description(), Core::MessageManager::Flash);
     }
     catch (...) {
-
+        Core::MessageManager::write(QLatin1String("Unknown error during loading dub project"), Core::MessageManager::Flash);
     }
 }
 
@@ -129,13 +134,14 @@ const ConfigurationInfo &DubProject::info(const QString conf)
 void DubProject::update()
 {
     try {
-        parseConfig();
-        buildSourceTree(m_parser->configurationsList().front());
+        updateSourceTree();
     }
-    catch (const DubException& /*ex*/) {
+    catch (const DubException &ex) {
+        Core::MessageManager::write(ex.description(), Core::MessageManager::Flash);
         return;
     }
     catch (...) {
+        Core::MessageManager::write(tr("Unknown error during updating source tree"), Core::MessageManager::Flash);
         return;
     }
     emit updated();
@@ -188,6 +194,12 @@ void DubProject::buildSourceTree(const QString& conf)
     m_rootNode->addFiles(m_files, 0);
     m_rootNode->addFilePath(m_filename);
     emit fileListChanged();
+}
+
+void DubProject::updateSourceTree()
+{
+    parseConfig();
+    buildSourceTree(m_parser->configurationsList().front());
 }
 
 void DubProject::dubFileChanged(const QString &filename)

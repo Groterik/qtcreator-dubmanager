@@ -2,6 +2,7 @@
 
 #include "dubprojectmanagerconstants.h"
 #include "dubproject.h"
+#include "duboptionspage.h"
 
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/target.h>
@@ -11,6 +12,8 @@
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QComboBox>
+
+using namespace DubProjectManager;
 
 namespace {
 const char BUILDSTEP_ID[] = "DubProjectManager.BuildStep";
@@ -123,7 +126,7 @@ QString DubBuildStep::commandString() const
 
 QString DubBuildStep::command() const
 {
-    return QString::fromLatin1("dub");
+    return DubOptionsPage::executable();
 }
 
 QVariantMap DubBuildStep::toMap() const

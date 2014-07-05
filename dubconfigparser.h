@@ -5,6 +5,8 @@
 #include <QStringList>
 #include <QMap>
 
+namespace DubProjectManager {
+
 class ConfigurationInfo
 {
 public:
@@ -38,6 +40,7 @@ public:
     explicit DubConfigParser(const QString& directory, QObject *parent = 0);
 
     bool parse();
+    const QString &errorString() const;
 
     const ConfigurationInfo& getState(const QString& conf) const;
 
@@ -67,5 +70,7 @@ private:
 
     bool parseDescribe(QByteArray array, ConfigurationInfo &state);
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBCONFIGPARSER_H

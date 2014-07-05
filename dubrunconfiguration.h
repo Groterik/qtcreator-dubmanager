@@ -4,6 +4,18 @@
 #include <projectexplorer/target.h>
 #include <projectexplorer/localapplicationrunconfiguration.h>
 
+QT_FORWARD_DECLARE_CLASS(QLineEdit)
+QT_FORWARD_DECLARE_CLASS(QCheckBox)
+QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QLabel)
+
+namespace Utils {
+class PathChooser;
+class DetailsWidget;
+}
+
+namespace DubProjectManager {
+
 class DubProject;
 
 class DubRunConfiguration : public ProjectExplorer::LocalApplicationRunConfiguration
@@ -51,16 +63,6 @@ private:
     bool m_terminal;
 
 };
-
-namespace Utils {
-class PathChooser;
-class DetailsWidget;
-}
-
-QT_FORWARD_DECLARE_CLASS(QLineEdit)
-QT_FORWARD_DECLARE_CLASS(QCheckBox)
-QT_FORWARD_DECLARE_CLASS(QComboBox)
-QT_FORWARD_DECLARE_CLASS(QLabel)
 
 class DubRunConfigurationWidget : public QWidget
 {
@@ -110,5 +112,7 @@ private:
     ProjectExplorer::RunConfiguration *doRestore(ProjectExplorer::Target *parent,
                                                  const QVariantMap &map);
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBRUNCONFIGURATION_H

@@ -20,12 +20,13 @@ SOURCES += dubprojectmanagerplugin.cpp \
     dubconfigparser.cpp
 
 HEADERS += dubprojectmanagerplugin.h \
-        dubprojectmanager_global.h \
-        dubprojectmanagerconstants.h \
+    dubprojectmanager_global.h \
+    dubprojectmanagerconstants.h \
     dubmanager.h \
     dubproject.h \
     dubfile.h \
     dubprojectnode.h \
+    dubexception.h \
     duboptionspage.h \
     dubbuildstep.h \
     dubbuildconfiguration.h \

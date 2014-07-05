@@ -4,6 +4,16 @@
 #include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/namedwidget.h>
 
+QT_FORWARD_DECLARE_CLASS(QCheckBox)
+QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QPushButton)
+
+namespace ProjectExplorer {
+class BuildInfo;
+}
+
+namespace DubProjectManager {
+
 class DubProject;
 
 class DubBuildConfiguration : public ProjectExplorer::BuildConfiguration
@@ -31,10 +41,6 @@ public slots:
 private:
     DubProject *m_project;
 };
-
-QT_FORWARD_DECLARE_CLASS(QCheckBox)
-QT_FORWARD_DECLARE_CLASS(QComboBox)
-QT_FORWARD_DECLARE_CLASS(QPushButton)
 
 class CheckedComboBoxWidget : public QWidget
 {
@@ -73,10 +79,6 @@ private:
     CheckedComboBoxWidget m_ccw;
 };
 
-namespace ProjectExplorer {
-class BuildInfo;
-}
-
 class DubBuildConfigurationFactory : public ProjectExplorer::IBuildConfigurationFactory
 {
     Q_OBJECT
@@ -105,5 +107,7 @@ public:
 
 private:
 };
+
+} // namespace DubProjectManager
 
 #endif // DUBBUILDCONFIGURATION_H

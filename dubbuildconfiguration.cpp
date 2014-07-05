@@ -19,6 +19,7 @@
 #include <QToolButton>
 #include <QPushButton>
 
+using namespace DubProjectManager;
 
 DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source) :
     ProjectExplorer::BuildConfiguration(target, source),

@@ -21,7 +21,7 @@ class DubBuildConfiguration : public ProjectExplorer::BuildConfiguration
     Q_OBJECT
 public:
     DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source);
-    DubBuildConfiguration(ProjectExplorer::Target *target, const Core::Id id);
+    DubBuildConfiguration(ProjectExplorer::Target *target);
     DubBuildConfiguration(ProjectExplorer::Target *target, const ProjectExplorer::BuildInfo& info);
 
     // pure ProjectExplorer::BuildConfiguration

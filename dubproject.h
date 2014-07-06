@@ -39,12 +39,14 @@ public:
 
     const ConfigurationInfo &info(const QString conf);
 
-    
+    virtual QVariantMap toMap() const;
 signals:
     void updated();
 public slots:
     void update();
     void setSourceTreeConfiguration(const QString& conf);
+protected:
+    virtual bool fromMap(const QVariantMap &map);
 private slots:
     void dubFileChanged(const QString &filename);
 

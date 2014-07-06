@@ -39,6 +39,9 @@ public:
     QString configuration() const;
     QStringList configurationsList() const;
 
+    virtual bool fromMap(const QVariantMap &map);
+    virtual QVariantMap toMap() const;
+
 signals:
     void updated();
 

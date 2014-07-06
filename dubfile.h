@@ -15,7 +15,6 @@ public:
 
     // pure Core::IDocument
     virtual bool save(QString *errorString, const QString &fileName = QString(), bool autoSave = false);
-    virtual QString fileName() const;
 
     virtual QString defaultPath() const;
     virtual QString suggestedFileName() const;
@@ -34,9 +33,7 @@ signals:
 public slots:
 
 private:
-    DubProject* m_project;
-    QString m_filename;
-    
+    DubProject* m_project;  
 };
 
 } // namespace DubProjectManager

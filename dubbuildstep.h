@@ -40,12 +40,12 @@ public:
     QString command() const;
 
 
-    QVariantMap toMap() const;
+    virtual QVariantMap toMap() const;
+    virtual bool fromMap(const QVariantMap &map);
 
     const DubProject *dubProject() const;
 
 protected:
-    bool fromMap(const QVariantMap &map);
 
 signals:
 
@@ -89,6 +89,8 @@ public:
 
     QList<Core::Id> availableCreationIds(ProjectExplorer::BuildStepList *bc) const;
     QString displayNameForId(const Core::Id id) const;
+private:
+    bool canHandle(ProjectExplorer::BuildStepList *parent) const;
 };
 
 class DubBuildStepConfigWidget : public ProjectExplorer::BuildStepConfigWidget

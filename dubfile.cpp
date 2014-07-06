@@ -4,9 +4,10 @@
 
 using namespace DubProjectManager;
 
-DubFile::DubFile(const QString &filename, DubProject *parent) :
-    Core::IDocument(), m_project(parent), m_filename(filename)
+DubFile::DubFile(const QString &filePath, DubProject *parent) :
+    Core::IDocument(), m_project(parent)
 {
+    setFilePath(filePath);
 }
 
 bool DubFile::save(QString *errorString, const QString &fileName, bool autoSave)
@@ -15,11 +16,6 @@ bool DubFile::save(QString *errorString, const QString &fileName, bool autoSave)
     Q_UNUSED(fileName);
     Q_UNUSED(autoSave);
     return false;
-}
-
-QString DubFile::fileName() const
-{
-    return m_filename;
 }
 
 QString DubFile::defaultPath() const

@@ -21,7 +21,11 @@ using namespace DubProjectManager;
 
 namespace {
 const char RUNCONFIGURATION_ID[] = "DubProjectManager.RunConfiguration";
-}
+
+const char S_ARGUMENTS_KEY[] = "DubProjectManager.DubRunConfiguration.Arguments";
+const char S_CONFIGURATION_KEY[] = "DubProjectManager.DubRunConfiguration.Configuration";
+
+} // namespace
 
 DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id, DubProject *project)
     : ProjectExplorer::LocalApplicationRunConfiguration(parent, id),
@@ -76,6 +80,25 @@ QStringList DubRunConfiguration::configurationsList() const
     return m_project->configurationList();
 }
 
+bool DubRunConfiguration::fromMap(const QVariantMap &map)
+{
+    if (!ProjectExplorer::RunConfiguration::fromMap(map)) {
+        return false;
+    }
+    m_arguments = map.value(QLatin1String(S_ARGUMENTS_KEY)).toString();
+    m_configuration = map.value(QLatin1String(S_CONFIGURATION_KEY)).toString();
+    update();
+    return true;
+}
+
+QVariantMap DubRunConfiguration::toMap() const
+{
+    QVariantMap map(ProjectExplorer::RunConfiguration::toMap());
+    map.insert(QLatin1String(S_ARGUMENTS_KEY), m_arguments);
+    map.insert(QLatin1String(S_CONFIGURATION_KEY), m_configuration);
+    return map;
+}
+
 void DubRunConfiguration::setArguments(const QString &args)
 {
     m_arguments = args;
@@ -87,13 +110,12 @@ void DubRunConfiguration::setConfiguration(const QString &conf)
     if (m_configuration == conf || conf.isEmpty()) return;
     m_configuration = conf;
     update();
-    emit updated();
 }
 
 void DubRunConfiguration::runInTerminal(bool toggled)
 {
     m_terminal = toggled;
-    m_runMode = Console;
+    m_runMode = toggled ? Console : Gui;
     emit updated();
 }
 
@@ -127,12 +149,13 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRun
     fl->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
 
     m_summary = new QLabel(this);
-    fl->addRow(tr("Command:"), m_summary);
+    fl->addRow(tr("<b>Command</b>:"), m_summary);
 
     m_workingDirectory = new QLabel(this);
     fl->addRow(tr("Working directory:"), m_workingDirectory);
 
     m_configurations = new QComboBox;
+    m_configurations->setDuplicatesEnabled(false);
     connect(m_configurations, SIGNAL(currentTextChanged(QString)),
             m_dubRunConfiguration, SLOT(setConfiguration(QString)));
     fl->addRow(tr("Configuration:"), m_configurations);
@@ -179,9 +202,11 @@ void DubRunConfigurationWidget::environmentWasChanged()
 
 void DubRunConfigurationWidget::runConfigurationUpdated()
 {
+    m_configurations->blockSignals(true);
     m_configurations->clear();
     m_configurations->addItems(m_dubRunConfiguration->configurationsList());
     m_configurations->setCurrentText(m_dubRunConfiguration->configuration());
+    m_configurations->blockSignals(false);
     m_argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
     m_runInTerminal->setChecked(m_dubRunConfiguration->runMode() != DubRunConfiguration::Gui);
     m_summary->setText(m_dubRunConfiguration->executable() + " " + m_dubRunConfiguration->commandLineArguments());
@@ -211,9 +236,10 @@ bool DubRunConfigurationFactory::canCreate(ProjectExplorer::Target *parent, cons
 
 bool DubRunConfigurationFactory::canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const
 {
-    Q_UNUSED(parent);
-    Q_UNUSED(map);
-    return false;
+    if (!canHandle(parent)) {
+        return false;
+    }
+    return ProjectExplorer::idFromMap(map).name().startsWith(RUNCONFIGURATION_ID);
 }
 
 bool DubRunConfigurationFactory::canClone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product) const
@@ -280,7 +306,7 @@ ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::doCreate(ProjectE
 
 ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::doRestore(ProjectExplorer::Target *parent, const QVariantMap &map)
 {
-    Q_UNUSED(parent);
     Q_UNUSED(map);
-    return 0;
+    return new DubRunConfiguration(parent, DubRunConfigurationFactory::idFromBuildTarget(parent->project()->displayName()),
+                                   qobject_cast<DubProject*>(parent->project()));
 }

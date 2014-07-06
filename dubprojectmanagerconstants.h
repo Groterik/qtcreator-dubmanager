@@ -19,6 +19,9 @@ const char * const DUBPROJECT_ID = "DubProjectManager.DubProject";
 // Buildconfiguration
 const char DUB_BC_ID[] = "DubProjectManager.DubBuildConfiguration";
 
+// Saved
+const char * const S_SOURCE_TREE_CONFIG = "DubProjectManager.DubProject.SourceTreeConfiguration";
+
 } // namespace DubProjectManager
 } // namespace Constants
 

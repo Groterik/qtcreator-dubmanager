@@ -18,10 +18,10 @@ using namespace DubProjectManager;
 namespace {
 const char BUILDSTEP_ID[] = "DubProjectManager.BuildStep";
 
-const char PACKAGE_KEY[] = "DubProjectManager.BuildStep.Package";
-const char BUILD_TYPE_KEY[] = "DubProjectManager.BuildStep.BuildType";
-const char CONFIGURATION_KEY[] = "DubProjectManager.BuildStep.Configuration";
-const char ADDITIONAL_ARGUMENTS_KEY[] = "DubProjectManager.BuildStep.AdditionalArguments";
+const char S_PACKAGE_KEY[] = "DubProjectManager.BuildStep.Package";
+const char S_BUILD_TYPE_KEY[] = "DubProjectManager.BuildStep.BuildType";
+const char S_CONFIGURATION_KEY[] = "DubProjectManager.BuildStep.Configuration";
+const char S_ADDITIONAL_ARGUMENTS_KEY[] = "DubProjectManager.BuildStep.AdditionalArguments";
 } // namespace
 
 DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl, const Core::Id id) :
@@ -132,10 +132,10 @@ QString DubBuildStep::command() const
 QVariantMap DubBuildStep::toMap() const
 {
     QVariantMap map(ProjectExplorer::AbstractProcessStep::toMap());
-    map.insert(QString::fromLatin1(PACKAGE_KEY), m_package);
-    map.insert(QString::fromLatin1(CONFIGURATION_KEY), m_configuration);
-    map.insert(QString::fromLatin1(BUILD_TYPE_KEY), m_buildType);
-    map.insert(QString::fromLatin1(ADDITIONAL_ARGUMENTS_KEY), m_additionalArguments);
+    map.insert(QString::fromLatin1(S_PACKAGE_KEY), m_package);
+    map.insert(QString::fromLatin1(S_CONFIGURATION_KEY), m_configuration);
+    map.insert(QString::fromLatin1(S_BUILD_TYPE_KEY), m_buildType);
+    map.insert(QString::fromLatin1(S_ADDITIONAL_ARGUMENTS_KEY), m_additionalArguments);
     return map;
 }
 
@@ -146,11 +146,11 @@ const DubProject *DubBuildStep::dubProject() const
 
 bool DubBuildStep::fromMap(const QVariantMap &map)
 {
-    m_package = map.value(QString::fromLatin1(PACKAGE_KEY)).toString();
-    m_configuration = map.value(QString::fromLatin1(CONFIGURATION_KEY)).toString();
-    m_buildType = map.value(QString::fromLatin1(BUILD_TYPE_KEY)).toString();
-    m_additionalArguments = map.value(QString::fromLatin1(ADDITIONAL_ARGUMENTS_KEY)).toString();
-
+    m_package = map.value(QString::fromLatin1(S_PACKAGE_KEY)).toString();
+    m_configuration = map.value(QString::fromLatin1(S_CONFIGURATION_KEY)).toString();
+    m_buildType = map.value(QString::fromLatin1(S_BUILD_TYPE_KEY)).toString();
+    m_additionalArguments = map.value(QString::fromLatin1(S_ADDITIONAL_ARGUMENTS_KEY)).toString();
+    emit updated();
     return ProjectExplorer::AbstractProcessStep::fromMap(map);
 }
 
@@ -207,6 +207,7 @@ QString DubBuildStepConfigWidget::displayName() const
 
 void DubBuildStepConfigWidget::update()
 {
+    m_buildTargetsList->blockSignals(true);
     QString oldBuildType = m_buildTargetsList->currentText();
     m_buildTargetsList->clear();
     const QStringList &list = m_step->dubProject()->buildTypesList();
@@ -214,9 +215,8 @@ void DubBuildStepConfigWidget::update()
     if (list.contains(oldBuildType)) {
         m_buildTargetsList->setCurrentText(oldBuildType);
     }
-
+    m_buildTargetsList->blockSignals(false);
 }
-
 
 DubBuildStepFactory::DubBuildStepFactory(QObject *parent)
     : ProjectExplorer::IBuildStepFactory(parent)
@@ -231,8 +231,7 @@ DubBuildStepFactory::~DubBuildStepFactory()
 
 bool DubBuildStepFactory::canCreate(ProjectExplorer::BuildStepList *parent, const Core::Id id) const
 {
-    if (parent->target()->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID
-            && parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD)
+    if (canHandle(parent))
         return id == BUILDSTEP_ID;
     return false;
 }
@@ -258,16 +257,19 @@ ProjectExplorer::BuildStep *DubBuildStepFactory::clone(ProjectExplorer::BuildSte
 
 bool DubBuildStepFactory::canRestore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) const
 {
-    Q_UNUSED(parent);
-    Q_UNUSED(map);
-    return false;
+    return canCreate(parent, ProjectExplorer::idFromMap(map));
 }
 
 ProjectExplorer::BuildStep *DubBuildStepFactory::restore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map)
 {
-    Q_UNUSED(parent);
-    Q_UNUSED(map);
-    return 0;
+    if (!canRestore(parent, map)) {
+        return 0;
+    }
+    DubBuildStep *bs = new DubBuildStep(parent);
+    if (!bs->fromMap(map)) {
+        return 0;
+    }
+    return bs;
 }
 
 QList<Core::Id> DubBuildStepFactory::availableCreationIds(ProjectExplorer::BuildStepList *bc) const
@@ -284,6 +286,12 @@ QString DubBuildStepFactory::displayNameForId(const Core::Id id) const
         return tr("Dub build step id");
     }
     return QString();
+}
+
+bool DubBuildStepFactory::canHandle(ProjectExplorer::BuildStepList *parent) const
+{
+    return parent->target()->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID
+           && parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD;
 }
 
 const char COMMON_DMD_PATTERN[] = "^(.*)\\((.*)\\): (.*):(.*)$";

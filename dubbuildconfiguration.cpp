@@ -30,8 +30,8 @@ DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, Bu
     cloneSteps(source);
 }
 
-DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, const Core::Id id)
-    : ProjectExplorer::BuildConfiguration(target, id),
+DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target)
+    : ProjectExplorer::BuildConfiguration(target, Core::Id(Constants::DUB_BC_ID)),
       m_project(qobject_cast<DubProject*>(target->project()))
 {
     Q_ASSERT(m_project);
@@ -139,16 +139,20 @@ ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::create(Projec
 
 bool DubBuildConfigurationFactory::canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const
 {
-    Q_UNUSED(parent);
     Q_UNUSED(map);
-    return false;
+    return canHandle(parent);
 }
 
 ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::restore(ProjectExplorer::Target *parent, const QVariantMap &map)
 {
-    Q_UNUSED(parent);
-    Q_UNUSED(map);
-    return 0;
+    if (!canRestore(parent, map)) {
+        return 0;
+    }
+    DubBuildConfiguration *bc = new DubBuildConfiguration(parent);
+    if (!bc->fromMap(map)) {
+        return 0;
+    }
+    return bc;
 }
 
 bool DubBuildConfigurationFactory::canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product) const

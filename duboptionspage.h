@@ -4,6 +4,7 @@
 #include <coreplugin/dialogs/ioptionspage.h>
 
 #include <QWidget>
+#include <QPointer>
 
 namespace Utils {
 class PathChooser;
@@ -37,7 +38,7 @@ signals:
 public slots:
 
 private:
-    DubOptionsWidget* m_widget;
+    QPointer<DubOptionsWidget> m_widget;
 
     DubValidator *m_dubValidatorForUser;
     DubValidator *m_dubValidatorForSystem;

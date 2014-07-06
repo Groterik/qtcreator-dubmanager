@@ -12,6 +12,10 @@
 
 using namespace DubProjectManager;
 
+namespace {
+const char S_DUB_EXECUTABLE[] = "dubExecutable";
+}
+
 namespace DubProjectManager {
 class DubValidator
 {
@@ -60,6 +64,7 @@ DubOptionsWidget::DubOptionsWidget(QWidget *parent)
     m_pathChooser = new Utils::PathChooser(this);
     m_pathChooser->setExpectedKind(Utils::PathChooser::ExistingCommand);
     m_pathChooser->setHistoryCompleter(QLatin1String("Dub.Command.History"));
+    m_pathChooser->setPath(DubOptionsPage::executable());
     formLayout->addRow(tr("Executable:"), m_pathChooser);
 }
 
@@ -70,8 +75,7 @@ QString DubOptionsWidget::path() const
 
 
 
-DubOptionsPage::DubOptionsPage() :
-    Core::IOptionsPage(), m_widget(0)
+DubOptionsPage::DubOptionsPage()
 {
     setId("Z.Dub");
     setDisplayName(tr("DubManager"));
@@ -106,13 +110,13 @@ QWidget *DubOptionsPage::widget()
 
 void DubOptionsPage::apply()
 {
-    if (!widget()) {
+    if (!m_widget) {
         return;
     }
     QSettings *settings = Core::ICore::settings();
     settings->beginGroup(QLatin1String("DubSettings"));
     m_dubValidatorForUser->setDubExecutable(m_widget->path());
-    settings->setValue(QLatin1String("dubExecutable"), m_dubValidatorForUser->dubExecutable());
+    settings->setValue(QLatin1String(S_DUB_EXECUTABLE), m_dubValidatorForUser->dubExecutable());
     settings->endGroup();
 }
 
@@ -130,7 +134,7 @@ QString DubOptionsPage::executable()
 {
     QSettings *settings = Core::ICore::settings();
     settings->beginGroup(tr("DubSettings"));
-    QString result = settings->value(QLatin1String("dubExecutable"), QLatin1String("dub")).toString();
+    QString result = settings->value(QLatin1String(S_DUB_EXECUTABLE), QLatin1String("dub")).toString();
     settings->endGroup();
     return result;
 }

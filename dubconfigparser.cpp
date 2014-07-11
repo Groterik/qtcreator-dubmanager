@@ -153,22 +153,22 @@ bool DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
         state.m_targetType = CheckPresentation(packageRoot.value("targetType")).toString();
         state.m_targetPath = CheckPresentation(packageRoot.value("targetPath")).toString();
 
+        QDir qpath(state.m_path);
         QJsonArray srcArray = CheckPresentation(packageRoot.value("files"), QJsonValue::Array).toArray();
         foreach (QJsonValue src, srcArray) {
-            QDir qpath(state.m_path);
             QJsonObject srcObj = CheckPresentation(src, QJsonValue::Object).toObject();
             if (CheckPresentation(srcObj.value("type")).toString() == "source") {
                 state.m_files.push_back(CheckPresentation(srcObj.value("path")).toString());
                 state.m_files.back() = qpath.absoluteFilePath(state.m_files.back());
             }
         }
-
         state.m_files.removeDuplicates();
 
         QJsonArray importPathsArray = CheckPresentation(packageRoot.value("importPaths"), QJsonValue::Array).toArray();
         foreach (QJsonValue importPathValue, importPathsArray) {
-            state.m_importPaths.push_back(CheckPresentation(importPathValue).toString());
+            state.m_importPaths.push_back(qpath.absoluteFilePath(CheckPresentation(importPathValue).toString()));
         }
+        state.m_importPaths.removeDuplicates();
     }
     catch (const DubException& ex) {
         m_errorString = ex.description();

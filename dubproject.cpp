@@ -19,6 +19,7 @@
 #include <projectexplorer/buildinfo.h>
 #include <coreplugin/icontext.h>
 #include <coreplugin/messagemanager.h>
+#include <cpptools/cppmodelmanagerinterface.h>
 
 #include <qtsupport/customexecutablerunconfiguration.h>
 
@@ -90,6 +91,9 @@ void DubProject::parseConfig()
     m_projectName = m_parser->projectName();
     m_rootNode->setDisplayName(m_projectName);
     m_type = s.targetType() == "executable" ? EXECUTABLE : LIBRARY;
+
+    appendIncludePaths(s);
+
 }
 
 void DubProject::init()
@@ -233,6 +237,30 @@ void DubProject::updateSourceTree()
 {
     parseConfig();
     buildSourceTree(m_parser->configurationsList().front());
+}
+
+void DubProject::appendIncludePaths(const ConfigurationInfo& info)
+{
+    CppTools::CppModelManagerInterface *modelmanager =
+            CppTools::CppModelManagerInterface::instance();
+    if (modelmanager) {
+        CppTools::CppModelManagerInterface::ProjectInfo pinfo = modelmanager->projectInfo(this);
+        if (pinfo.isNull()) return;
+
+        pinfo.clearProjectParts();
+
+        CppTools::ProjectPart::Ptr part(new CppTools::ProjectPart);
+        part->project = this;
+        part->displayName = displayName();
+        part->projectFile = projectFilePath();
+
+        // This explicitly adds -I. to the include paths
+        part->includePaths += projectDirectory();
+        part->includePaths += info.importPaths();
+
+        pinfo.appendProjectPart(part);
+        modelmanager->updateProjectInfo(pinfo);
+    }
 }
 
 void DubProject::dubFileChanged(const QString &filename)

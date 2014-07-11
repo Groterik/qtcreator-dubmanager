@@ -66,7 +66,8 @@ QTC_LIB_DEPENDS += \
 
 QTC_PLUGIN_DEPENDS += \
     coreplugin \
-    projectexplorer
+    projectexplorer \
+    cpptools
 
 QTC_PLUGIN_RECOMMENDS += \
     # optional plugin dependencies. nothing here at this time

@@ -60,6 +60,7 @@ private:
     void parseConfig();
     void buildSourceTree(const QString &conf);
     void updateSourceTree();
+    void appendIncludePaths(const ConfigurationInfo &info);
     void init();
 
     DubManager* m_manager;

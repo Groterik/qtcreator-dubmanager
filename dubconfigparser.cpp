@@ -131,18 +131,26 @@ bool DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
 
         QJsonArray packageArray = packages.toArray();
         QJsonObject packageRoot;
+        QMap<QString, QStringList> dependenciesImports;
         foreach (QJsonValue package, packageArray) {
             CheckPresentation(package, QJsonValue::Object);
 
             QJsonObject packageObject = package.toObject();
-            QJsonValue targetPackageName = packageObject.value("name");
-            CheckPresentation(targetPackageName);
+            QString targetPackageName = CheckPresentation(packageObject.value("name")).toString();
 
-            if (targetPackageName.toString() == m_projectName) {
+            if (targetPackageName == m_projectName) {
                 if (!packageRoot.isEmpty()) {
                     throw DubException("main package duplicate");
                 }
                 packageRoot = packageObject;
+            } else {
+                QString depPath = CheckPresentation(packageObject.value("path")).toString();
+                QStringList depImports;
+                QJsonArray importPathsArray = CheckPresentation(packageObject.value("importPaths"), QJsonValue::Array).toArray();
+                foreach (QJsonValue importPathValue, importPathsArray) {
+                    depImports.append(QDir(depPath).absoluteFilePath(CheckPresentation(importPathValue).toString()));
+                }
+                dependenciesImports[targetPackageName] = depImports;
             }
         }
 
@@ -167,6 +175,9 @@ bool DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
         QJsonArray importPathsArray = CheckPresentation(packageRoot.value("importPaths"), QJsonValue::Array).toArray();
         foreach (QJsonValue importPathValue, importPathsArray) {
             state.m_importPaths.push_back(qpath.absoluteFilePath(CheckPresentation(importPathValue).toString()));
+        }
+        foreach (const QStringList& di, dependenciesImports) {
+            state.m_importPaths += di;
         }
         state.m_importPaths.removeDuplicates();
     }

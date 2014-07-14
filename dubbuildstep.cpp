@@ -119,6 +119,11 @@ const QString &DubBuildStep::package() const
     return m_package;
 }
 
+const QString &DubBuildStep::buildType() const
+{
+    return m_buildType;
+}
+
 QString DubBuildStep::commandString() const
 {
     return command() + " " + generateArguments();
@@ -208,13 +213,9 @@ QString DubBuildStepConfigWidget::displayName() const
 void DubBuildStepConfigWidget::update()
 {
     m_buildTargetsList->blockSignals(true);
-    QString oldBuildType = m_buildTargetsList->currentText();
     m_buildTargetsList->clear();
-    const QStringList &list = m_step->dubProject()->buildTypesList();
-    m_buildTargetsList->addItems(list);
-    if (list.contains(oldBuildType)) {
-        m_buildTargetsList->setCurrentText(oldBuildType);
-    }
+    m_buildTargetsList->addItems(m_step->dubProject()->buildTypesList());
+    m_buildTargetsList->setCurrentText(m_step->buildType());
     m_buildTargetsList->blockSignals(false);
 }
 

@@ -30,11 +30,10 @@ public:
 
     // others
     
-    const QString& additionalArguments() const;
-
-    const QString& configuration() const;
-
-    const QString& package() const;
+    const QString &additionalArguments() const;
+    const QString &configuration() const;
+    const QString &package() const;
+    const QString &buildType() const;
 
     QString commandString() const;
     QString command() const;

@@ -179,23 +179,22 @@ DubBuildStepConfigWidget::DubBuildStepConfigWidget(DubBuildStep *step)
     m_package->setText(m_step->package());
     connect(m_package, SIGNAL(textChanged(QString)), m_step, SLOT(updatePackage(QString)));
 
-    m_configuration = new QLineEdit(this);
+    m_configuration = new QComboBox(this);
     fl->addRow(tr("Configuration:"), m_configuration);
-    m_configuration->setText(m_step->configuration());
-    connect(m_configuration, SIGNAL(textChanged(QString)), m_step, SLOT(updateConfiguration(QString)));
+    m_configuration->setCurrentText(m_step->configuration());
+    connect(m_configuration, SIGNAL(currentTextChanged(QString)), m_step, SLOT(updateConfiguration(QString)));
+
+    m_buildTargetsList = new QComboBox(this);
+    fl->addRow(tr("Build type:"), m_buildTargetsList);
+    connect(m_buildTargetsList, SIGNAL(currentTextChanged(QString)), m_step, SLOT(updateBuildType(QString)));
 
     m_additionalArguments = new QLineEdit(this);
     fl->addRow(tr("Additional arguments:"), m_additionalArguments);
     m_additionalArguments->setText(m_step->additionalArguments());
     connect(m_additionalArguments, SIGNAL(textChanged(QString)), m_step, SLOT(updateAdditionalArguments(QString)));
 
-    m_buildTargetsList = new QComboBox(this);
-    connect(m_buildTargetsList, SIGNAL(currentTextChanged(QString)), m_step, SLOT(updateBuildType(QString)));
-
     connect(m_step, SIGNAL(updated()), this, SIGNAL(updateSummary()));
     connect(m_step->dubProject(), SIGNAL(updated()), this, SLOT(update()));
-
-    fl->addRow(tr("Build type:"), m_buildTargetsList);
 
     update();
 }
@@ -217,6 +216,12 @@ void DubBuildStepConfigWidget::update()
     m_buildTargetsList->addItems(m_step->dubProject()->buildTypesList());
     m_buildTargetsList->setCurrentText(m_step->buildType());
     m_buildTargetsList->blockSignals(false);
+
+    m_configuration->blockSignals(true);
+    m_configuration->clear();
+    m_configuration->addItems(m_step->dubProject()->configurationList());
+    m_configuration->setCurrentText(m_step->configuration());
+    m_configuration->blockSignals(false);
 }
 
 DubBuildStepFactory::DubBuildStepFactory(QObject *parent)

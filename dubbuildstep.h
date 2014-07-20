@@ -110,7 +110,7 @@ public slots:
 
 private:
     DubBuildStep *m_step;
-    QLineEdit *m_configuration;
+    QComboBox *m_configuration;
     QLineEdit *m_package;
     QLineEdit *m_additionalArguments;
     QComboBox *m_buildTargetsList;

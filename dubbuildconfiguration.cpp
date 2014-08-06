@@ -111,7 +111,11 @@ int DubBuildConfigurationFactory::priority(const ProjectExplorer::Target *parent
 QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableBuilds(const ProjectExplorer::Target *parent) const
 {
     ProjectExplorer::BuildInfo *info = new ProjectExplorer::BuildInfo(this);
+#if QTCREATOR_MINOR_VERSION < 2
     info->buildDirectory = Utils::FileName::fromString(parent->project()->projectDirectory());
+#else
+    info->buildDirectory = parent->project()->projectDirectory();
+#endif
     info->displayName = "new";
     info->kitId = parent->kit()->id();
     info->supportsShadowBuild = true;

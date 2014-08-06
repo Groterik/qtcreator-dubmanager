@@ -252,11 +252,20 @@ void DubProject::appendIncludePaths(const ConfigurationInfo& info)
         CppTools::ProjectPart::Ptr part(new CppTools::ProjectPart);
         part->project = this;
         part->displayName = displayName();
-        part->projectFile = projectFilePath();
 
         // This explicitly adds -I. to the include paths
+#if QTCREATOR_MINOR_VERSION < 2
+        part->projectFile = projectFilePath();
         part->includePaths += projectDirectory();
         part->includePaths += info.importPaths();
+#else
+        part->projectFile = projectFilePath().toString();
+        part->headerPaths.push_back(CppTools::ProjectPart::HeaderPath(projectDirectory().toString(),
+                                                                      CppTools::ProjectPart::HeaderPath::IncludePath));
+        foreach (const QString &imp, info.importPaths()) {
+            part->headerPaths.push_back(CppTools::ProjectPart::HeaderPath(imp, CppTools::ProjectPart::HeaderPath::IncludePath));
+        }
+#endif
 
         pinfo.appendProjectPart(part);
         modelmanager->updateProjectInfo(pinfo);

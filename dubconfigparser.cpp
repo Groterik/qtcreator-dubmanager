@@ -17,10 +17,8 @@ static const QString defaultConfiguration = " [default]";
 
 void runDubProcess(QProcess& process, const QStringList& args, const QString& directory)
 {
-    process.setProgram(DubOptionsPage::executable());
-    process.setArguments(args);
     process.setWorkingDirectory(directory);
-    process.start();
+    process.start(DubOptionsPage::executable(), args);
     process.waitForFinished(10000);
 }
 

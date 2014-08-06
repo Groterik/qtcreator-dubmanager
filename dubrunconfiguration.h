@@ -27,6 +27,10 @@ public:
 
     // pure ProjectExplorer::LocalApplicationRunConfiguration
 
+#if QTCREATOR_MINOR_VERSION >= 2
+    typedef ProjectExplorer::ApplicationLauncher::Mode RunMode;
+#endif
+
     virtual QString executable() const;
     virtual RunMode runMode() const;
     virtual QString workingDirectory() const;
@@ -97,12 +101,17 @@ public:
     explicit DubRunConfigurationFactory(QObject *parent = 0);
     ~DubRunConfigurationFactory();
 
+    // pure ProjectExplorer::IRunConfigurationFactory
     bool canCreate(ProjectExplorer::Target *parent, const Core::Id id) const;
     bool canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const;
     bool canClone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product) const;
     ProjectExplorer::RunConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product);
 
-    QList<Core::Id> availableCreationIds(ProjectExplorer::Target *parent) const;
+#if QTCREATOR_MINOR_VERSION < 2
+    virtual QList<Core::Id> availableCreationIds(ProjectExplorer::Target *parent) const;
+#else
+    virtual QList<Core::Id> availableCreationIds(ProjectExplorer::Target *parent, CreationMode mode) const;
+#endif
     QString displayNameForId(const Core::Id id) const;
 
     static Core::Id idFromBuildTarget(const QString &target);

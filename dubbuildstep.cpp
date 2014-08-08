@@ -300,7 +300,7 @@ bool DubBuildStepFactory::canHandle(ProjectExplorer::BuildStepList *parent) cons
            && parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD;
 }
 
-const char COMMON_DMD_PATTERN[] = "^(.*)\\((.*)\\): (.*):(.*)$";
+const char COMMON_DMD_PATTERN[] = "^(.*)\\((.*)\\): (\\w*):(.*)$";
 
 
 DubOutputDmdParser::DubOutputDmdParser()

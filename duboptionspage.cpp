@@ -127,11 +127,7 @@ void DubOptionsPage::finish()
 
 QString DubOptionsPage::findDubExecutable() const
 {
-#if QTCREATOR_MINOR_VERSION < 2
     return Utils::Environment::systemEnvironment().searchInPath(QLatin1String("dub"));
-#else
-    return Utils::Environment::systemEnvironment().searchInPath(QLatin1String("dub")).toString();
-#endif
 }
 
 QString DubOptionsPage::executable()

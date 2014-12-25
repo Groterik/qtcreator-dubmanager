@@ -19,7 +19,7 @@
 #include <projectexplorer/buildinfo.h>
 #include <coreplugin/icontext.h>
 #include <coreplugin/messagemanager.h>
-#include <cpptools/cppmodelmanagerinterface.h>
+#include <cpptools/cppmodelmanager.h>
 
 #include <qtsupport/customexecutablerunconfiguration.h>
 
@@ -241,12 +241,10 @@ void DubProject::updateSourceTree()
 
 void DubProject::appendIncludePaths(const ConfigurationInfo& info)
 {
-    CppTools::CppModelManagerInterface *modelmanager =
-            CppTools::CppModelManagerInterface::instance();
+    CppTools::CppModelManager *modelmanager =
+            CppTools::CppModelManager::instance();
     if (modelmanager) {
-        CppTools::CppModelManagerInterface::ProjectInfo pinfo = modelmanager->projectInfo(this);
-        if (pinfo.isNull()) return;
-
+        CppTools::ProjectInfo pinfo = modelmanager->projectInfo(this);
         pinfo.clearProjectParts();
 
         CppTools::ProjectPart::Ptr part(new CppTools::ProjectPart);
@@ -254,20 +252,15 @@ void DubProject::appendIncludePaths(const ConfigurationInfo& info)
         part->displayName = displayName();
 
         // This explicitly adds -I. to the include paths
-#if QTCREATOR_MINOR_VERSION < 2
-        part->projectFile = projectFilePath();
-        part->includePaths += projectDirectory();
-        part->includePaths += info.importPaths();
-#else
         part->projectFile = projectFilePath().toString();
         part->headerPaths.push_back(CppTools::ProjectPart::HeaderPath(projectDirectory().toString(),
                                                                       CppTools::ProjectPart::HeaderPath::IncludePath));
         foreach (const QString &imp, info.importPaths()) {
             part->headerPaths.push_back(CppTools::ProjectPart::HeaderPath(imp, CppTools::ProjectPart::HeaderPath::IncludePath));
         }
-#endif
 
         pinfo.appendProjectPart(part);
+        pinfo.finish();
         modelmanager->updateProjectInfo(pinfo);
     }
 }

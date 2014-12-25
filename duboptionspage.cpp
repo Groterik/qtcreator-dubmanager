@@ -127,7 +127,7 @@ void DubOptionsPage::finish()
 
 QString DubOptionsPage::findDubExecutable() const
 {
-    return Utils::Environment::systemEnvironment().searchInPath(QLatin1String("dub"));
+    return Utils::Environment::systemEnvironment().searchInPath(QLatin1String("dub")).toString();
 }
 
 QString DubOptionsPage::executable()

@@ -64,5 +64,3 @@ ExtensionSystem::IPlugin::ShutdownFlag DubProjectManagerPlugin::aboutToShutdown(
     return SynchronousShutdown;
 }
 
-Q_EXPORT_PLUGIN2(DubProjectManager, DubProjectManagerPlugin)
-

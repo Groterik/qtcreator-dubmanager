@@ -22,6 +22,9 @@ const char DUB_BC_ID[] = "DubProjectManager.DubBuildConfiguration";
 // Saved
 const char * const S_SOURCE_TREE_CONFIG = "DubProjectManager.DubProject.SourceTreeConfiguration";
 
+// Context menu button
+const char * const DUBUPDATECONTEXTMENU = "DubProjectManager.DubProject.UpdateMenu";
+
 } // namespace DubProjectManager
 } // namespace Constants
 

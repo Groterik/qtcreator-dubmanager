@@ -3,6 +3,11 @@
 
 #include <projectexplorer/iprojectmanager.h>
 
+namespace ProjectExplorer
+{
+class Node;
+}
+
 namespace DubProjectManager {
 
 class DubOptionsPage;
@@ -23,9 +28,14 @@ public:
 signals:
     
 public slots:
+    void updateProject(ProjectExplorer::Project *project);
+    void updateContextMenu(ProjectExplorer::Project *project,
+                           ProjectExplorer::Node *node);
 
 private:
     DubOptionsPage *optionsPage;
+
+    ProjectExplorer::Project *m_contextProject;
     
 };
 

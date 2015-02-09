@@ -6,6 +6,8 @@
 #include "dubbuildconfiguration.h"
 #include "dubbuildstep.h"
 #include "dubrunconfiguration.h"
+#include "dubcompletionassistprovider.h"
+#include "dubtexteditorfactory.h"
 
 #include <coreplugin/mimedatabase.h>
 #include <coreplugin/icore.h>
@@ -45,6 +47,8 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
     addAutoReleasedObject(new DubBuildStepFactory);
     addAutoReleasedObject(new DubBuildConfigurationFactory);
     addAutoReleasedObject(new DubRunConfigurationFactory);
+    addAutoReleasedObject(new DubCompletionAssistProvider);
+    addAutoReleasedObject(new DubTextEditorFactory);
     
     return true;
 }

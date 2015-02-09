@@ -17,7 +17,9 @@ SOURCES += dubprojectmanagerplugin.cpp \
     dubbuildstep.cpp \
     dubbuildconfiguration.cpp \
     dubrunconfiguration.cpp \
-    dubconfigparser.cpp
+    dubconfigparser.cpp \
+    dubcompletionassistprovider.cpp \
+    dubtexteditorfactory.cpp
 
 HEADERS += dubprojectmanagerplugin.h \
     dubprojectmanager_global.h \
@@ -31,7 +33,9 @@ HEADERS += dubprojectmanagerplugin.h \
     dubbuildstep.h \
     dubbuildconfiguration.h \
     dubrunconfiguration.h \
-    dubconfigparser.h
+    dubconfigparser.h \
+    dubcompletionassistprovider.h \
+    dubtexteditorfactory.h
 
 # Qt Creator linking
 

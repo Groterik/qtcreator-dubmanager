@@ -18,14 +18,7 @@ DubTextEditorFactory::DubTextEditorFactory()
     setEditorWidgetCreator([]() { return new TextEditor::TextEditorWidget; });
     setEditorCreator([]() { return new TextEditor::BaseTextEditor; });
 
-//    setIndenterCreator([]() { return new DlangIndenter; });
-//    setAutoCompleterCreator([]() { return new DlangAutoCompleter; });
-
     setCompletionAssistProvider(new DubCompletionAssistProvider);
-
-//    if (DlangOptionsPage::hoverEnable()) {
-//        addHoverHandler(new DlangHoverHandler);
-//    }
 
     setParenthesesMatchingEnabled(true);
     setMarksVisible(true);

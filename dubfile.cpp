@@ -5,7 +5,7 @@
 using namespace DubProjectManager;
 
 DubFile::DubFile(const QString &filePath, DubProject *parent) :
-    Core::IDocument(), m_project(parent)
+    TextEditor::TextDocument(Constants::DUB_EDITOR_ID), m_project(parent)
 {
     setFilePath(filePath);
 }

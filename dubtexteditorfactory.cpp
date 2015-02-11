@@ -3,8 +3,7 @@
 #include "dubprojectmanagerconstants.h"
 
 #include "dubcompletionassistprovider.h"
-
-#include <texteditor/textdocument.h>
+#include "dubfile.h"
 
 using namespace DubProjectManager;
 
@@ -14,9 +13,10 @@ DubTextEditorFactory::DubTextEditorFactory()
     setDisplayName(tr(Constants::DUB_EDITOR_DISPLAY_NAME));
     addMimeType(Constants::DUBMIMETYPE);
 
-    setDocumentCreator([]() { return new TextEditor::TextDocument; });
+    setDocumentCreator([]() { return new DubProjectManager::DubFile; });
     setEditorWidgetCreator([]() { return new TextEditor::TextEditorWidget; });
     setEditorCreator([]() { return new TextEditor::BaseTextEditor; });
+    setGenericSyntaxHighlighter(Constants::DUBMIMETYPE);
 
     setCompletionAssistProvider(new DubCompletionAssistProvider);
 

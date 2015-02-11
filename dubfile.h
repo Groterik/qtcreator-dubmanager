@@ -1,17 +1,17 @@
 #ifndef DUBFILE_H
 #define DUBFILE_H
 
-#include <coreplugin/idocument.h>
+#include <texteditor/textdocument.h>
 
 namespace DubProjectManager {
 
 class DubProject;
 
-class DubFile : public Core::IDocument
+class DubFile : public TextEditor::TextDocument
 {
     Q_OBJECT
 public:
-    explicit DubFile(const QString& filename, DubProject *parent = 0);
+    explicit DubFile(const QString& filename = QString(), DubProject *parent = 0);
 
     // pure Core::IDocument
     virtual bool save(QString *errorString, const QString &fileName = QString(), bool autoSave = false);

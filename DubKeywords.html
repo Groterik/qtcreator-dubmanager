@@ -1,0 +1,514 @@
+			<table>
+				<tr>
+					<th>Name</th>
+					<th>Type</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>name [required]</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>Name of the package, used to uniquely identify the package. Must be comprised of only lower case ASCII alpha-numeric characters, "-" or "_".</td>
+				</tr>
+				<tr>
+					<td>description [required for publishing]</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>Brief description of the package</td>
+				</tr>
+				<tr>
+					<td>homepage</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>URL of the project website</td>
+				</tr>
+				<tr>
+					<td>authors</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>List of project authors</td>
+				</tr>
+				<tr>
+					<td>copyright</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>Copyright declaration string</td>
+				</tr>
+				<tr>
+					<td>license [required for publishing]</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>License(s) under which the project can be used - see the <a href="#licenses">license specification</a> section for possible values</td>
+				</tr>
+				<tr>
+					<td>subPackages</td>
+					<td>
+						<code>T[]</code>
+					</td>
+					<td>Defines an array of sub-packages defined in the same directory as the root project, where each entry is either a path of a sub folder or an object of the same formatas a dub.json file - see the <a href="#sub-packages">sub package section</a> for more information</td>
+				</tr>
+				<tr>
+					<td>configurations</td>
+					<td>
+						<code>T[]</code>
+					</td>
+					<td>Speficies an optional list of build configurations (specified using "--config=...") - see the <a href="#configurations">configurations section</a> for more details</td>
+				</tr>
+				<tr>
+					<td>buildTypes</td>
+					<td>
+						<code>T[string]</code>
+					</td>
+					<td>Defines additional custom build types or overrides the default ones (specified using "--build=...") - see the <a href="#build-types">build types section</a> for an example</td>
+				</tr>
+				<tr>
+					<td>-ddoxFilterArgs</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Specifies a list of command line flags usable for controlling filter behavior for --build=ddox <span style="color: red;">[experimental]</span></td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<th>Name</th>
+					<th>Type</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>dependencies</td>
+					<td>
+						<code>T[string]</code>
+					</td>
+					<td>List of project dependencies given as pairs of <code>"&lt;name&gt;" : &lt;version-spec&gt;</code> - see <a href="#version-specs">next section</a> for how version specifications look like</td>
+				</tr>
+				<tr>
+					<td>systemDependencies</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>A textual description of the required system dependencies (external C libraries) required by the package. This will be visible on the registry and will be displayed in case of linker errors.</td>
+				</tr>
+				<tr>
+					<td>targetType</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>Specifies a specific <a href="#target-types">target type</a> - this field does not support platform suffixes</td>
+				</tr>
+				<tr>
+					<td>targetName</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>Sets the base name of the output file; type and platform specific pre- and suffixes are added automatically - this field does not support platform suffixes</td>
+				</tr>
+				<tr>
+					<td>targetPath</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>The destination path of the output binary - this field does not support platform suffixes</td>
+				</tr>
+				<tr>
+					<td>workingDirectory</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>A fixed working directory from which the generated executable will be run - this field does not support platform suffixes</td>
+				</tr>
+				<tr>
+					<td>subConfigurations</td>
+					<td>
+						<code>string[string]</code>
+					</td>
+					<td>Locks the dependencies to specific configurations; a map from package name to configuration name, see also the <a href="#configurations">configurations section</a> - this field does not support platform suffixes</td>
+				</tr>
+				<tr>
+					<td>buildRequirements</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>List of required settings for the build process. See the <a href="#build-requirements">build requirements section</a> for details.</td>
+				</tr>
+				<tr>
+					<td>buildOptions</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>List of build option identifiers (corresponding to compiler flags) - see the <a href="#build-options">build options section</a> for details.</td>
+				</tr>
+				<tr>
+					<td>libs</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>A list of external library names - depending on the compiler, these will be converted to the proper linker flag (e.g. "ssl" might get translated to "-L-lssl")</td>
+				</tr>
+				<tr>
+					<td>sourceFiles</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Additional files passed to the compiler - can be useful to add certain configuration dependent source files that are not contained in the general source folder</td>
+				</tr>
+				<tr>
+					<td>sourcePaths</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Allows to customize the path where to look for source files (any folder "source" or "src" is automatically used as a source path if no <code>sourcePaths</code> field is given) - note that you usually also need to define <code>"importPaths"</code> as <code>"sourcePaths"</code> don't influence those</td>
+				</tr>
+				<tr>
+					<td>excludedSourceFiles</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Files that should be removed for the set of already added source files (takes precedence over "sourceFiles" and "sourcePaths") - <a href="http://dlang.org/phobos/std_path.html#.globMatch">Glob matching</a> can be used to pattern match multiple files at once</td>
+				</tr>
+				<tr>
+					<td>mainSourceFile</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>Determines the file that contains the <code>main()</code> function. This field can be used by dub to exclude this file in situations where a different main function is defined (e.g. for "dub test") - this field does not support platform suffixes</td>
+				</tr>
+				<tr>
+					<td>copyFiles</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Files that are copied to the applications directory - typically these are DLLs on Windows</td>
+				</tr>
+				<tr>
+					<td>versions</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>A list of D versions to be defined during compilation</td>
+				</tr>
+				<tr>
+					<td>debugVersions</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>A list of D debug identifiers to be defined during compilation</td>
+				</tr>
+				<tr>
+					<td>importPaths</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Additional import paths to search for D modules (the <code>source/</code> folder is used by default as a source folder, if it exists)</td>
+				</tr>
+				<tr>
+					<td>stringImportPaths</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Additional import paths to search for string imports/views (the <code>views/</code> folder is used by default as a string import folder, if it exists)</td>
+				</tr>
+				<tr>
+					<td>preGenerateCommands</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>A list of shell commands that is executed before project generation is started</td>
+				</tr>
+				<tr>
+					<td>postGenerateCommands</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>A list of shell commands that is executed after project generation is finished</td>
+				</tr>
+				<tr>
+					<td>preBuildCommands</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>A list of shell commands that is executed always before the project is built</td>
+				</tr>
+				<tr>
+					<td>postBuildCommands</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>A list of shell commands that is executed always after the project is built</td>
+				</tr>
+				<tr>
+					<td>dflags</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Additional flags passed to the D compiler - note that these flags are usually specific to the compiler in use, but a set of flags is automatically translated from DMD to the selected compiler</td>
+				</tr>
+				<tr>
+					<td>lflags</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>Additional flags passed to the linker - note that these flags are usually specific to the linker in use</td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<th>Value</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>"autodetect"</td>
+					<td>Automatically detects the target type. This is the default global value and causes dub to try and generate "application" and "library" <a href="#configurations">configurations</a>. Use of other values limits the auto-generated configurations to either of the two. This value is not allowed inside of a configuration block.</td>
+				</tr>
+				<tr>
+					<td>"none"</td>
+					<td>Does not generate an output file. This is useful for packages that are supposed to drag in other packages using its "dependencies" field.</td>
+				</tr>
+				<tr>
+					<td>"executable"</code></td>
+					<td>Generates an executable binary</td>
+				</tr>
+				<tr>
+					<td>"library"</code></td>
+					<td>Specifies that the package is to be used as a library, without limiting the actual type of library. This should be the default for most libraries.</td>
+				</tr>
+				<tr>
+					<td>"sourceLibrary"</code></td>
+					<td>This target type does not generate a binary, but rather forces dub to add all source files directly to the same compiler invocation as the dependent project.</td>
+				</tr>
+				<tr>
+					<td>"staticLibrary"</code></td>
+					<td>Forces output as a static library container.</td>
+				</tr>
+				<tr>
+					<td>"dynamicLibrary"</code></td>
+					<td>Forces output as a dynamic/shared library.</td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<th>Value</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>"allowWarnings"</td>
+					<td>Warnings do not abort compilation</td>
+				</tr>
+				<tr>
+					<td>"silenceWarnings"</td>
+					<td>Don't show warnings</td>
+				</tr>
+				<tr>
+					<td>"disallowDeprecations"</td>
+					<td>Using deprecated features aborts compilation</td>
+				</tr>
+				<tr>
+					<td>"silenceDeprecations"</td>
+					<td>Don't show deprecation warnings</td>
+				</tr>
+				<tr>
+					<td>"disallowInlining"</td>
+					<td>Avoid function inlining, even in release builds</td>
+				</tr>
+				<tr>
+					<td>"disallowOptimization"</td>
+					<td>Avoid optimizations, even in release builds</td>
+				</tr>
+				<tr>
+					<td>"requireBoundsCheck"</td>
+					<td>Always perform bounds checks</td>
+				</tr>
+				<tr>
+					<td>"requireContracts"</td>
+					<td>Leave assertions and contracts enabled in release builds</td>
+				</tr>
+				<tr>
+					<td>"relaxProperties"</td>
+					<td>Do not enforce strict property handling (removes the -property switch) <span style="color: red;">[deprecated, recent versions of DUB never issue -property]</span></td>
+				</tr>
+				<tr>
+					<td>"noDefaultFlags"</td>
+					<td>Does not emit build type specific flags (e.g. -debug, -cov or -unittest). <span style="color: red;">Note that this flag should never be used for released packages and is indended purely as a development/debugging tool. Using "-build=plain" may also be a more appropriate alternative.</span></td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<th>Value</th>
+					<th>Description</th>
+					<th>Corresponding DMD flag</th>
+				</tr>
+				<tr>
+					<td>"debugMode"</td>
+					<td>Compile in debug mode (enables contracts)</td>
+					<td>-debug</td>
+				</tr>
+				<tr>
+					<td>"releaseMode"</td>
+					<td>Compile in release mode (disables assertions and bounds checks)</td>
+					<td>-release</td>
+				</tr>
+				<tr>
+					<td>"coverage"</td>
+					<td>Enable code coverage analysis</td>
+					<td>-cov</td>
+				</tr>
+				<tr>
+					<td>"debugInfo"</td>
+					<td>Enable symbolic debug information</td>
+					<td>-g</td>
+				</tr>
+				<tr>
+					<td>"debugInfoC"</td>
+					<td>Enable symbolic debug information in C compatible form</td>
+					<td>-gc</td>
+				</tr>
+				<tr>
+					<td>"alwaysStackFrame"</td>
+					<td>Always generate a stack frame</td>
+					<td>-gs</td>
+				</tr>
+				<tr>
+					<td>"stackStomping"</td>
+					<td>Perform stack stomping</td>
+					<td>-gx</td>
+				</tr>
+				<tr>
+					<td>"inline"</td>
+					<td>Perform function inlining</td>
+					<td>-inline</td>
+				</tr>
+				<tr>
+					<td>"noBoundsCheck"</td>
+					<td>Disable all bounds checking</td>
+					<td>-noboundscheck</td>
+				</tr>
+				<tr>
+					<td>"optimize"</td>
+					<td>Enable optimizations</td>
+					<td>-O</td>
+				</tr>
+				<tr>
+					<td>"profile"</td>
+					<td>Emit profiling code</td>
+					<td>-profile</td>
+				</tr>
+				<tr>
+					<td>"unittests"</td>
+					<td>Compile unit tests</td>
+					<td>-unittest</td>
+				</tr>
+				<tr>
+					<td>"verbose"</td>
+					<td>Verbose compiler output</td>
+					<td>-v</td>
+				</tr>
+				<tr>
+					<td>"ignoreUnknownPragmas"</td>
+					<td>Ignores unknown pragmas during compilation</td>
+					<td>-ignore</td>
+				</tr>
+				<tr>
+					<td>"syntaxOnly"</td>
+					<td>Don't generate object files</td>
+					<td>-o-</td>
+				</tr>
+				<tr>
+					<td>"warnings"</td>
+					<td>Enable warnings, enabled by default (use "buildRequirements" to control this setting)</td>
+					<td>-wi</td>
+				</tr>
+				<tr>
+					<td>"warningsAsErrors"</td>
+					<td>Treat warnings as errors (use "buildRequirements" to control this setting)</td>
+					<td>-w</td>
+				</tr>
+				<tr>
+					<td>"ignoreDeprecations"</td>
+					<td>Do not warn about using deprecated features (use "buildRequirements" to control this setting)</td>
+					<td>-d</td>
+				</tr>
+				<tr>
+					<td>"deprecationWarnings"</td>
+					<td>Warn about using deprecated features, enabled by default (use "buildRequirements" to control this setting)</td>
+					<td>-dw</td>
+				</tr>
+				<tr>
+					<td>"deprecationErrors"</td>
+					<td>Stop compilation upon usage of deprecated features (use "buildRequirements" to control this setting)</td>
+					<td>-de</td>
+				</tr>
+				<tr>
+					<td>"property"</td>
+					<td>Enforce property syntax - <span style="color: red;">deprecated</span></td>
+					<td>-property</td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<th>Name</th>
+					<th>Type</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>name [required]</td>
+					<td>
+						<code>string</code>
+					</td>
+					<td>Name of the configuration</td>
+				</tr>
+				<tr>
+					<td>platforms</td>
+					<td>
+						<code>string[]</code>
+					</td>
+					<td>A list of platform suffixes (as used for the build settings) to limit on which platforms the configuration applies</td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<th>Name</th>
+					<th>Build options</th>
+				</tr>
+				<tr>
+					<td>plain</td>
+					<td><code>[]</code></td>
+				</tr>
+				<tr>
+					<td>debug</td>
+					<td><code>["debugMode", "debugInfo"]</code></td>
+				</tr>
+				<tr>
+					<td>release</td>
+					<td><code>["releaseMode", "optimize", "inline"]</code></td>
+				</tr>
+				<tr>
+					<td>unittest</td>
+					<td><code>["unittests", "debugMode", "debugInfo"]</code></td>
+				</tr>
+				<tr>
+					<td>docs</td>
+					<td><code>["syntaxOnly"]</code>, plus <code>"dflags": ["-c", "-Dddocs"]</code></td>
+				</tr>
+				<tr>
+					<td>ddox</td>
+					<td><code>["syntaxOnly"]</code>, plus <code>"dflags": ["-c", "-Df__dummy.html", "-Xfdocs.json"]</code></td>
+				</tr>
+				<tr>
+					<td>profile</td>
+					<td><code>["profile", "optimize", "inline", "debugInfo"]</code></td>
+				</tr>
+				<tr>
+					<td>cov</td>
+					<td><code>["coverage", "debugInfo"]</code></td>
+				</tr>
+				<tr>
+					<td>unittest-cov</td>
+					<td><code>["unittests", "coverage", "debugMode", "debugInfo"]</code></td>
+				</tr>
+			</table>

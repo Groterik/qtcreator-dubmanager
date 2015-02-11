@@ -13,17 +13,9 @@ class DubFile : public TextEditor::TextDocument
 public:
     explicit DubFile(const QString& filename = QString(), DubProject *parent = 0);
 
-    // pure Core::IDocument
+    // customize TextEditor::TextDocument
     virtual bool save(QString *errorString, const QString &fileName = QString(), bool autoSave = false);
-
-    virtual QString defaultPath() const;
-    virtual QString suggestedFileName() const;
-    virtual QString mimeType() const;
-
-    virtual bool isModified() const;
     virtual bool isSaveAsAllowed() const;
-
-    virtual bool reload(QString *errorString, ReloadFlag flag, ChangeType type);
     virtual void rename(const QString &newName);
 
     // others

@@ -44,15 +44,20 @@ QString DubManager::mimeType() const
 
 ProjectExplorer::Project *DubManager::openProject(const QString &fileName, QString *errorString)
 {
-    if (!QFileInfo(fileName).isFile()) {
-        if (errorString)
-            *errorString = tr("Failed opening project '%1': Project is not a file")
-                .arg(fileName);
+    try {
+        return new DubProject(this, fileName);
+    } catch (const std::exception& ex) {
+        if (errorString) {
+            *errorString = ex.what();
+        }
+        return 0;
+    } catch (...) {
+        if (errorString) {
+            *errorString = tr("Unknown error during DubManager::openProject");
+        }
         return 0;
     }
-
-        return new DubProject(this, fileName);
-    }
+}
 
 void DubManager::updateProject(ProjectExplorer::Project *project)
 {

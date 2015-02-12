@@ -36,6 +36,10 @@ DubProject::DubProject(DubManager *manager, const QString &filePath)
     setProjectContext(Core::Context(DubProjectManager::Constants::PROJECTCONTEXT));
     setProjectLanguages(Core::Context(ProjectExplorer::Constants::LANG_CXX));
 
+    if (!QFileInfo(filePath).isFile()) {
+        throw DubException(tr("Failed opening project '%1': Project is not a file").arg(filePath));
+    }
+
     m_projectName = QFileInfo(filePath).absoluteDir().dirName();
     m_buildDirectory = QFileInfo(m_filename).absoluteDir().absolutePath();
 
@@ -98,15 +102,7 @@ void DubProject::parseConfig()
 
 void DubProject::init()
 {
-    try {
         updateSourceTree();
-    }
-    catch (const DubException &ex) {
-        Core::MessageManager::write(ex.description(), Core::MessageManager::Flash);
-    }
-    catch (...) {
-        Core::MessageManager::write(QLatin1String("Unknown error during loading dub project"), Core::MessageManager::Flash);
-    }
 }
 
 const QString &DubProject::buildDirectory() const

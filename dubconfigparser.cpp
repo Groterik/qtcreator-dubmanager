@@ -10,6 +10,8 @@
 #include <QJsonArray>
 #include <QDir>
 
+#include <QDebug>
+
 using namespace DubProjectManager;
 
 namespace {
@@ -19,7 +21,12 @@ void runDubProcess(QProcess& process, const QStringList& args, const QString& di
 {
     process.setWorkingDirectory(directory);
     process.start(DubOptionsPage::executable(), args);
-    process.waitForFinished(10000);
+    if (!process.waitForFinished(10000)
+            || process.exitStatus() != QProcess::NormalExit
+            || process.exitCode() != 0) {
+        qWarning() << "Process failed: " << process.program() << args.join(' ');
+        throw DubException(QLatin1String("Dub process failed: ") + process.errorString() + "\n" + process.readAllStandardError());
+    }
 }
 
 QStringList parseList(QByteArray& array)
@@ -75,27 +82,10 @@ const QString &DubConfigParser::projectName() const
 
 QStringList DubConfigParser::readList(const QStringList &args)
 {
-    m_errorString.clear();
     QProcess dub;
     runDubProcess(dub, args, m_directory);
-
-    QStringList result;
-    switch (dub.exitStatus()) {
-    case QProcess::NormalExit:
-        if (dub.exitCode() != 0) {
-            m_errorString = dub.readAllStandardError();
-        } else {
-            QByteArray array(dub.readAllStandardOutput());
-            result = parseList(array);
-        }
-        break;
-    case QProcess::CrashExit:
-        m_errorString = dub.readAllStandardError();
-        break;
-    default:
-        break;
-    }
-    return result;
+    QByteArray array(dub.readAllStandardOutput());
+    return parseList(array);
 }
 
 const QJsonValue& CheckPresentation(const QJsonValue& v, QJsonValue::Type type = QJsonValue::String)
@@ -106,121 +96,101 @@ const QJsonValue& CheckPresentation(const QJsonValue& v, QJsonValue::Type type =
     return v;
 }
 
-bool DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
+void DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
 {
-    try {
-        QJsonParseError err;
-        QJsonDocument doc = QJsonDocument::fromJson(array, &err);
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(array, &err);
 
-        if (err.error != QJsonParseError::NoError) {
-            throw DubException(err.errorString());
-        }
+    if (err.error != QJsonParseError::NoError) {
+        throw DubException(err.errorString());
+    }
 
-        QJsonObject root = doc.object();
-        QJsonValue nameValue = root.value(QString::fromUtf8("mainPackage"));
-        CheckPresentation(nameValue);
-        if (!m_projectName.isEmpty() && m_projectName != nameValue.toString()) {
-            throw DubException("main package is mutable");
-        }
-        m_projectName = nameValue.toString();
+    QJsonObject root = doc.object();
+    QJsonValue nameValue = root.value(QString::fromUtf8("mainPackage"));
+    CheckPresentation(nameValue);
+    if (!m_projectName.isEmpty() && m_projectName != nameValue.toString()) {
+        throw DubException("main package is mutable");
+    }
+    m_projectName = nameValue.toString();
 
-        QJsonValue packages = root.value(QString::fromUtf8("packages"));
-        CheckPresentation(packages, QJsonValue::Array);
+    QJsonValue packages = root.value(QString::fromUtf8("packages"));
+    CheckPresentation(packages, QJsonValue::Array);
 
-        QJsonArray packageArray = packages.toArray();
-        QJsonObject packageRoot;
-        QMap<QString, QStringList> dependenciesImports;
-        foreach (QJsonValue package, packageArray) {
-            CheckPresentation(package, QJsonValue::Object);
+    QJsonArray packageArray = packages.toArray();
+    QJsonObject packageRoot;
+    QMap<QString, QStringList> dependenciesImports;
+    foreach (QJsonValue package, packageArray) {
+        CheckPresentation(package, QJsonValue::Object);
 
-            QJsonObject packageObject = package.toObject();
-            QString targetPackageName = CheckPresentation(packageObject.value("name")).toString();
+        QJsonObject packageObject = package.toObject();
+        QString targetPackageName = CheckPresentation(packageObject.value("name")).toString();
 
-            if (targetPackageName == m_projectName) {
-                if (!packageRoot.isEmpty()) {
-                    throw DubException("main package duplicate");
-                }
-                packageRoot = packageObject;
-            } else {
-                QString depPath = CheckPresentation(packageObject.value("path")).toString();
-                QStringList depImports;
-                QJsonArray importPathsArray = CheckPresentation(packageObject.value("importPaths"), QJsonValue::Array).toArray();
-                foreach (QJsonValue importPathValue, importPathsArray) {
-                    depImports.append(QDir(depPath).absoluteFilePath(CheckPresentation(importPathValue).toString()));
-                }
-                dependenciesImports[targetPackageName] = depImports;
+        if (targetPackageName == m_projectName) {
+            if (!packageRoot.isEmpty()) {
+                throw DubException("main package duplicate");
             }
-        }
-
-        state.m_path = CheckPresentation(packageRoot.value("path")).toString();
-        state.m_targetName = CheckPresentation(packageRoot.value("targetName")).toString();
-        state.m_workingDirectory = CheckPresentation(packageRoot.value("workingDirectory")).toString();
-        state.m_targetFilename = CheckPresentation(packageRoot.value("targetFileName")).toString();
-        state.m_targetType = CheckPresentation(packageRoot.value("targetType")).toString();
-        state.m_targetPath = CheckPresentation(packageRoot.value("targetPath")).toString();
-
-        QDir qpath(state.m_path);
-        QJsonArray srcArray = CheckPresentation(packageRoot.value("files"), QJsonValue::Array).toArray();
-        foreach (QJsonValue src, srcArray) {
-            QJsonObject srcObj = CheckPresentation(src, QJsonValue::Object).toObject();
-            if (CheckPresentation(srcObj.value("type")).toString() == "source") {
-                state.m_files.push_back(CheckPresentation(srcObj.value("path")).toString());
-                state.m_files.back() = qpath.absoluteFilePath(state.m_files.back());
+            packageRoot = packageObject;
+        } else {
+            QString depPath = CheckPresentation(packageObject.value("path")).toString();
+            QStringList depImports;
+            QJsonArray importPathsArray = CheckPresentation(packageObject.value("importPaths"), QJsonValue::Array).toArray();
+            foreach (QJsonValue importPathValue, importPathsArray) {
+                depImports.append(QDir(depPath).absoluteFilePath(CheckPresentation(importPathValue).toString()));
             }
+            dependenciesImports[targetPackageName] = depImports;
         }
-        state.m_files.removeDuplicates();
+    }
 
-        QJsonArray importPathsArray = CheckPresentation(packageRoot.value("importPaths"), QJsonValue::Array).toArray();
-        foreach (QJsonValue importPathValue, importPathsArray) {
-            state.m_importPaths.push_back(qpath.absoluteFilePath(CheckPresentation(importPathValue).toString()));
+    state.m_path = CheckPresentation(packageRoot.value("path")).toString();
+    state.m_targetName = CheckPresentation(packageRoot.value("targetName")).toString();
+    state.m_workingDirectory = CheckPresentation(packageRoot.value("workingDirectory")).toString();
+    state.m_targetFilename = CheckPresentation(packageRoot.value("targetFileName")).toString();
+    state.m_targetType = CheckPresentation(packageRoot.value("targetType")).toString();
+    state.m_targetPath = CheckPresentation(packageRoot.value("targetPath")).toString();
+
+    QDir qpath(state.m_path);
+    QJsonArray srcArray = CheckPresentation(packageRoot.value("files"), QJsonValue::Array).toArray();
+    foreach (QJsonValue src, srcArray) {
+        QJsonObject srcObj = CheckPresentation(src, QJsonValue::Object).toObject();
+        if (CheckPresentation(srcObj.value("type")).toString() == "source") {
+            state.m_files.push_back(CheckPresentation(srcObj.value("path")).toString());
+            state.m_files.back() = qpath.absoluteFilePath(state.m_files.back());
         }
-        foreach (const QStringList& di, dependenciesImports) {
-            state.m_importPaths += di;
-        }
-        state.m_importPaths.removeDuplicates();
     }
-    catch (const DubException& ex) {
-        m_errorString = ex.description();
-        return false;
+    state.m_files.removeDuplicates();
+
+    QJsonArray importPathsArray = CheckPresentation(packageRoot.value("importPaths"), QJsonValue::Array).toArray();
+    foreach (QJsonValue importPathValue, importPathsArray) {
+        state.m_importPaths.push_back(qpath.absoluteFilePath(CheckPresentation(importPathValue).toString()));
     }
-    catch (...) {
-        m_errorString = tr("Unknown error during dub describe parsing");
-        return false;
+    foreach (const QStringList& di, dependenciesImports) {
+        state.m_importPaths += di;
     }
-    return true;
+    state.m_importPaths.removeDuplicates();
 }
 
 bool DubConfigParser::parse()
 {
-    m_errorString.clear();
+    try {
+        m_errorString.clear();
 
-    m_configurations = readList(QStringList() << "build" << "--annotate" << "--print-configs");
-    if (m_configurations.empty()) {
-        return false;
-    }
-    m_buildTypes = readList(QStringList() << "build" << "--annotate" << "--print-builds");
-    if (m_buildTypes.empty()) {
-        return false;
-    }
-
-    QProcess dub;
-    StateMap map;
-    foreach (const QString &conf, m_configurations) {
-        runDubProcess(dub, QStringList() << "describe" << ("--config=" + conf), m_directory);
-        switch (dub.exitStatus()) {
-        case QProcess::NormalExit:
-            if (!parseDescribe(dub.readAllStandardOutput(), map[conf])) {
-                return false;
-            }
-            break;
-        case QProcess::CrashExit:
-            m_errorString = dub.readAllStandardError();
-            return false;
-        default:
-            break;
+        m_configurations = readList(QStringList() << "build" << "--annotate" << "--print-configs");
+        m_buildTypes = readList(QStringList() << "build" << "--annotate" << "--print-builds");
+        QProcess dub;
+        StateMap map;
+        foreach (const QString &conf, m_configurations) {
+            runDubProcess(dub, QStringList() << "describe" << ("--config=" + conf), m_directory);
+            parseDescribe(dub.readAllStandardOutput(), map[conf]);
         }
+        m_states.swap(map);
+    } catch (const QException &ex) {
+        m_errorString = ex.what();
+        return false;
+    } catch (...) {
+        m_errorString = tr("Dub parse: Unknown error");
+        return false;
     }
-    m_states.swap(map);
+
     return true;
 }
 

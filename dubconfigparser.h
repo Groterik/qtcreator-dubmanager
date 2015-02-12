@@ -68,7 +68,7 @@ private:
     typedef QMap<QString, ConfigurationInfo> StateMap;
     StateMap m_states;
 
-    bool parseDescribe(QByteArray array, ConfigurationInfo &state);
+    void parseDescribe(QByteArray array, ConfigurationInfo &state);
 };
 
 } // namespace DubProjectManager

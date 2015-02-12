@@ -16,12 +16,14 @@ public:
     virtual DubException *clone() const;
 
     virtual const QString &description() const;
+    virtual const char *what() const Q_DECL_NOEXCEPT;
 
     virtual ~DubException() throw();
 
 private:
 
     QString errorString;
+    mutable std::string str;
     
 };
 

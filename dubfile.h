@@ -14,7 +14,6 @@ public:
     explicit DubFile(const QString& filename = QString(), DubProject *parent = 0);
 
     // customize TextEditor::TextDocument
-    virtual bool save(QString *errorString, const QString &fileName = QString(), bool autoSave = false);
     virtual bool isSaveAsAllowed() const;
     virtual void rename(const QString &newName);
 

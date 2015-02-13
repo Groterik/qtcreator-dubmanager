@@ -12,14 +12,6 @@ DubFile::DubFile(const QString &filePath, DubProject *parent) :
     setFilePath(filePath);
 }
 
-bool DubFile::save(QString *errorString, const QString &fileName, bool autoSave)
-{
-    Q_UNUSED(errorString);
-    Q_UNUSED(fileName);
-    Q_UNUSED(autoSave);
-    return false;
-}
-
 bool DubFile::isSaveAsAllowed() const
 {
     return false;

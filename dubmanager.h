@@ -20,8 +20,8 @@ public:
     explicit DubManager(DubOptionsPage* page);
 
     // pure ProjectExplorer::IProjectManager
-    virtual QString mimeType() const;
-    virtual ProjectExplorer::Project *openProject(const QString &fileName, QString *errorString);
+    virtual QString mimeType() const Q_DECL_OVERRIDE;
+    virtual ProjectExplorer::Project *openProject(const QString &fileName, QString *errorString) Q_DECL_OVERRIDE;
 
     // others
     

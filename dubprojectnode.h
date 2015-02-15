@@ -13,11 +13,10 @@ public:
 
     // pure ProjectExplorer::ProjectNode
 
-    virtual bool canAddSubProject(const QString &proFilePath) const;
+    virtual bool canAddSubProject(const QString &proFilePath) const Q_DECL_OVERRIDE;
 
-    virtual bool addSubProjects(const QStringList &proFilePaths);
-    virtual bool removeSubProjects(const QStringList &proFilePaths);
-    virtual QList<ProjectExplorer::RunConfiguration *> runConfigurationsFor(Node *node);
+    virtual bool addSubProjects(const QStringList &proFilePaths) Q_DECL_OVERRIDE;
+    virtual bool removeSubProjects(const QStringList &proFilePaths) Q_DECL_OVERRIDE;
 
     // others
 

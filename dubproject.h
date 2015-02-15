@@ -21,13 +21,13 @@ public:
     virtual ~DubProject();
 
     // pure ProjectExplorer::Project
-    virtual QString displayName() const;
-    virtual Core::IDocument *document() const;
-    virtual ProjectExplorer::IProjectManager *projectManager() const;
+    virtual QString displayName() const Q_DECL_OVERRIDE;
+    virtual Core::IDocument *document() const Q_DECL_OVERRIDE;
+    virtual ProjectExplorer::IProjectManager *projectManager() const Q_DECL_OVERRIDE;
 
-    virtual ProjectExplorer::ProjectNode *rootProjectNode() const;
+    virtual ProjectExplorer::ProjectNode *rootProjectNode() const Q_DECL_OVERRIDE;
 
-    virtual QStringList files(FilesMode fileMode) const;
+    virtual QStringList files(FilesMode fileMode) const Q_DECL_OVERRIDE;
 
     // others
 
@@ -39,14 +39,14 @@ public:
 
     const ConfigurationInfo &info(const QString conf);
 
-    virtual QVariantMap toMap() const;
+    virtual QVariantMap toMap() const Q_DECL_OVERRIDE;
 signals:
     void updated();
 public slots:
     void update();
     void setSourceTreeConfiguration(const QString& conf);
 protected:
-    virtual bool fromMap(const QVariantMap &map);
+    virtual bool fromMap(const QVariantMap &map) Q_DECL_OVERRIDE;
 private slots:
     void dubFileChanged(const QString &filename);
 

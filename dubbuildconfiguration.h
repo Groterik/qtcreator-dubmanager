@@ -26,9 +26,9 @@ public:
 
     // pure ProjectExplorer::BuildConfiguration
 
-    virtual ProjectExplorer::NamedWidget *createConfigWidget();
+    virtual ProjectExplorer::NamedWidget *createConfigWidget() Q_DECL_OVERRIDE;
 
-    virtual BuildType buildType() const;
+    virtual BuildType buildType() const Q_DECL_OVERRIDE;
 
     // others
 
@@ -87,19 +87,19 @@ public:
 
     // pure ProjectExplorer::IBuildConfigurationFactory
 
-    virtual int priority(const ProjectExplorer::Target *parent) const;
-    virtual QList<ProjectExplorer::BuildInfo *> availableBuilds(const ProjectExplorer::Target *parent) const;
+    virtual int priority(const ProjectExplorer::Target *parent) const Q_DECL_OVERRIDE;
+    virtual QList<ProjectExplorer::BuildInfo *> availableBuilds(const ProjectExplorer::Target *parent) const Q_DECL_OVERRIDE;
 
-    virtual int priority(const ProjectExplorer::Kit *k, const QString &projectPath) const;
-    virtual QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k, const QString &projectPath) const;
+    virtual int priority(const ProjectExplorer::Kit *k, const QString &projectPath) const Q_DECL_OVERRIDE;
+    virtual QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k, const QString &projectPath) const Q_DECL_OVERRIDE;
 
-    virtual ProjectExplorer::BuildConfiguration *create(ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const;
+    virtual ProjectExplorer::BuildConfiguration *create(ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const Q_DECL_OVERRIDE;
 
     // used to recreate the runConfigurations when restoring settings
-    virtual bool canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const;
-    virtual ProjectExplorer::BuildConfiguration *restore(ProjectExplorer::Target *parent, const QVariantMap &map);
-    virtual bool canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product) const;
-    virtual ProjectExplorer::BuildConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product);
+    virtual bool canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const Q_DECL_OVERRIDE;
+    virtual ProjectExplorer::BuildConfiguration *restore(ProjectExplorer::Target *parent, const QVariantMap &map) Q_DECL_OVERRIDE;
+    virtual bool canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product) const Q_DECL_OVERRIDE;
+    virtual ProjectExplorer::BuildConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product) Q_DECL_OVERRIDE;
 
     // others
 

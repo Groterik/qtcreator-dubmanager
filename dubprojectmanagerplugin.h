@@ -17,8 +17,8 @@ public:
     DubProjectManagerPlugin();
     ~DubProjectManagerPlugin();
     
-    bool initialize(const QStringList &arguments, QString *errorString);
-    void extensionsInitialized();
+    bool initialize(const QStringList &arguments, QString *errorString) Q_DECL_OVERRIDE;
+    void extensionsInitialized() Q_DECL_OVERRIDE;
     ShutdownFlag aboutToShutdown();
     
 private slots:

@@ -27,16 +27,14 @@ public:
 
     // pure ProjectExplorer::LocalApplicationRunConfiguration
 
-#if QTCREATOR_MINOR_VERSION >= 2
     typedef ProjectExplorer::ApplicationLauncher::Mode RunMode;
-#endif
 
-    virtual QString executable() const;
-    virtual RunMode runMode() const;
-    virtual QString workingDirectory() const;
-    virtual QString commandLineArguments() const;
+    virtual QString executable() const Q_DECL_OVERRIDE;
+    virtual RunMode runMode() const Q_DECL_OVERRIDE;
+    virtual QString workingDirectory() const Q_DECL_OVERRIDE;
+    virtual QString commandLineArguments() const Q_DECL_OVERRIDE;
 
-    QWidget *createConfigurationWidget();
+    virtual QWidget *createConfigurationWidget() Q_DECL_OVERRIDE;
 
     // others
 

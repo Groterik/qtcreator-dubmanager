@@ -28,12 +28,6 @@ bool DubProjectNode::removeSubProjects(const QStringList &proFilePaths)
     return false;
 }
 
-QList<ProjectExplorer::RunConfiguration *> DubProjectNode::runConfigurationsFor(ProjectExplorer::Node *node)
-{
-    Q_UNUSED(node);
-    return QList<ProjectExplorer::RunConfiguration*>();
-}
-
 class NodeEqualPred
 {
 public:

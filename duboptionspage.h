@@ -24,9 +24,9 @@ public:
 
     // pure Core::IOptionsPage
 
-    virtual QWidget *widget();
-    virtual void apply();
-    virtual void finish();
+    virtual QWidget *widget() Q_DECL_OVERRIDE;
+    virtual void apply() Q_DECL_OVERRIDE;
+    virtual void finish() Q_DECL_OVERRIDE;
 
     // others
 

@@ -16,8 +16,3 @@ bool DubFile::isSaveAsAllowed() const
 {
     return false;
 }
-
-void DubFile::rename(const QString &newName)
-{
-    Q_UNUSED(newName);
-}

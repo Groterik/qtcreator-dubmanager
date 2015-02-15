@@ -12,8 +12,8 @@ public:
     explicit DubException() throw();
     explicit DubException(const QString& descr) throw();
 
-    virtual void raise() const;
-    virtual DubException *clone() const;
+    virtual void raise() const Q_DECL_OVERRIDE;
+    virtual DubException *clone() const Q_DECL_OVERRIDE;
 
     virtual const QString &description() const;
     virtual const char *what() const Q_DECL_NOEXCEPT;

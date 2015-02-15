@@ -7,35 +7,35 @@ DEFINES += DUBPROJECTMANAGER_LIBRARY
 
 # DubProjectManager files
 
-SOURCES += dubprojectmanagerplugin.cpp \
-    dubmanager.cpp \
-    dubproject.cpp \
-    dubfile.cpp \
-    dubprojectnode.cpp \
-    dubexception.cpp \
-    duboptionspage.cpp \
-    dubbuildstep.cpp \
-    dubbuildconfiguration.cpp \
-    dubrunconfiguration.cpp \
-    dubconfigparser.cpp \
-    dubcompletionassistprovider.cpp \
-    dubtexteditorfactory.cpp
+SOURCES += src/dubprojectmanagerplugin.cpp \
+    src/dubmanager.cpp \
+    src/dubproject.cpp \
+    src/dubfile.cpp \
+    src/dubprojectnode.cpp \
+    src/dubexception.cpp \
+    src/duboptionspage.cpp \
+    src/dubbuildstep.cpp \
+    src/dubbuildconfiguration.cpp \
+    src/dubrunconfiguration.cpp \
+    src/dubconfigparser.cpp \
+    src/dubcompletionassistprovider.cpp \
+    src/dubtexteditorfactory.cpp
 
-HEADERS += dubprojectmanagerplugin.h \
-    dubprojectmanager_global.h \
-    dubprojectmanagerconstants.h \
-    dubmanager.h \
-    dubproject.h \
-    dubfile.h \
-    dubprojectnode.h \
-    dubexception.h \
-    duboptionspage.h \
-    dubbuildstep.h \
-    dubbuildconfiguration.h \
-    dubrunconfiguration.h \
-    dubconfigparser.h \
-    dubcompletionassistprovider.h \
-    dubtexteditorfactory.h
+HEADERS += src/dubprojectmanagerplugin.h \
+    src/dubprojectmanager_global.h \
+    src/dubprojectmanagerconstants.h \
+    src/dubmanager.h \
+    src/dubproject.h \
+    src/dubfile.h \
+    src/dubprojectnode.h \
+    src/dubexception.h \
+    src/duboptionspage.h \
+    src/dubbuildstep.h \
+    src/dubbuildconfiguration.h \
+    src/dubrunconfiguration.h \
+    src/dubconfigparser.h \
+    src/dubcompletionassistprovider.h \
+    src/dubtexteditorfactory.h
 
 # Qt Creator linking
 

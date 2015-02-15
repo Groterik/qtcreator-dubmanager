@@ -264,5 +264,5 @@ void DubProject::appendIncludePaths(const ConfigurationInfo& info)
 void DubProject::dubFileChanged(const QString &filename)
 {
     Q_UNUSED(filename);
-    init();
+    update();
 }

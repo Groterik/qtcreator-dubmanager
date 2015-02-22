@@ -215,8 +215,12 @@ void DubRunConfigurationWidget::runConfigurationUpdated()
     m_configurations->addItems(m_dubRunConfiguration->configurationsList());
     m_configurations->setCurrentText(m_dubRunConfiguration->configuration());
     m_configurations->blockSignals(false);
-    m_argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
-    m_runInTerminal->setChecked(m_dubRunConfiguration->runMode() != Gui);
+    if (m_argumentsLineEdit->text() != m_dubRunConfiguration->commandLineArguments()) {
+        m_argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
+    }
+    if (m_runInTerminal->isChecked() != (m_dubRunConfiguration->runMode() != Gui)) {
+        m_runInTerminal->setChecked(m_dubRunConfiguration->runMode() != Gui);
+    }
     m_summary->setText(m_dubRunConfiguration->executable() + " " + m_dubRunConfiguration->commandLineArguments());
     m_workingDirectory->setText(m_dubRunConfiguration->workingDirectory());
 }

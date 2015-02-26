@@ -2,3 +2,18 @@ language: cpp
 compiler:
   - gcc
   - clang
+
+before_install:
+  - sudo add-apt-repository ppa:beineri/opt-qt541
+  - sudo apt-get update -q
+  - wget "http://download.qt-project.org/official_releases/qtcreator/3.3/3.3.1/qt-creator-opensource-src-3.3.1.tar.gz"
+  - tar xvzf qt-creator-opensource-src-3.3.1.tar.gz
+
+install:
+  - sudo apt-get install qt54creator
+
+script:
+  - . /opt/qt54/bin/qt54-env.sh
+  - mkdir -p build && cd build
+  - qmake ../dubprojectmanager.pro -r -spec linux-g++ CONFIG+=release QTC_SOURCE="$(pwd)/../qt-creator-opensource-src-3.3.1" QTC_BUILD="/opt/qt54/lib/x86_64-linux-gnu/qtcreator/" OUTPUT_PATH="$(pwd)/plugins/"
+  - make

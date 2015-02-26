@@ -57,7 +57,11 @@ isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=/usr/lib/qtcreator
 ##    "%LOCALAPPDATA%\QtProject\qtcreator" on Windows Vista and later
 ##    "$XDG_DATA_HOME/data/QtProject/qtcreator" or "~/.local/share/data/QtProject/qtcreator" on Linux
 ##    "~/Library/Application Support/QtProject/Qt Creator" on Mac
-USE_USER_DESTDIR = yes
+#USE_USER_DESTDIR = yes
+
+isEmpty(OUTPUT_PATH) {
+    USE_USER_DESTDIR = yes
+}
 
 PROVIDER = cleem
 
@@ -96,7 +100,7 @@ message("Your QtCreator's sources minor version is $$QTCREATOR_MINOR_VERSION")
 
 isEqual(QTCREATOR_MAJOR_VERSION, 2) {
   error("Only QtCreator >= 3.0.0 is supported")
-}
+}	
 
 DEFINES += QTCREATOR_MAJOR_VERSION=$$QTCREATOR_MAJOR_VERSION \
     QTCREATOR_MINOR_VERSION=$$QTCREATOR_MINOR_VERSION \
@@ -106,4 +110,11 @@ OTHER_FILES += \
 
 RESOURCES += \
     resources.qrc
+
+## define output path
+!isEmpty(OUTPUT_PATH) {
+    DESTDIR = $$OUTPUT_PATH
+    message("You set output path to $$DESTDIR")
+}
+message("Plugin output path is $$DESTDIR")
 

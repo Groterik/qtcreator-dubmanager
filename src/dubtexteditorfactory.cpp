@@ -16,7 +16,11 @@ DubTextEditorFactory::DubTextEditorFactory()
     setDocumentCreator([]() { return new DubProjectManager::DubFile; });
     setEditorWidgetCreator([]() { return new TextEditor::TextEditorWidget; });
     setEditorCreator([]() { return new TextEditor::BaseTextEditor; });
+#if QTCREATOR_MINOR_VERSION < 4
     setGenericSyntaxHighlighter(Constants::DUBMIMETYPE);
+#else
+    setUseGenericHighlighter(true);
+#endif
 
     setCompletionAssistProvider(new DubCompletionAssistProvider);
 

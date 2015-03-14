@@ -2,6 +2,8 @@
 
 #include "dubprojectmanagerconstants.h"
 
+#include <utils/fileutils.h>
+
 using namespace DubProjectManager;
 
 DubFile::DubFile(const QString &filePath, DubProject *parent) :
@@ -9,7 +11,11 @@ DubFile::DubFile(const QString &filePath, DubProject *parent) :
 {
     setMimeType(DubProjectManager::Constants::DUBMIMETYPE);
     setSuggestedFileName(QLatin1String("dub.json"));
+#if QTCREATOR_MINOR_VERSION < 4
     setFilePath(filePath);
+#else
+    setFilePath(Utils::FileName::fromString(filePath));
+#endif
 }
 
 bool DubFile::isSaveAsAllowed() const

@@ -5,6 +5,7 @@
 #include <texteditor/codeassist/assistproposalitem.h>
 #include <texteditor/codeassist/iassistproposal.h>
 #include <texteditor/codeassist/genericproposalmodel.h>
+#include <coreplugin/id.h>
 
 #include <QFile>
 

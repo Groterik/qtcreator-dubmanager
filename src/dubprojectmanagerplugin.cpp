@@ -9,7 +9,12 @@
 #include "dubcompletionassistprovider.h"
 #include "dubtexteditorfactory.h"
 
+#if QTCREATOR_MINOR_VERSION < 4
 #include <coreplugin/mimedatabase.h>
+#else
+#include <utils/mimetypes/mimedatabase.h>
+#endif
+
 #include <coreplugin/icore.h>
 
 #include <QAction>
@@ -20,6 +25,12 @@
 #include <QtPlugin>
 
 using namespace DubProjectManager::Internal;
+
+using namespace Core;
+#if QTCREATOR_MINOR_VERSION < 4
+#else
+using MimeDatabase = ::Utils::MimeDatabase;
+#endif
 
 DubProjectManagerPlugin::DubProjectManagerPlugin()
 {
@@ -35,8 +46,12 @@ DubProjectManagerPlugin::~DubProjectManagerPlugin()
 bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *errorString)
 {
     // Register objects in the plugin manager's object pool
+#if QTCREATOR_MINOR_VERSION < 4
     if (!Core::MimeDatabase::addMimeTypes(QLatin1String(":resources/DubProject.mimetypes.xml"), errorString))
         return false;
+#else
+    MimeDatabase::addMimeTypes(QLatin1String(":resources/DubProject.mimetypes.xml"));
+#endif
     
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)

@@ -196,7 +196,9 @@ void DubProject::setupTargets()
     info->buildDirectory = Utils::FileName::fromString(buildDirectory());
     info->kitId = defaultKit->id();
     info->displayName = QString::fromLatin1("all");
+#if QTCREATOR_MINOR_VERSION < 4
     info->supportsShadowBuild = true;
+#endif
     info->typeName = "Dub Manager";
     infos.push_back(info);
     this->setup(infos);
@@ -241,7 +243,10 @@ void DubProject::appendIncludePaths(const ConfigurationInfo& info)
             CppTools::CppModelManager::instance();
     if (modelmanager) {
         CppTools::ProjectInfo pinfo = modelmanager->projectInfo(this);
+#if QTCREATOR_MINOR_VERSION < 4
         pinfo.clearProjectParts();
+#else
+#endif
 
         CppTools::ProjectPart::Ptr part(new CppTools::ProjectPart);
         part->project = this;

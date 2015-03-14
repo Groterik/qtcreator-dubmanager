@@ -7,7 +7,10 @@ namespace DubProjectManager {
 
 class DubProjectNode : public ProjectExplorer::ProjectNode
 {
+#if QTCREATOR_MINOR_VERSION < 4
     Q_OBJECT
+#else
+#endif
 public:
     explicit DubProjectNode(const QString filename);
 
@@ -23,11 +26,6 @@ public:
     bool addFilePath(const QString& path);
     virtual bool addFiles(const QStringList &filePaths, QStringList *notAdded);
     void clear();
-    
-signals:
-    
-public slots:
-
 };
 
 } // namespace DubProjectManager

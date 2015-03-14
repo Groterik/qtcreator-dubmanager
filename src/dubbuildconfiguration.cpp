@@ -9,7 +9,11 @@
 #include <projectexplorer/buildinfo.h>
 #include <projectexplorer/kit.h>
 #include <projectexplorer/kitmanager.h>
+#if QTCREATOR_MINOR_VERSION < 4
 #include <coreplugin/mimedatabase.h>
+#else
+#include <utils/mimetypes/mimedatabase.h>
+#endif
 #include <coreplugin/coreconstants.h>
 
 #include <QFormLayout>
@@ -20,6 +24,12 @@
 #include <QPushButton>
 
 using namespace DubProjectManager;
+
+using namespace Core;
+#if QTCREATOR_MINOR_VERSION < 4
+#else
+using MimeDatabase = ::Utils::MimeDatabase;
+#endif
 
 DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source) :
     ProjectExplorer::BuildConfiguration(target, source),
@@ -118,15 +128,23 @@ QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableBuild
 #endif
     info->displayName = "new";
     info->kitId = parent->kit()->id();
+#if QTCREATOR_MINOR_VERSION < 4
     info->supportsShadowBuild = true;
+#else
+#endif
     info->typeName = "Dub Manager";
     return QList<ProjectExplorer::BuildInfo*>() << info;
 }
 
 int DubBuildConfigurationFactory::priority(const ProjectExplorer::Kit *k, const QString &projectPath) const
 {
-    return (k && Core::MimeDatabase::findByFile(QFileInfo(projectPath))
+#if QTCREATOR_MINOR_VERSION < 4
+    return (k && MimeDatabase::findByFile(QFileInfo(projectPath))
             .matchesType(QLatin1String(DubProjectManager::Constants::DUBMIMETYPE))) ? 0 : -1;
+#else
+    return (k && MimeDatabase().mimeTypeForFile(QFileInfo(projectPath))
+            .matchesName(QLatin1String(DubProjectManager::Constants::DUBMIMETYPE))) ? 0 : -1;
+#endif
 }
 
 QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableSetups(const ProjectExplorer::Kit *k, const QString &projectPath) const

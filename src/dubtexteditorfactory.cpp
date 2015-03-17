@@ -4,6 +4,7 @@
 
 #include "dubcompletionassistprovider.h"
 #include "dubfile.h"
+#include "dubhoverhandler.h"
 
 using namespace DubProjectManager;
 
@@ -21,6 +22,8 @@ DubTextEditorFactory::DubTextEditorFactory()
 #else
     setUseGenericHighlighter(true);
 #endif
+
+    addHoverHandler(new DubHoverHandler);
 
     setCompletionAssistProvider(new DubCompletionAssistProvider);
 

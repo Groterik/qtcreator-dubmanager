@@ -11,6 +11,7 @@ SOURCES += src/dubprojectmanagerplugin.cpp \
     src/dubmanager.cpp \
     src/dubproject.cpp \
     src/dubfile.cpp \
+    src/dubformatcache.cpp \
     src/dubprojectnode.cpp \
     src/dubexception.cpp \
     src/duboptionspage.cpp \
@@ -19,6 +20,7 @@ SOURCES += src/dubprojectmanagerplugin.cpp \
     src/dubrunconfiguration.cpp \
     src/dubconfigparser.cpp \
     src/dubcompletionassistprovider.cpp \
+    src/dubhoverhandler.cpp \
     src/dubtexteditorfactory.cpp
 
 HEADERS += src/dubprojectmanagerplugin.h \
@@ -27,6 +29,7 @@ HEADERS += src/dubprojectmanagerplugin.h \
     src/dubmanager.h \
     src/dubproject.h \
     src/dubfile.h \
+    src/dubformatcache.h \
     src/dubprojectnode.h \
     src/dubexception.h \
     src/duboptionspage.h \
@@ -35,6 +38,7 @@ HEADERS += src/dubprojectmanagerplugin.h \
     src/dubrunconfiguration.h \
     src/dubconfigparser.h \
     src/dubcompletionassistprovider.h \
+    src/dubhoverhandler.h \
     src/dubtexteditorfactory.h
 
 # Qt Creator linking

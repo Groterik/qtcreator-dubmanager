@@ -17,18 +17,16 @@ public:
 private:
     void initKeywords();
     TextEditor::Keywords m_keywords;
-    QMap<QString, QString> m_details;
 };
 
 class KeywordsWithDetailsCompletionAssistProcessor : public TextEditor::KeywordsCompletionAssistProcessor
 {
 public:
-    KeywordsWithDetailsCompletionAssistProcessor(TextEditor::Keywords, QMap<QString, QString> details);
+    KeywordsWithDetailsCompletionAssistProcessor(TextEditor::Keywords);
 
     //virtual TextEditor::IAssistProcessor
     TextEditor::IAssistProposal *perform(const TextEditor::AssistInterface *interface) Q_DECL_OVERRIDE;
 private:
-    QMap<QString, QString> m_details;
 };
 
 } // namespace DubProjectManager

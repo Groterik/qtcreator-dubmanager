@@ -8,6 +8,7 @@
 #include "dubrunconfiguration.h"
 #include "dubcompletionassistprovider.h"
 #include "dubtexteditorfactory.h"
+#include "dubwizard.h"
 
 #if QTCREATOR_MINOR_VERSION < 4
 #include <coreplugin/mimedatabase.h>
@@ -64,6 +65,7 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
     addAutoReleasedObject(new DubRunConfigurationFactory);
     addAutoReleasedObject(new DubCompletionAssistProvider);
     addAutoReleasedObject(new DubTextEditorFactory);
+    addAutoReleasedObject(new DubWizard);
     
     return true;
 }

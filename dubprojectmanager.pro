@@ -21,7 +21,8 @@ SOURCES += src/dubprojectmanagerplugin.cpp \
     src/dubconfigparser.cpp \
     src/dubcompletionassistprovider.cpp \
     src/dubhoverhandler.cpp \
-    src/dubtexteditorfactory.cpp
+    src/dubtexteditorfactory.cpp \
+    src/dubwizard.cpp
 
 HEADERS += src/dubprojectmanagerplugin.h \
     src/dubprojectmanager_global.h \
@@ -39,7 +40,8 @@ HEADERS += src/dubprojectmanagerplugin.h \
     src/dubconfigparser.h \
     src/dubcompletionassistprovider.h \
     src/dubhoverhandler.h \
-    src/dubtexteditorfactory.h
+    src/dubtexteditorfactory.h \
+    src/dubwizard.h
 
 # Qt Creator linking
 

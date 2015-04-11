@@ -1,5 +1,5 @@
 #ifndef DUBHOVERHANDLER_H
-#define DUBGHOVERHANDLER_H
+#define DUBHOVERHANDLER_H
 
 #include <QSharedPointer>
 

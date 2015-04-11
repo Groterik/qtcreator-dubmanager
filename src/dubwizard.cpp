@@ -5,6 +5,7 @@
 #include <projectexplorer/projectexplorerconstants.h>
 #include <utils/pathchooser.h>
 #include <texteditor/fontsettings.h>
+#include <projectexplorer/projectexplorer.h>
 
 #include <QFormLayout>
 #include <QHBoxLayout>
@@ -12,6 +13,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPlainTextEdit>
+#include <QFileInfo>
 #include <QProcess>
 #include <QMessageBox>
 
@@ -31,6 +33,8 @@ DubWizard::DubWizard()
     setFlags(PlatformIndependent);
 }
 
+#include <QDir>
+
 void DubWizard::runWizard(const QString &path, QWidget *parent,
                           const QString &platform, const QVariantMap &variables)
 {
@@ -38,7 +42,26 @@ void DubWizard::runWizard(const QString &path, QWidget *parent,
     Q_UNUSED(platform)
     Q_UNUSED(variables)
 
-    QMessageBox::information(parent, "Sorry", "Sorry, not implemented yet, please use << dub init >> ");
+    QSharedPointer<DubWizardWidget> widget(new DubWizardWidget);
+    if (widget->exec() == DubWizardWidget::Accepted) {
+        QDir dir(widget->directory());
+        const QString ERROR = tr("Error");
+        if (!dir.exists()) {
+            QMessageBox::critical(parent, ERROR, tr("Directory %1 does not exist").arg(dir.absolutePath()));
+            return;
+        }
+        auto entries = dir.entryList(QStringList() << QLatin1String("dub.json"), QDir::Files);
+        if (entries.isEmpty()) {
+            QMessageBox::critical(parent, ERROR, tr("File dub.json does not exist in %1").arg(dir.absolutePath()));
+            return;
+        }
+        QFileInfo dubFile(dir, entries.front());
+        QString errorMessage;
+        if (!ProjectExplorer::ProjectExplorerPlugin::instance()->openProject(dubFile.absoluteFilePath(), &errorMessage)) {
+            QMessageBox::critical(parent, ERROR, tr("Failed to open project: ") + errorMessage);
+            return;
+        }
+    }
 }
 
 
@@ -75,48 +98,81 @@ void DubWizardWidget::setDirectory(const QString &dir)
     m_directory = dir;
 }
 
+QString DubWizardWidget::directory() const
+{
+    return m_directory;
+}
+
 DubInitSettingsPage::DubInitSettingsPage(DubWizardWidget *parent)
     : m_wizardWidget(parent)
 {
     auto layout = new QFormLayout(this);
+
+    QLabel *description = new QLabel;
+    description->setWordWrap(true);
+    description->setText(tr("Please enter the directory in which you want to build your DUB project. \n"
+                          "Qt Creator will execute DUB with the following arguments to initialize the project."));
+    description->setSizeIncrement(0, 100);
+    layout->addRow(description);
+
     m_pc = new Utils::PathChooser;
+    m_pc->setToolTip("Accepts only absolute paths)");
     layout->addRow("Directory: ", m_pc);
     connect(m_pc, &Utils::PathChooser::pathChanged, [this] {
         this->updateDubCommand();
+        emit completeChanged();
     });
 
     m_dubCommand = new QLabel;
     layout->addRow("DUB command: ", m_dubCommand);
 
-    m_dubInitType = new QComboBox(this);
+    m_dubInitType = new QComboBox;
     connect(m_dubInitType, &QComboBox::currentTextChanged, [this]() {
         this->updateDubCommand();
     });
-    m_dubInitType->addItems(QStringList() << DUB_INIT_NO_TYPE << "minimal" << "vibe.d");
+    layout->addRow("Init type: ", m_dubInitType);
 
     m_dubInitExtraArguments = new QLineEdit;
     connect(m_dubInitExtraArguments, &QLineEdit::textChanged, [this]() {
         this->updateDubCommand();
     });
+    layout->addRow("Extra arguments: ", m_dubInitExtraArguments);
 
     setLayout(layout);
 
-    setTitle(tr("Init DUB project"));
+    m_dubInitType->addItems(QStringList() << DUB_INIT_NO_TYPE << "minimal" << "vibe.d");
+    emit completeChanged();
+
+    setTitle(tr("Configure project"));
 }
 
 bool DubInitSettingsPage::validatePage()
 {
+    const QString path = m_pc->path();
     m_wizardWidget->setDubCommand(getCommand());
     m_wizardWidget->setDubArguments(getArguments());
-    m_wizardWidget->setDirectory(m_pc->path());
+    m_wizardWidget->setDirectory(path);
+    QDir dir(path);
+    if (dir.exists()) {
+        return QMessageBox::warning(this, tr("Warning"),
+                                    tr("Path %1 already exists.\nPress OK to continue creating project or CANCEL to cancel.").arg(dir.absolutePath()),
+                                    QMessageBox::Ok, QMessageBox::Cancel) == QMessageBox::Ok;
+    }
     return true;
+}
+
+bool DubInitSettingsPage::isComplete() const
+{
+    const QString path = m_pc->path();
+    return !path.isEmpty() && QDir(path).isAbsolute();
 }
 
 
 void DubInitSettingsPage::updateDubCommand()
 {
     QChar delim = QLatin1Char(' ');
-    m_dubCommand->setText(getCommand() + delim + getArguments().join(delim));
+    m_dubCommand->setText(getCommand() + delim
+                          + getArguments().join(delim));
 }
 
 QStringList DubInitSettingsPage::getArguments() const
@@ -127,7 +183,10 @@ QStringList DubInitSettingsPage::getArguments() const
     if (type != DUB_INIT_NO_TYPE) {
         result << type;
     }
-    result << m_dubInitExtraArguments->text();
+    auto args = m_dubInitExtraArguments->text();
+    if (!args.isEmpty()) {
+        result << m_dubInitExtraArguments->text();
+    }
     return result;
 }
 
@@ -140,23 +199,24 @@ QString DubInitSettingsPage::getCommand() const
 DubInitResultsPage::DubInitResultsPage(DubWizardWidget *parent)
     : m_wizardWidget(parent), m_isCompleted(false)
 {
+    setTitle(tr("Run DUB"));
+
     auto layout = new QFormLayout;
 
     m_output = new QPlainTextEdit;
-    m_output = new QPlainTextEdit(this);
     m_output->setReadOnly(true);
     m_output->setMinimumHeight(15);
     QFont f(TextEditor::FontSettings::defaultFixedFontFamily());
     f.setStyleHint(QFont::TypeWriter);
     m_output->setFont(f);
     QSizePolicy pl = m_output->sizePolicy();
-    pl.setVerticalStretch(1);
+    pl.setVerticalStretch(2);
     m_output->setSizePolicy(pl);
     layout->addRow(m_output);
 
-    m_exitCode = new QLabel(this);
-    m_exitCode->setVisible(false);
-    layout->addRow(m_exitCode);
+    m_exitCode = new QLabel;
+    layout->addRow("Exit code: ", m_exitCode);
+    setLayout(layout);
 }
 
 void DubInitResultsPage::initializePage()
@@ -182,6 +242,11 @@ bool DubInitResultsPage::validatePage()
 bool DubInitResultsPage::isComplete() const
 {
     return m_isCompleted;
+}
+
+void DubInitResultsPage::cleanupPage()
+{
+    m_output->clear();
 }
 
 void DubInitResultsPage::dubReadyReadStandardOutput()
@@ -219,15 +284,15 @@ void DubInitResultsPage::dubReadyReadStandardError()
 
 void DubInitResultsPage::dubFinished()
 {
-    if (m_dubProcess->exitCode() != 0 || m_dubProcess->exitStatus() != QProcess::NormalExit) {
-        m_exitCode->setText("Exit code = " + QString::number(m_dubProcess->exitCode())
-                            + " (" + m_dubProcess->errorString() + ")");
-        m_exitCode->setVisible(true);
+    QString exitStatus = QString::number(m_dubProcess->exitCode());
+    if (m_dubProcess->exitCode() == 0 && m_dubProcess->exitStatus() == QProcess::NormalExit) {
+        setCompleted(true);
+    } else {
+        exitStatus += " (" + m_dubProcess->errorString() + ")";
         setCompleted(false);
-        return;
     }
-    setVisible(false);
-    setCompleted(true);
+
+    m_exitCode->setText(exitStatus);
 }
 
 void DubInitResultsPage::setCompleted(bool b)

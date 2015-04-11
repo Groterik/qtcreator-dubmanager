@@ -42,6 +42,7 @@ public:
     QStringList dubArguments() const;
 
     void setDirectory(const QString& dir);
+    QString directory() const;
 private:
     QString m_dubCommand;
     QStringList m_dubArguments;
@@ -55,6 +56,7 @@ public:
     explicit DubInitSettingsPage(DubWizardWidget *parent);
 
     virtual bool validatePage() Q_DECL_OVERRIDE;
+    virtual bool isComplete() const Q_DECL_OVERRIDE;
 private slots:
     void updateDubCommand();
 private:
@@ -77,6 +79,7 @@ public:
     virtual void initializePage() Q_DECL_OVERRIDE;
     virtual bool validatePage() Q_DECL_OVERRIDE;
     virtual bool isComplete() const Q_DECL_OVERRIDE;
+    virtual void cleanupPage() Q_DECL_OVERRIDE;
 private slots:
     void dubReadyReadStandardOutput();
     void dubReadyReadStandardError();

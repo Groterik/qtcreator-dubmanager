@@ -106,7 +106,12 @@ message("Your QtCreator's sources minor version is $$QTCREATOR_MINOR_VERSION")
 
 isEqual(QTCREATOR_MAJOR_VERSION, 2) {
   error("Only QtCreator >= 3.0.0 is supported")
-}	
+}
+
+!isEmpty(SET_VERSION_MINOR) {
+    QTCREATOR_MINOR_VERSION = $$SET_VERSION_MINOR
+    message("You set minor version to $$QTCREATOR_MINOR_VERSION forcedly")
+}
 
 DEFINES += QTCREATOR_MAJOR_VERSION=$$QTCREATOR_MAJOR_VERSION \
     QTCREATOR_MINOR_VERSION=$$QTCREATOR_MINOR_VERSION \

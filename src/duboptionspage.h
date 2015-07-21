@@ -6,6 +6,8 @@
 #include <QWidget>
 #include <QPointer>
 
+QT_FORWARD_DECLARE_CLASS(QSpinBox)
+
 namespace Utils {
 class PathChooser;
 }
@@ -33,6 +35,8 @@ public:
     QString findDubExecutable() const;
     static QString executable();
 
+    static int timeout();
+
 signals:
 
 public slots:
@@ -51,10 +55,12 @@ public:
     DubOptionsWidget(QWidget *parent = 0);
     virtual ~DubOptionsWidget() {}
     QString path() const;
+    int timeout() const;
 private slots:
 
 private:
     Utils::PathChooser *m_pathChooser;
+    QSpinBox* m_timeoutSpin;
 };
 
 } // namespace DubProjectManager

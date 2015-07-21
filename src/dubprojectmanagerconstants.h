@@ -25,6 +25,9 @@ const char * const S_SOURCE_TREE_CONFIG = "DubProjectManager.DubProject.SourceTr
 // Context menu button
 const char * const DUBUPDATECONTEXTMENU = "DubProjectManager.DubProject.UpdateMenu";
 
+// No configuration string
+const char* const DUB_NO_CONFIG = "<no config>";
+
 } // namespace DubProjectManager
 } // namespace Constants
 

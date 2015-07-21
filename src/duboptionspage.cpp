@@ -9,11 +9,13 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QFormLayout>
+#include <QSpinBox>
 
 using namespace DubProjectManager;
 
 namespace {
 const char S_DUB_EXECUTABLE[] = "dubExecutable";
+const char S_DUB_TIMEOUT[] = "dubTimeout";
 }
 
 namespace DubProjectManager {
@@ -56,7 +58,7 @@ bool DubValidator::isValid() const
 }
 
 DubOptionsWidget::DubOptionsWidget(QWidget *parent)
-    : QWidget(parent), m_pathChooser(0)
+    : QWidget(parent), m_pathChooser(0), m_timeoutSpin(0)
 {
     QFormLayout *formLayout = new QFormLayout(this);
     formLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
@@ -65,12 +67,25 @@ DubOptionsWidget::DubOptionsWidget(QWidget *parent)
     m_pathChooser->setExpectedKind(Utils::PathChooser::ExistingCommand);
     m_pathChooser->setHistoryCompleter(QLatin1String("Dub.Command.History"));
     m_pathChooser->setPath(DubOptionsPage::executable());
+
+    m_timeoutSpin = new QSpinBox(this);
+    m_timeoutSpin->setMinimum(0);
+    m_timeoutSpin->setMaximum(3600);
+    m_timeoutSpin->setSingleStep(1);
+    m_timeoutSpin->setValue(DubOptionsPage::timeout());
+
     formLayout->addRow(tr("Executable:"), m_pathChooser);
+    formLayout->addRow(tr("Timeout (sec):"), m_timeoutSpin);
 }
 
 QString DubOptionsWidget::path() const
 {
     return m_pathChooser->path();
+}
+
+int DubOptionsWidget::timeout() const
+{
+    return m_timeoutSpin->value();
 }
 
 
@@ -117,6 +132,7 @@ void DubOptionsPage::apply()
     settings->beginGroup(QLatin1String("DubSettings"));
     m_dubValidatorForUser->setDubExecutable(m_widget->path());
     settings->setValue(QLatin1String(S_DUB_EXECUTABLE), m_dubValidatorForUser->dubExecutable());
+    settings->setValue(QLatin1String(S_DUB_TIMEOUT), m_widget->timeout());
     settings->endGroup();
 }
 
@@ -135,6 +151,15 @@ QString DubOptionsPage::executable()
     QSettings *settings = Core::ICore::settings();
     settings->beginGroup(tr("DubSettings"));
     QString result = settings->value(QLatin1String(S_DUB_EXECUTABLE), QLatin1String("dub")).toString();
+    settings->endGroup();
+    return result;
+}
+
+int DubOptionsPage::timeout()
+{
+    QSettings *settings = Core::ICore::settings();
+    settings->beginGroup(tr("DubSettings"));
+    int result = settings->value(QLatin1String(S_DUB_TIMEOUT), 30).toInt();
     settings->endGroup();
     return result;
 }

@@ -1,5 +1,7 @@
 #include "dubconfigparser.h"
 
+#include "dubprojectmanagerconstants.h"
+
 #include "dubexception.h"
 #include "duboptionspage.h"
 
@@ -21,9 +23,11 @@ void runDubProcess(QProcess& process, const QStringList& args, const QString& di
 {
     process.setWorkingDirectory(directory);
     process.start(DubOptionsPage::executable(), args);
-    if (!process.waitForFinished(10000)
-            || process.exitStatus() != QProcess::NormalExit
-            || process.exitCode() != 0) {
+    if (!process.waitForFinished(DubOptionsPage::timeout() * 1000)) {
+        qWarning() << "Process timeout: " << process.program() << args.join(' ');
+        throw DubException(QLatin1String("Dub process timeout. Try to change timeout in Options."));
+    }
+    if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
         qWarning() << "Process failed: " << process.program() << args.join(' ');
         throw DubException(QLatin1String("Dub process failed: ") + process.errorString() + "\n" + process.readAllStandardError());
     }
@@ -96,7 +100,7 @@ const QJsonValue& CheckPresentation(const QJsonValue& v, QJsonValue::Type type =
     return v;
 }
 
-void DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
+QJsonDocument parseOutput(QByteArray array)
 {
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(array, &err);
@@ -105,13 +109,21 @@ void DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
         throw DubException(err.errorString());
     }
 
+    return doc;
+}
+
+QString DubConfigParser::parseDescribe(QByteArray array, const QString &projectName,
+                                    const QString &projectDir, ConfigurationInfo &state)
+{
+    QJsonDocument doc = parseOutput(array);
+
     QJsonObject root = doc.object();
     QJsonValue nameValue = root.value(QString::fromUtf8("mainPackage"));
     CheckPresentation(nameValue);
-    if (!m_projectName.isEmpty() && m_projectName != nameValue.toString()) {
+    if (!projectName.isEmpty() && projectName != nameValue.toString()) {
         throw DubException("main package is mutable");
     }
-    m_projectName = nameValue.toString();
+    QString realProjectName = nameValue.toString();
 
     QJsonValue packages = root.value(QString::fromUtf8("packages"));
     CheckPresentation(packages, QJsonValue::Array);
@@ -119,18 +131,27 @@ void DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
     QJsonArray packageArray = packages.toArray();
     QJsonObject packageRoot;
     QMap<QString, QStringList> dependenciesImports;
+    QStringList subPackagesFiles;
     foreach (QJsonValue package, packageArray) {
         CheckPresentation(package, QJsonValue::Object);
 
         QJsonObject packageObject = package.toObject();
         QString targetPackageName = CheckPresentation(packageObject.value("name")).toString();
 
-        if (targetPackageName == m_projectName) {
+        if (targetPackageName == realProjectName) {
             if (!packageRoot.isEmpty()) {
                 throw DubException("main package duplicate");
             }
             packageRoot = packageObject;
         } else {
+            if (targetPackageName.startsWith(realProjectName + QLatin1Char(':'))) {
+                // this is subPackage
+                QProcess dubSp;
+                runDubProcess(dubSp, QStringList() << "describe" << targetPackageName, projectDir);
+                ConfigurationInfo infoSp;
+                parseDescribe(dubSp.readAllStandardOutput(), targetPackageName, projectDir, infoSp);
+                subPackagesFiles.append(infoSp.files());
+            }
             QString depPath = CheckPresentation(packageObject.value("path")).toString();
             QStringList depImports;
             QJsonArray importPathsArray = CheckPresentation(packageObject.value("importPaths"), QJsonValue::Array).toArray();
@@ -157,6 +178,7 @@ void DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
             state.m_files.back() = qpath.absoluteFilePath(state.m_files.back());
         }
     }
+    state.m_files.append(subPackagesFiles);
     state.m_files.removeDuplicates();
 
     QJsonArray importPathsArray = CheckPresentation(packageRoot.value("importPaths"), QJsonValue::Array).toArray();
@@ -167,6 +189,7 @@ void DubConfigParser::parseDescribe(QByteArray array, ConfigurationInfo &state)
         state.m_importPaths += di;
     }
     state.m_importPaths.removeDuplicates();
+    return realProjectName;
 }
 
 bool DubConfigParser::parse()
@@ -175,12 +198,17 @@ bool DubConfigParser::parse()
         m_errorString.clear();
 
         m_configurations = readList(QStringList() << "build" << "--annotate" << "--print-configs");
+        m_configurations.push_front(Constants::DUB_NO_CONFIG);
         m_buildTypes = readList(QStringList() << "build" << "--annotate" << "--print-builds");
         QProcess dub;
         StateMap map;
         foreach (const QString &conf, m_configurations) {
-            runDubProcess(dub, QStringList() << "describe" << ("--config=" + conf), m_directory);
-            parseDescribe(dub.readAllStandardOutput(), map[conf]);
+            QStringList args("describe");
+            if (conf != Constants::DUB_NO_CONFIG) {
+                args << ("--config=" + conf);
+            }
+            runDubProcess(dub, args, m_directory);
+            m_projectName = parseDescribe(dub.readAllStandardOutput(), m_projectName, m_directory, map[conf]);
         }
         m_states.swap(map);
     } catch (const QException &ex) {

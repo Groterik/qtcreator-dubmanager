@@ -101,7 +101,7 @@ void DubBuildStep::construct()
 QString DubBuildStep::generateArguments() const
 {
     QString result = "build " + m_package;
-    if (!m_configuration.isEmpty()) {
+    if (!m_configuration.isEmpty() && m_configuration != Constants::DUB_NO_CONFIG) {
         result += QLatin1String(" --config=\"") + m_configuration + QLatin1String("\"");
     }
     result += QLatin1String(" --build=") + m_buildType;

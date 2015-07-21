@@ -51,7 +51,7 @@ bool DubBuildStep::init()
     params->setWorkingDirectory(bc->buildDirectory().toString());
     params->setEnvironment(bc->environment());
 
-    setOutputParser(new DubOutputDmdParser);
+    setOutputParser(new DubOutputDmdParser(params->workingDirectory()));
 
     return AbstractProcessStep::init();
 }
@@ -303,7 +303,8 @@ bool DubBuildStepFactory::canHandle(ProjectExplorer::BuildStepList *parent) cons
 const char COMMON_DMD_PATTERN[] = "^(.*)\\((.*)\\): (\\w*):(.*)$";
 
 
-DubOutputDmdParser::DubOutputDmdParser()
+DubOutputDmdParser::DubOutputDmdParser(const QString &workingDir)
+    : m_workingDir(workingDir)
 {
     m_tasks.reserve(MAX_TASKS);
     m_commonDmdError.setPattern(COMMON_DMD_PATTERN);
@@ -319,7 +320,9 @@ void DubOutputDmdParser::stdError(const QString &line)
 
     if (m_commonDmdError.indexIn(trimmedLine) != -1) {
         ProjectExplorer::Task::TaskType type = m_commonDmdError.cap(3) == "Error" ? ProjectExplorer::Task::Error : ProjectExplorer::Task::Warning;
-        m_tasks.push_back(ProjectExplorer::Task(type, m_commonDmdError.cap(4), Utils::FileName::fromUserInput(m_commonDmdError.cap(1)),
+        Utils::FileName filePath = Utils::FileName::fromString(m_workingDir);
+        filePath.appendPath(m_commonDmdError.cap(1));
+        m_tasks.push_back(ProjectExplorer::Task(type, m_commonDmdError.cap(4), filePath,
                           m_commonDmdError.cap(2).toInt(), ProjectExplorer::Constants::TASK_CATEGORY_BUILDSYSTEM));
     }
 

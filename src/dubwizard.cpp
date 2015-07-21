@@ -16,6 +16,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QMessageBox>
+#include <QScopedPointer>
 
 const char CATEGORY[] = "I.Projects";
 const char DISPLAY_CATEGORY[] = QT_TRANSLATE_NOOP("DubWizard", "Non-Qt Project");
@@ -35,33 +36,55 @@ DubWizard::DubWizard()
 
 #include <QDir>
 
+#if QTCREATOR_MINOR_VERSION < 5
 void DubWizard::runWizard(const QString &path, QWidget *parent,
                           const QString &platform, const QVariantMap &variables)
+#else
+Utils::Wizard *DubWizard::runWizardImpl(const QString &path, QWidget *parent,
+                          const QString &platform, const QVariantMap &variables)
+#endif
 {
     Q_UNUSED(path)
     Q_UNUSED(platform)
     Q_UNUSED(variables)
 
-    QSharedPointer<DubWizardWidget> widget(new DubWizardWidget);
+    QScopedPointer<DubWizardWidget> widget(new DubWizardWidget);
     if (widget->exec() == DubWizardWidget::Accepted) {
         QDir dir(widget->directory());
         const QString ERROR = tr("Error");
         if (!dir.exists()) {
             QMessageBox::critical(parent, ERROR, tr("Directory %1 does not exist").arg(dir.absolutePath()));
+#if QTCREATOR_MINOR_VERSION < 5
             return;
+#else
+            return widget.take();
+#endif
         }
         auto entries = dir.entryList(QStringList() << QLatin1String("dub.json"), QDir::Files);
         if (entries.isEmpty()) {
             QMessageBox::critical(parent, ERROR, tr("File dub.json does not exist in %1").arg(dir.absolutePath()));
+#if QTCREATOR_MINOR_VERSION < 5
             return;
+#else
+            return widget.take();
+#endif
         }
         QFileInfo dubFile(dir, entries.front());
         QString errorMessage;
         if (!ProjectExplorer::ProjectExplorerPlugin::instance()->openProject(dubFile.absoluteFilePath(), &errorMessage)) {
             QMessageBox::critical(parent, ERROR, tr("Failed to open project: ") + errorMessage);
+#if QTCREATOR_MINOR_VERSION < 5
             return;
+#else
+            return widget.take();
+#endif
         }
     }
+
+#if QTCREATOR_MINOR_VERSION < 5
+#else
+    return widget.take();
+#endif
 }
 
 

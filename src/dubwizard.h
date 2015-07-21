@@ -25,8 +25,13 @@ class DubWizard : public Core::IWizardFactory
 public:
     DubWizard();
 
+#if QTCREATOR_MINOR_VERSION < 5
     virtual void runWizard(const QString &path, QWidget *parent,
                            const QString &platform, const QVariantMap &variables) Q_DECL_OVERRIDE;
+#else
+    virtual Utils::Wizard *runWizardImpl(const QString &path, QWidget *parent,
+                                     const QString &platform, const QVariantMap &variables) Q_DECL_OVERRIDE;
+#endif
 
     QString buildDirectory() const;
 };

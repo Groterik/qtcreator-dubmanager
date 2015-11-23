@@ -60,9 +60,9 @@ Utils::Wizard *DubWizard::runWizardImpl(const QString &path, QWidget *parent,
             return widget.take();
 #endif
         }
-        auto entries = dir.entryList(QStringList() << QLatin1String("dub.json"), QDir::Files);
+        auto entries = dir.entryList(QStringList() << QLatin1String("dub.sdl") << QLatin1String("dub.json"), QDir::Files);
         if (entries.isEmpty()) {
-            QMessageBox::critical(parent, ERROR, tr("File dub.json does not exist in %1").arg(dir.absolutePath()));
+            QMessageBox::critical(parent, ERROR, tr("File dub.(sdl|json) does not exist in %1").arg(dir.absolutePath()));
 #if QTCREATOR_MINOR_VERSION < 5
             return;
 #else

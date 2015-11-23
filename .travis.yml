@@ -4,7 +4,7 @@ compiler:
 
 env:
   - ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-opensource-src-3.4.2" ENV_QTC_BUILD="/opt/qt55/lib/x86_64-linux-gnu/qtcreator/" ENV_QTC_VERSION="3.4.2" ENV_QTC_MV="4"
-  - ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-3.5.0" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/qtc_build/3.5.0/lib/qtcreator/" ENV_QTC_VERSION="3.5.0" ENV_QTC_MV="5"
+  - ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-3.5.1" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/qtc_build/3.5.1/lib/qtcreator/" ENV_QTC_VERSION="3.5.0" ENV_QTC_MV="5"
 
 
 before_install:
@@ -17,11 +17,11 @@ before_install:
   - wget "http://download.qt-project.org/official_releases/qtcreator/3.4/3.4.2/qt-creator-opensource-src-3.4.2.tar.gz"
   - tar xzf qt-creator-opensource-src-3.4.2.tar.gz
 # Latest tagged QtC sources and binaries
-  - wget "https://github.com/qtproject/qt-creator/archive/v3.5.0.tar.gz"
-  - tar xzf v3.5.0.tar.gz
-  - wget "http://download.qt.io/snapshots/qtcreator/3.5.0/latest/installer_source/qtcreator_linux-g++-Rhel6.6-x64.7z"
+  - wget "https://github.com/qtproject/qt-creator/archive/v3.5.1.tar.gz"
+  - tar xzf v3.5.1.tar.gz
+  - wget "http://download.qt.io/snapshots/qtcreator/3.5.1/latest/installer_source/qtcreator_linux-g++-Rhel6.6-x64.7z"
   - sudo apt-get install p7zip
-  - 7zr x -o./qtc_build/3.5.0/ qtcreator_linux-g++-Rhel6.6-x64.7z
+  - 7zr x -o./qtc_build/3.5.1/ qtcreator_linux-g++-Rhel6.6-x64.7z
 
 install:
   - sudo apt-get install qt55creator

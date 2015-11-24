@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
 <mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
   <mime-type type="text/x-dub">
+    <sub-class-of type="application/x-sdl"/>
+    <comment>DUB Project file</comment>
+    <glob pattern="dub.sdl"/>
+  </mime-type>
+  <mime-type type="text/x-dub-json">
     <sub-class-of type="application/json"/>
     <comment>DUB Project file</comment>
     <glob pattern="dub.json"/>

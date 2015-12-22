@@ -71,8 +71,14 @@ Utils::Wizard *DubWizard::runWizardImpl(const QString &path, QWidget *parent,
         }
         QFileInfo dubFile(dir, entries.front());
         QString errorMessage;
+#if QTCREATOR_MINOR_VERSION < 6
         if (!ProjectExplorer::ProjectExplorerPlugin::instance()->openProject(dubFile.absoluteFilePath(), &errorMessage)) {
             QMessageBox::critical(parent, ERROR, tr("Failed to open project: ") + errorMessage);
+#else
+        auto openProjectResult = ProjectExplorer::ProjectExplorerPlugin::instance()->openProject(dubFile.absoluteFilePath());
+        if (!openProjectResult) {
+            QMessageBox::critical(parent, ERROR, tr("Failed to open project: ") + openProjectResult.errorMessage());
+#endif
 #if QTCREATOR_MINOR_VERSION < 5
             return;
 #else

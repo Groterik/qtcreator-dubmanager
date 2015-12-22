@@ -165,10 +165,21 @@ void DubProject::setSourceTreeConfiguration(const QString &conf)
     }
 }
 
+#if QTCREATOR_MINOR_VERSION < 6
 bool DubProject::fromMap(const QVariantMap &map)
+#else
+DubProject::RestoreResult DubProject::fromMap(const QVariantMap &map, QString *errorMessage)
+#endif
 {
+#if QTCREATOR_MINOR_VERSION < 6
     if (!Project::fromMap(map))
         return false;
+#else
+    auto result = Project::fromMap(map, errorMessage);
+    if (result != RestoreResult::Ok) {
+        return result;
+    }
+#endif
 
     bool hasUserFile = activeTarget();
     if (hasUserFile) {
@@ -184,7 +195,11 @@ bool DubProject::fromMap(const QVariantMap &map)
             setupTargets();
         }
     }
+#if QTCREATOR_MINOR_VERSION < 6
     return true;
+#else
+    return RestoreResult::Ok;
+#endif
 }
 
 void DubProject::setupTargets()

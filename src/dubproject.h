@@ -46,7 +46,12 @@ public slots:
     void update();
     void setSourceTreeConfiguration(const QString& conf);
 protected:
+#if QTCREATOR_MINOR_VERSION < 6
     virtual bool fromMap(const QVariantMap &map) Q_DECL_OVERRIDE;
+#else
+    using RestoreResult = ProjectExplorer::Project::RestoreResult;
+    virtual RestoreResult fromMap(const QVariantMap &map, QString *errorMessage) Q_DECL_OVERRIDE;
+#endif
 private slots:
     void dubFileChanged(const QString &filename);
 

@@ -7,6 +7,7 @@
 #include <texteditor/fontsettings.h>
 #include <projectexplorer/projectexplorer.h>
 
+#include <QDir>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QComboBox>
@@ -20,6 +21,7 @@
 
 const char CATEGORY[] = "I.Projects";
 const char DISPLAY_CATEGORY[] = QT_TRANSLATE_NOOP("DubWizard", "Non-Qt Project");
+const char WIZARD_ID[] = "WI.DubWizard";
 const QString DUB_INIT_NO_TYPE = QLatin1String("<no type>");
 
 using namespace DubProjectManager;
@@ -31,10 +33,9 @@ DubWizard::DubWizard()
     setDisplayCategory(DISPLAY_CATEGORY);
     setDescription("Create empty DUB project");
     setDisplayName("DUB Project");
+    setId(WIZARD_ID);
     setFlags(PlatformIndependent);
 }
-
-#include <QDir>
 
 #if QTCREATOR_MINOR_VERSION < 5
 void DubWizard::runWizard(const QString &path, QWidget *parent,

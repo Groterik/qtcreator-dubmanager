@@ -16,6 +16,11 @@
 #include <utils/mimetypes/mimedatabase.h>
 #endif
 
+#if QTCREATOR_MINOR_VERSION < 6
+#else
+#include <coreplugin/iwizardfactory.h>
+#endif
+
 #include <coreplugin/icore.h>
 
 #include <QAction>
@@ -65,7 +70,12 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
     addAutoReleasedObject(new DubRunConfigurationFactory);
     addAutoReleasedObject(new DubCompletionAssistProvider);
     addAutoReleasedObject(new DubTextEditorFactory);
+#if QTCREATOR_MINOR_VERSION < 6
     addAutoReleasedObject(new DubWizard);
+#else
+    Core::IWizardFactory::registerFactoryCreator([]() {
+                return QList<Core::IWizardFactory *>() << new DubWizard;});
+#endif
     
     return true;
 }

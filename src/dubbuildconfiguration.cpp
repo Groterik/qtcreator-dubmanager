@@ -139,11 +139,13 @@ QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableBuild
 int DubBuildConfigurationFactory::priority(const ProjectExplorer::Kit *k, const QString &projectPath) const
 {
 #if QTCREATOR_MINOR_VERSION < 4
-    return (k && MimeDatabase::findByFile(QFileInfo(projectPath))
-            .matchesType(QLatin1String(DubProjectManager::Constants::DUBMIMETYPE))) ? 0 : -1;
+    auto mimeType = MimeDatabase::findByFile(QFileInfo(projectPath));
+    return (k && (mimeType.matchesType(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_JSON))
+                  || mimeType.matchesType(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_SDL)))) ? 0 : -1;
 #else
-    return (k && MimeDatabase().mimeTypeForFile(QFileInfo(projectPath))
-            .matchesName(QLatin1String(DubProjectManager::Constants::DUBMIMETYPE))) ? 0 : -1;
+    auto mimeType = MimeDatabase().mimeTypeForFile(QFileInfo(projectPath));
+    return (k && (mimeType.matchesName(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_JSON))
+                  || mimeType.matchesName(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_SDL)))) ? 0 : -1;
 #endif
 }
 

@@ -19,7 +19,6 @@
 #include <coreplugin/icore.h>
 
 #include <QAction>
-#include <QMessageBox>
 #include <QMainWindow>
 #include <QMenu>
 
@@ -59,7 +58,8 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
     
     DubOptionsPage *optionsPage = new DubOptionsPage;
     addAutoReleasedObject(optionsPage);
-    addAutoReleasedObject(new DubManager(optionsPage));
+    addAutoReleasedObject(new DubManager(optionsPage, Constants::DUB_MIMETYPE_JSON));
+    addAutoReleasedObject(new DubManager(optionsPage, Constants::DUB_MIMETYPE_SDL));
     addAutoReleasedObject(new DubBuildStepFactory);
     addAutoReleasedObject(new DubBuildConfigurationFactory);
     addAutoReleasedObject(new DubRunConfigurationFactory);

@@ -16,8 +16,7 @@ class DubManager : public ProjectExplorer::IProjectManager
     Q_OBJECT
 public:
 
-    // TODO: make settings page
-    explicit DubManager(DubOptionsPage* page);
+    explicit DubManager(DubOptionsPage *page, const QString &mimeType);
 
     // pure ProjectExplorer::IProjectManager
     virtual QString mimeType() const Q_DECL_OVERRIDE;
@@ -34,7 +33,7 @@ public slots:
 
 private:
     DubOptionsPage *optionsPage;
-
+    QString m_mimeType;
     ProjectExplorer::Project *m_contextProject;
     
 };

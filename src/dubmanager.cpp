@@ -16,8 +16,8 @@
 
 using namespace DubProjectManager;
 
-DubManager::DubManager(DubOptionsPage *page)
-    : optionsPage(page)
+DubManager::DubManager(DubOptionsPage *page, const QString &mimeType)
+    : optionsPage(page), m_mimeType(mimeType)
 {
 #if QTCREATOR_MINOR_VERSION < 4
     ProjectExplorer::ProjectExplorerPlugin *projectExplorer = ProjectExplorer::ProjectExplorerPlugin::instance();
@@ -48,7 +48,7 @@ DubManager::DubManager(DubOptionsPage *page)
 
 QString DubManager::mimeType() const
 {
-    return QString::fromUtf8(Constants::DUBMIMETYPE);
+    return m_mimeType;
 }
 
 ProjectExplorer::Project *DubManager::openProject(const QString &fileName, QString *errorString)

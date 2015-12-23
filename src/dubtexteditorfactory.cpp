@@ -12,13 +12,13 @@ DubTextEditorFactory::DubTextEditorFactory()
 {
     setId(Constants::DUB_EDITOR_ID);
     setDisplayName(tr(Constants::DUB_EDITOR_DISPLAY_NAME));
-    addMimeType(Constants::DUBMIMETYPE);
+    addMimeType(Constants::DUB_MIMETYPE_JSON);
 
     setDocumentCreator([]() { return new DubProjectManager::DubFile; });
     setEditorWidgetCreator([]() { return new TextEditor::TextEditorWidget; });
     setEditorCreator([]() { return new TextEditor::BaseTextEditor; });
 #if QTCREATOR_MINOR_VERSION < 4
-    setGenericSyntaxHighlighter(Constants::DUBMIMETYPE);
+    setGenericSyntaxHighlighter(Constants::DUB_MIMETYPE_JSON);
 #else
     setUseGenericHighlighter(true);
 #endif

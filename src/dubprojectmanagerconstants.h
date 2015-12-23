@@ -8,7 +8,8 @@ const char ACTION_ID[] = "DubProjectManager.Action";
 const char MENU_ID[] = "DubProjectManager.Menu";
 
 const char * const PROJECTCONTEXT = "DubProject.ProjectContext";
-const char * const DUBMIMETYPE  = "text/x-dub";
+const char * const DUB_MIMETYPE_JSON = "text/x-dub-json";
+const char * const DUB_MIMETYPE_SDL = "text/x-dub-sdl";
 const char * const DUB_EDITOR_ID = "DubProject.DubEditor";
 const char * const DUB_EDITOR_DISPLAY_NAME = "Dub Editor";
 const char * const C_DUBEDITOR = "DubProject.Context.DubEditor";

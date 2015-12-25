@@ -22,12 +22,13 @@ install:
 
 # Setup an environment and generate import libs
 before_build:
-  - cmd: %QTDIR%\bin\qtenv2.bat
-  - cmd: "%ProgramFiles(x86)%\Microsoft Visual Studio %VSVER%\VC\vcvarsall.bat" x86
-  - cmd: %APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\bin %APPVEYOR_BUILD_FOLDER%\qt-libs
-  - cmd: %APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\lib\qtcreator\plugins %APPVEYOR_BUILD_FOLDER%\qt-libs
+  - cmd: '%QTDIR%\bin\qtenv2.bat'
+  - cmd: '"%ProgramFiles(x86)%\Microsoft Visual Studio %VSVER%\VC\vcvarsall.bat" x86'
+  - cmd: mkdir %APPVEYOR_BUILD_FOLDER%\qt-libs
+  - cmd: '%APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\bin %APPVEYOR_BUILD_FOLDER%\qt-libs'
+  - cmd: '%APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\lib\qtcreator\plugins %APPVEYOR_BUILD_FOLDER%\qt-libs'
 
-build:
+build_script:
   - cmd: qmake %APPVEYOR_BUILD_FOLDER%/dubprojectmanager.pro -r "CONFIG+=%configuration%" "QTC_SOURCE=%APPVEYOR_BUILD_FOLDER%\qt-src\qt-creator-opensource-src-3.6.0" "QTC_BUILD=%APPVEYOR_BUILD_FOLDER%\qt-bin\bin" "LIBS+=-L%APPVEYOR_BUILD_FOLDER%\qt-libs" "OUTPUT_PATH=%APPVEYOR_BUILD_FOLDER%\artifacts\3.6.0"
   - cmd: nmake.exe
 
@@ -35,5 +36,5 @@ after_build:
   - cmd: 7z a %APPVEYOR_PROJECT_NAME%-win32.zip %APPVEYOR_BUILD_FOLDER%\artifacts\3.6.0\*
 
 artifacts:
-  - path: %APPVEYOR_PROJECT_NAME%-win32.zip
-    name: %APPVEYOR_PROJECT_NAME%
+  - path: '%APPVEYOR_PROJECT_NAME%-win32.zip'
+    name: '%APPVEYOR_PROJECT_NAME%'

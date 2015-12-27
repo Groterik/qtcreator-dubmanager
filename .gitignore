@@ -2,3 +2,4 @@
 *.obj
 *.user
 *.user.*
+.bintray.json

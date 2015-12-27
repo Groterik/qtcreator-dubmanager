@@ -3,10 +3,13 @@ compiler:
   - gcc
 
 env:
+  global:
+    - VERSION=1.0
+  matrix:
 # Qt 5.5.1 and QtC 3.6.0
-  - ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-opensource-src-3.6.0" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/qtc_build/3.6.0/lib/qtcreator/" ENV_QTC_VERSION="3.6.0" ENV_QTC_MV="6"
+    - ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-opensource-src-3.6.0" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/qtc_build/3.6.0/lib/qtcreator/" ENV_QTC_VERSION="3.6.0" ENV_QTC_MV="6"
 # Latest tagged QtC
-#  - ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-3.5.1" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/qtc_build/3.5.1/lib/qtcreator/" ENV_QTC_VERSION="3.5.0" ENV_QTC_MV="5"
+#   - ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-3.5.1" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/qtc_build/3.5.1/lib/qtcreator/" ENV_QTC_VERSION="3.5.0" ENV_QTC_MV="5"
 
 
 before_install:
@@ -15,8 +18,9 @@ before_install:
 # GCC 4.8
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update -qq
-# 7z
+# 7z and zip
   - sudo apt-get install p7zip
+  - sudo apt-get install zip
 # QtC sources and binaries
   - wget "http://download.qt-project.org/official_releases/qtcreator/3.6/3.6.0/qt-creator-opensource-src-3.6.0.tar.gz"
   - tar xzf qt-creator-opensource-src-3.6.0.tar.gz
@@ -49,3 +53,15 @@ addons:
   artifacts:
     paths:
       - ./build/plugins
+
+before_deploy:
+  - "$TRAVIS_BUILD_DIR/build/generate_bintray.sh"
+  - cd "$TRAVIS_BUILD_DIR/build" && zip -r output "./plugins" && cd -
+
+deploy:
+  provider: bintray
+  file: "$TRAVIS_BUILD_DIR/.bintray.json"
+  user: "groterik"
+  key:
+    secure: "TOjXZ2Zk1k/eOyLbXJBXSjJ6YGu2Fz0VRTxaMCl6csIoggazgxRXf7vjax2Do1XQwwX1dnwJJwAKLSoI9Zm7dxVQLnTstFkcvY7lrEyYimPd1MQSVeUJ/5DHMoSG+JgxX6ht9tU+WpzMNwsEsAOVQxcTWTi63UFNtDw+xGU89Zc="
+

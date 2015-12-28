@@ -8,8 +8,13 @@ version: 1.0.{build}
 os: Visual Studio 2013
 platform: x86
 environment:
+  VERSION: 1.0
+  OS_NAME: win32
   QTDIR: C:\Qt\5.5\msvc2013
   VSVER: 12.0
+  BINTRAY_KEY:
+    secure: 64COF2Ng3AdKqw6BEQqhlTu8G1j0F43qv6zZ6tg4VLbVCxXBxB2kW42COoqSiBJA
+
 configuration:
   - Release
 
@@ -33,8 +38,13 @@ build_script:
   - cmd: nmake.exe
 
 after_build:
-  - cmd: 7z a %APPVEYOR_PROJECT_NAME%-win32.zip %APPVEYOR_BUILD_FOLDER%\artifacts\3.6.0\*
+  - cmd: 7z a output.zip %APPVEYOR_BUILD_FOLDER%\artifacts\3.6.0\*
+  - cmd: python %APPVEYOR_BUILD_FOLDER%/build/generate_bintray.py %APPVEYOR_BUILD_FOLDER%
+  - cmd: curl -fsSL "http://curl.haxx.se/ca/cacert.pem" -o %APPVEYOR_BUILD_FOLDER%\cacert.pem
+  - cmd: SET SSL_CERT_FILE=%APPVEYOR_BUILD_FOLDER%\cacert.pem
+  - cmd: gem install dpl
+  - cmd: dpl --provider=bintray --file=%APPVEYOR_BUILD_FOLDER%/.bintray.json --user=groterik --key=%BINTRAY_KEY%
 
 artifacts:
-  - path: '%APPVEYOR_PROJECT_NAME%-win32.zip'
+  - path: 'output.zip'
     name: '%APPVEYOR_PROJECT_NAME%'

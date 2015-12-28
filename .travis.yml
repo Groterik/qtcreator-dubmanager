@@ -55,7 +55,7 @@ addons:
       - ./build/plugins
 
 before_deploy:
-  - "$TRAVIS_BUILD_DIR/build/generate_bintray.sh"
+  - python "$TRAVIS_BUILD_DIR/build/generate_bintray.py" "$TRAVIS_BUILD_DIR"
   - cd "$TRAVIS_BUILD_DIR/build" && zip -r output "./plugins" && cd -
 
 deploy:

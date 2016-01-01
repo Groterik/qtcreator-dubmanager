@@ -124,15 +124,9 @@ public:
     explicit DubOutputDmdParser(const QString &workingDir);
     void stdError(const QString &line) Q_DECL_OVERRIDE;
 
-protected:
-    void doFlush();
-
 private:
     QString m_workingDir;
-    QVector<ProjectExplorer::Task> m_tasks;
     QRegExp m_commonDmdError;
-
-    static const int MAX_TASKS = 10;
 };
 
 } // namespace DubProjectManager

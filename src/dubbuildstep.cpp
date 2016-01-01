@@ -300,13 +300,12 @@ bool DubBuildStepFactory::canHandle(ProjectExplorer::BuildStepList *parent) cons
            && parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD;
 }
 
-const char COMMON_DMD_PATTERN[] = "^(.*)\\((.*)\\): (\\w*):(.*)$";
+const char COMMON_DMD_PATTERN[] = "^(.*)\\((.*),(.*)\\): (\\w*):(.*)$";
 
 
 DubOutputDmdParser::DubOutputDmdParser(const QString &workingDir)
     : m_workingDir(workingDir)
 {
-    m_tasks.reserve(MAX_TASKS);
     m_commonDmdError.setPattern(COMMON_DMD_PATTERN);
     m_commonDmdError.setMinimal(true);
 }
@@ -319,24 +318,15 @@ void DubOutputDmdParser::stdError(const QString &line)
     }
 
     if (m_commonDmdError.indexIn(trimmedLine) != -1) {
-        ProjectExplorer::Task::TaskType type = m_commonDmdError.cap(3) == "Error" ? ProjectExplorer::Task::Error : ProjectExplorer::Task::Warning;
+        ProjectExplorer::Task::TaskType type = m_commonDmdError.cap(4) == "Error" ? ProjectExplorer::Task::Error : ProjectExplorer::Task::Warning;
         Utils::FileName filePath = Utils::FileName::fromString(m_workingDir);
         filePath.appendPath(m_commonDmdError.cap(1));
-        m_tasks.push_back(ProjectExplorer::Task(type, m_commonDmdError.cap(4), filePath,
-                          m_commonDmdError.cap(2).toInt(), ProjectExplorer::Constants::TASK_CATEGORY_BUILDSYSTEM));
-    }
+        auto task = ProjectExplorer::Task(type, m_commonDmdError.cap(5), filePath,
+                                          m_commonDmdError.cap(2).toInt(),
+                                          ProjectExplorer::Constants::TASK_CATEGORY_BUILDSYSTEM);
+        emit addTask(task);
 
-    if (m_tasks.size() >= MAX_TASKS) {
-        doFlush();
     }
 
     IOutputParser::stdError(line);
-}
-
-void DubOutputDmdParser::doFlush()
-{
-    foreach (const ProjectExplorer::Task& t, m_tasks) {
-        emit addTask(t);
-    }
-    m_tasks.clear();
 }

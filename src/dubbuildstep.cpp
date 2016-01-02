@@ -318,10 +318,11 @@ void DubOutputDmdParser::stdError(const QString &line)
     }
 
     if (m_commonDmdError.indexIn(trimmedLine) != -1) {
-        ProjectExplorer::Task::TaskType type = m_commonDmdError.cap(4) == "Error" ? ProjectExplorer::Task::Error : ProjectExplorer::Task::Warning;
-        Utils::FileName filePath = Utils::FileName::fromString(m_workingDir);
-        filePath.appendPath(m_commonDmdError.cap(1));
-        auto task = ProjectExplorer::Task(type, m_commonDmdError.cap(5), filePath,
+        ProjectExplorer::Task::TaskType type = m_commonDmdError.cap(4) == "Error" ?
+                    ProjectExplorer::Task::Error : ProjectExplorer::Task::Warning;
+        QDir path = m_commonDmdError.cap(1);
+        QString filePath = path.isAbsolute() ? path.path() : QDir(m_workingDir).filePath(path.path());
+        auto task = ProjectExplorer::Task(type, m_commonDmdError.cap(5), Utils::FileName::fromString(filePath),
                                           m_commonDmdError.cap(2).toInt(),
                                           ProjectExplorer::Constants::TASK_CATEGORY_BUILDSYSTEM);
         emit addTask(task);

@@ -325,7 +325,7 @@ void DubOutputDmdParser::stdError(const QString &line)
         auto task = ProjectExplorer::Task(type, m_commonDmdError.cap(5), Utils::FileName::fromString(filePath),
                                           m_commonDmdError.cap(2).toInt(),
                                           ProjectExplorer::Constants::TASK_CATEGORY_BUILDSYSTEM);
-        emit addTask(task);
+        emit addTask(task, 1);
 
     }
 

@@ -248,16 +248,22 @@ void DubProject::appendIncludePaths(const ConfigurationInfo& info)
     CppTools::CppModelManager *modelmanager =
             CppTools::CppModelManager::instance();
     if (modelmanager) {
-        CppTools::ProjectInfo pinfo = CppTools::ProjectInfo(this);
-        CppTools::ProjectPartBuilder pbuilder(pinfo);
+        CppTools::ProjectInfo pInfo = CppTools::ProjectInfo(this);
+        CppTools::ProjectPart::Ptr part(new CppTools::ProjectPart);
+        part->project = pInfo.project();
+        part->displayName = pInfo.project()->displayName();
+        part->projectFile = pInfo.project()->projectFilePath().toString();
 
-        pbuilder.setDisplayName(displayName());
-        pbuilder.setProjectFile(projectFilePath().toString());
+
         auto includePaths = info.importPaths();
-        pbuilder.setIncludePaths(includePaths << projectDirectory().toString());
-
-        pinfo.finish();
-        modelmanager->updateProjectInfo(pinfo);
+        includePaths.append(projectDirectory().toString());
+        for (const auto& path : includePaths) {
+            part->headerPaths.append(CppTools::ProjectPart::HeaderPath(
+                                        path, CppTools::ProjectPart::HeaderPath::IncludePath));
+        }
+        pInfo.appendProjectPart(part);
+        pInfo.finish();
+        modelmanager->updateProjectInfo(pInfo);
     }
 }
 

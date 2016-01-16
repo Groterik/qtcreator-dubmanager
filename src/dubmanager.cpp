@@ -6,10 +6,7 @@
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectnodes.h>
-#if QTCREATOR_MINOR_VERSION < 4
-#else
 #include <projectexplorer/projecttree.h>
-#endif
 #include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/actionmanager/actionmanager.h>
 #include <QAction>
@@ -19,14 +16,8 @@ using namespace DubProjectManager;
 DubManager::DubManager(DubOptionsPage *page, const QString &mimeType)
     : optionsPage(page), m_mimeType(mimeType)
 {
-#if QTCREATOR_MINOR_VERSION < 4
-    ProjectExplorer::ProjectExplorerPlugin *projectExplorer = ProjectExplorer::ProjectExplorerPlugin::instance();
-    connect(projectExplorer, &ProjectExplorer::ProjectExplorerPlugin::aboutToShowContextMenu,
-            this, &DubManager::updateContextMenu);
-#else
     connect(ProjectExplorer::ProjectTree::instance(), &ProjectExplorer::ProjectTree::aboutToShowContextMenu,
             this, &DubManager::updateContextMenu);
-#endif
 
     Core::ActionContainer *mproject =
             Core::ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);

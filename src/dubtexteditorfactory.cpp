@@ -17,11 +17,7 @@ DubTextEditorFactory::DubTextEditorFactory()
     setDocumentCreator([]() { return new DubProjectManager::DubFile; });
     setEditorWidgetCreator([]() { return new TextEditor::TextEditorWidget; });
     setEditorCreator([]() { return new TextEditor::BaseTextEditor; });
-#if QTCREATOR_MINOR_VERSION < 4
-    setGenericSyntaxHighlighter(Constants::DUB_MIMETYPE_JSON);
-#else
     setUseGenericHighlighter(true);
-#endif
 
     addHoverHandler(new DubHoverHandler);
 

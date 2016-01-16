@@ -7,10 +7,6 @@ namespace DubProjectManager {
 
 class DubProjectNode : public ProjectExplorer::ProjectNode
 {
-#if QTCREATOR_MINOR_VERSION < 4
-    Q_OBJECT
-#else
-#endif
 public:
     explicit DubProjectNode(const QString filename);
 

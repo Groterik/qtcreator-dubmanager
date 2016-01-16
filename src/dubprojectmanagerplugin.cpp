@@ -10,17 +10,8 @@
 #include "dubtexteditorfactory.h"
 #include "dubwizard.h"
 
-#if QTCREATOR_MINOR_VERSION < 4
-#include <coreplugin/mimedatabase.h>
-#else
 #include <utils/mimetypes/mimedatabase.h>
-#endif
-
-#if QTCREATOR_MINOR_VERSION < 6
-#else
 #include <coreplugin/iwizardfactory.h>
-#endif
-
 #include <coreplugin/icore.h>
 
 #include <QAction>
@@ -32,10 +23,7 @@
 using namespace DubProjectManager::Internal;
 
 using namespace Core;
-#if QTCREATOR_MINOR_VERSION < 4
-#else
 using MimeDatabase = ::Utils::MimeDatabase;
-#endif
 
 DubProjectManagerPlugin::DubProjectManagerPlugin()
 {
@@ -51,12 +39,7 @@ DubProjectManagerPlugin::~DubProjectManagerPlugin()
 bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *errorString)
 {
     // Register objects in the plugin manager's object pool
-#if QTCREATOR_MINOR_VERSION < 4
-    if (!Core::MimeDatabase::addMimeTypes(QLatin1String(":resources/DubProject.mimetypes.xml"), errorString))
-        return false;
-#else
     MimeDatabase::addMimeTypes(QLatin1String(":resources/DubProject.mimetypes.xml"));
-#endif
     
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
@@ -70,12 +53,8 @@ bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *
     addAutoReleasedObject(new DubRunConfigurationFactory);
     addAutoReleasedObject(new DubCompletionAssistProvider);
     addAutoReleasedObject(new DubTextEditorFactory);
-#if QTCREATOR_MINOR_VERSION < 6
-    addAutoReleasedObject(new DubWizard);
-#else
     Core::IWizardFactory::registerFactoryCreator([]() {
                 return QList<Core::IWizardFactory *>() << new DubWizard;});
-#endif
     
     return true;
 }

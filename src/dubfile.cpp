@@ -11,11 +11,7 @@ DubFile::DubFile(const QString &filePath, DubProject *parent) :
 {
     setMimeType(DubProjectManager::Constants::DUB_MIMETYPE_JSON);
     setSuggestedFileName(QLatin1String("dub.json"));
-#if QTCREATOR_MINOR_VERSION < 4
-    setFilePath(filePath);
-#else
     setFilePath(Utils::FileName::fromString(filePath));
-#endif
 }
 
 bool DubFile::isSaveAsAllowed() const

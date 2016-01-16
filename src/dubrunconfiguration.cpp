@@ -27,18 +27,12 @@ const char S_CONFIGURATION_KEY[] = "DubProjectManager.DubRunConfiguration.Config
 
 } // namespace
 
-#if QTCREATOR_MINOR_VERSION >= 2
-#define Gui ProjectExplorer::ApplicationLauncher::Gui
-#define Console ProjectExplorer::ApplicationLauncher::Console
-#else
-#define Gui DubRunConfiguration::Gui
-#endif
-
+using AppMode = ProjectExplorer::ApplicationLauncher::Mode;
 
 DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id, DubProject *project)
     : ProjectExplorer::LocalApplicationRunConfiguration(parent, id),
       m_project(project),
-      m_runMode(Gui)
+      m_runMode(AppMode::Gui)
 {
     m_configuration = m_project->configurationList().front();
     init();
@@ -123,7 +117,7 @@ void DubRunConfiguration::setConfiguration(const QString &conf)
 void DubRunConfiguration::runInTerminal(bool toggled)
 {
     m_terminal = toggled;
-    m_runMode = toggled ? Console : Gui;
+    m_runMode = toggled ? AppMode::Console : AppMode::Gui;
     emit updated();
 }
 
@@ -218,8 +212,8 @@ void DubRunConfigurationWidget::runConfigurationUpdated()
     if (m_argumentsLineEdit->text() != m_dubRunConfiguration->commandLineArguments()) {
         m_argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
     }
-    if (m_runInTerminal->isChecked() != (m_dubRunConfiguration->runMode() != Gui)) {
-        m_runInTerminal->setChecked(m_dubRunConfiguration->runMode() != Gui);
+    if (m_runInTerminal->isChecked() != (m_dubRunConfiguration->runMode() != AppMode::Gui)) {
+        m_runInTerminal->setChecked(m_dubRunConfiguration->runMode() != AppMode::Gui);
     }
     m_summary->setText(m_dubRunConfiguration->executable() + " " + m_dubRunConfiguration->commandLineArguments());
     m_workingDirectory->setText(m_dubRunConfiguration->workingDirectory());
@@ -274,11 +268,7 @@ ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::clone(ProjectExpl
     return new DubRunConfiguration(parent, w);
 }
 
-#if QTCREATOR_MINOR_VERSION < 2
-QList<Core::Id> DubRunConfigurationFactory::availableCreationIds(ProjectExplorer::Target *parent) const
-#else
 QList<Core::Id> DubRunConfigurationFactory::availableCreationIds(ProjectExplorer::Target *parent, CreationMode) const
-#endif
 {
     if (!canHandle(parent))
         return QList<Core::Id>();

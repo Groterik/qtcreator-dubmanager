@@ -5,11 +5,7 @@
 using namespace DubProjectManager;
 
 DubProjectNode::DubProjectNode(const QString filename)
-#if QTCREATOR_MINOR_VERSION < 4
-    : ProjectExplorer::ProjectNode(filename)
-#else
     : ProjectExplorer::ProjectNode(Utils::FileName::fromString(filename))
-#endif
 {
 }
 
@@ -38,11 +34,7 @@ public:
     NodeEqualPred(const QString& a) : a(a) {}
     bool operator()(ProjectExplorer::FolderNode* b)
     {
-#if QTCREATOR_MINOR_VERSION < 4
-        return a == b->path();
-#else
         return a == b->path().toString();
-#endif
     }
 private:
     const QString& a;
@@ -50,11 +42,7 @@ private:
 
 bool DubProjectNode::addFilePath(const QString &path)
 {
-#if QTCREATOR_MINOR_VERSION < 4
-    QString relativePath = QDir(QFileInfo(this->path()).path()).relativeFilePath(path);
-#else
     QString relativePath = QDir(QFileInfo(this->path().toString()).path()).relativeFilePath(path);
-#endif
     QStringList subpaths = relativePath.split(QLatin1Char('/'), QString::SkipEmptyParts);
     subpaths.pop_back();
 
@@ -67,11 +55,7 @@ bool DubProjectNode::addFilePath(const QString &path)
         SubFolders::iterator it = std::find_if(nodes.begin(), nodes.end(), pred);
         if (it == nodes.end()) {
             SubFolders list;
-#if QTCREATOR_MINOR_VERSION < 4
-            ProjectExplorer::FolderNode* added = new ProjectExplorer::FolderNode(s);
-#else
             ProjectExplorer::FolderNode* added = new ProjectExplorer::FolderNode(Utils::FileName::fromString(s));
-#endif
             list.push_back(added);
             node->addFolderNodes(list);
             node = added;
@@ -79,12 +63,8 @@ bool DubProjectNode::addFilePath(const QString &path)
             node = *it;
         }
     }
-#if QTCREATOR_MINOR_VERSION < 4
-    node->addFileNodes(QList<ProjectExplorer::FileNode*>() << new ProjectExplorer::FileNode(path, ProjectExplorer::SourceType, false));
-#else
     node->addFileNodes(QList<ProjectExplorer::FileNode*>()
                        << new ProjectExplorer::FileNode(Utils::FileName::fromString(path), ProjectExplorer::SourceType, false));
-#endif
 
     return true;
 }

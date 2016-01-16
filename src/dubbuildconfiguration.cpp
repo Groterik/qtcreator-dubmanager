@@ -9,11 +9,7 @@
 #include <projectexplorer/buildinfo.h>
 #include <projectexplorer/kit.h>
 #include <projectexplorer/kitmanager.h>
-#if QTCREATOR_MINOR_VERSION < 4
-#include <coreplugin/mimedatabase.h>
-#else
 #include <utils/mimetypes/mimedatabase.h>
-#endif
 #include <coreplugin/coreconstants.h>
 
 #include <QFormLayout>
@@ -25,11 +21,7 @@
 
 using namespace DubProjectManager;
 
-using namespace Core;
-#if QTCREATOR_MINOR_VERSION < 4
-#else
 using MimeDatabase = ::Utils::MimeDatabase;
-#endif
 
 DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source) :
     ProjectExplorer::BuildConfiguration(target, source),
@@ -121,32 +113,18 @@ int DubBuildConfigurationFactory::priority(const ProjectExplorer::Target *parent
 QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableBuilds(const ProjectExplorer::Target *parent) const
 {
     ProjectExplorer::BuildInfo *info = new ProjectExplorer::BuildInfo(this);
-#if QTCREATOR_MINOR_VERSION < 2
-    info->buildDirectory = Utils::FileName::fromString(parent->project()->projectDirectory());
-#else
     info->buildDirectory = parent->project()->projectDirectory();
-#endif
     info->displayName = "new";
     info->kitId = parent->kit()->id();
-#if QTCREATOR_MINOR_VERSION < 4
-    info->supportsShadowBuild = true;
-#else
-#endif
     info->typeName = "Dub Manager";
     return QList<ProjectExplorer::BuildInfo*>() << info;
 }
 
 int DubBuildConfigurationFactory::priority(const ProjectExplorer::Kit *k, const QString &projectPath) const
 {
-#if QTCREATOR_MINOR_VERSION < 4
-    auto mimeType = MimeDatabase::findByFile(QFileInfo(projectPath));
-    return (k && (mimeType.matchesType(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_JSON))
-                  || mimeType.matchesType(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_SDL)))) ? 0 : -1;
-#else
     auto mimeType = MimeDatabase().mimeTypeForFile(QFileInfo(projectPath));
     return (k && (mimeType.matchesName(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_JSON))
                   || mimeType.matchesName(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_SDL)))) ? 0 : -1;
-#endif
 }
 
 QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableSetups(const ProjectExplorer::Kit *k, const QString &projectPath) const

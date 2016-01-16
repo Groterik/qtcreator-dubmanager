@@ -90,7 +90,8 @@ void DubProject::parseConfig()
     if (!m_parser->parse()) {
         throw DubException(m_parser->errorString());
     }
-    const ConfigurationInfo& s = m_parser->configurationInfo(m_parser->configurationsList().front());
+    const ConfigurationInfo& s = m_parser->configurationInfo(
+                m_parser->configurationsList().front());
     m_files = s.files();
     m_projectName = m_parser->projectName();
     m_rootNode->setDisplayName(m_projectName);
@@ -130,7 +131,8 @@ const ConfigurationInfo &DubProject::info(const QString conf)
     try {
         return m_parser->configurationInfo(conf);
     } catch (...) {
-        Core::MessageManager::write(tr("Configuration %1 not found").arg(conf), Core::MessageManager::Flash);
+        Core::MessageManager::write(tr("Configuration %1 not found").arg(conf),
+                                    Core::MessageManager::Flash);
         return m_parser->configurationInfo(m_parser->configurationsList().front());
     }
 }
@@ -152,7 +154,8 @@ void DubProject::update()
         return;
     }
     catch (...) {
-        Core::MessageManager::write(tr("Unknown error during updating source tree"), Core::MessageManager::Flash);
+        Core::MessageManager::write(tr("Unknown error during updating source tree"),
+                                    Core::MessageManager::Flash);
         return;
     }
     emit updated();
@@ -160,7 +163,8 @@ void DubProject::update()
 
 void DubProject::setSourceTreeConfiguration(const QString &conf)
 {
-    if (conf != m_configuration && (conf.isEmpty() || m_parser->configurationsList().contains(conf))) {
+    if (conf != m_configuration && (conf.isEmpty()
+                                    || m_parser->configurationsList().contains(conf))) {
         buildSourceTree(conf);
     }
 }
@@ -174,7 +178,8 @@ DubProject::RestoreResult DubProject::fromMap(const QVariantMap &map, QString *e
 
     bool hasUserFile = activeTarget();
     if (hasUserFile) {
-        setSourceTreeConfiguration(map.value(QLatin1String(Constants::S_SOURCE_TREE_CONFIG)).toString());
+        setSourceTreeConfiguration(map.value(
+                                       QLatin1String(Constants::S_SOURCE_TREE_CONFIG)).toString());
     } else {
         ProjectExplorer::Kit *defaultKit = ProjectExplorer::KitManager::defaultKit();
         if (defaultKit) {
@@ -192,7 +197,8 @@ DubProject::RestoreResult DubProject::fromMap(const QVariantMap &map, QString *e
 void DubProject::setupTargets()
 {
     ProjectExplorer::Kit* defaultKit = ProjectExplorer::KitManager::defaultKit();
-    ProjectExplorer::IBuildConfigurationFactory* factory = ProjectExplorer::IBuildConfigurationFactory::find(defaultKit, m_filename);
+    ProjectExplorer::IBuildConfigurationFactory* factory =
+            ProjectExplorer::IBuildConfigurationFactory::find(defaultKit, m_filename);
     QList<const ProjectExplorer::BuildInfo *> infos;
     ProjectExplorer::BuildInfo *info = new ProjectExplorer::BuildInfo(factory);
     info->buildDirectory = Utils::FileName::fromString(buildDirectory());
@@ -204,7 +210,8 @@ void DubProject::setupTargets()
 
     foreach (ProjectExplorer::Target* t, this->targets()) {
         DubRunConfiguration* rc =
-                new DubRunConfiguration(t, DubRunConfigurationFactory::idFromBuildTarget(m_projectName), this);
+                new DubRunConfiguration(
+                    t, DubRunConfigurationFactory::idFromBuildTarget(m_projectName), this);
         t->addRunConfiguration(rc);
         t->updateDefaultRunConfigurations();
     }

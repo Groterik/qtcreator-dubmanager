@@ -19,13 +19,15 @@ private:
     TextEditor::Keywords m_keywords;
 };
 
-class KeywordsWithDetailsCompletionAssistProcessor : public TextEditor::KeywordsCompletionAssistProcessor
+class KeywordsWithDetailsCompletionAssistProcessor
+        : public TextEditor::KeywordsCompletionAssistProcessor
 {
 public:
     KeywordsWithDetailsCompletionAssistProcessor(TextEditor::Keywords);
 
     //virtual TextEditor::IAssistProcessor
-    TextEditor::IAssistProposal *perform(const TextEditor::AssistInterface *interface) Q_DECL_OVERRIDE;
+    TextEditor::IAssistProposal *perform(
+            const TextEditor::AssistInterface *interface) Q_DECL_OVERRIDE;
 private:
 };
 

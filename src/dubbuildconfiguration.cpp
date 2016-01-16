@@ -23,9 +23,10 @@ using namespace DubProjectManager;
 
 using MimeDatabase = ::Utils::MimeDatabase;
 
-DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, BuildConfiguration *source) :
-    ProjectExplorer::BuildConfiguration(target, source),
-    m_project(qobject_cast<DubProject*>(target->project()))
+DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target,
+                                             BuildConfiguration *source)
+    : ProjectExplorer::BuildConfiguration(target, source),
+      m_project(qobject_cast<DubProject*>(target->project()))
 {
     Q_ASSERT(m_project);
     Q_UNUSED(target);
@@ -39,7 +40,8 @@ DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target)
     Q_ASSERT(m_project);
 }
 
-DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, const ProjectExplorer::BuildInfo &info)
+DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target,
+                                             const ProjectExplorer::BuildInfo &info)
     : ProjectExplorer::BuildConfiguration(target, DubProjectManager::Constants::DUB_BC_ID),
       m_project(qobject_cast<DubProject*>(target->project()))
 {
@@ -48,7 +50,8 @@ DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target, co
     setDefaultDisplayName(info.displayName);
     setBuildDirectory(info.buildDirectory);
 
-    ProjectExplorer::BuildStepList* buildSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
+    ProjectExplorer::BuildStepList* buildSteps =
+            stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
     
     DubBuildStep *build = new DubBuildStep(buildSteps);
 
@@ -89,7 +92,8 @@ DubBuildConfigurationWidget::DubBuildConfigurationWidget(DubBuildConfiguration* 
     fl->addRow(tr("Source tree: "), &m_ccw);
 
     connect(&(m_configuration->dubPoject()), SIGNAL(updated()), this, SLOT(update()));
-    connect(&m_ccw, SIGNAL(currentTextChanged(QString)), &(m_configuration->dubPoject()), SLOT(setSourceTreeConfiguration(QString)));
+    connect(&m_ccw, SIGNAL(currentTextChanged(QString)),
+            &(m_configuration->dubPoject()), SLOT(setSourceTreeConfiguration(QString)));
 
     update();
 
@@ -97,7 +101,8 @@ DubBuildConfigurationWidget::DubBuildConfigurationWidget(DubBuildConfiguration* 
 
 void DubBuildConfigurationWidget::update()
 {
-    m_ccw.setCurrentText(m_configuration->dubPoject().sourceTreeConfiguration(), m_configuration->dubPoject().configurationList());
+    m_ccw.setCurrentText(m_configuration->dubPoject().sourceTreeConfiguration(),
+                         m_configuration->dubPoject().configurationList());
 }
 
 DubBuildConfigurationFactory::DubBuildConfigurationFactory(QObject *parent)
@@ -110,7 +115,8 @@ int DubBuildConfigurationFactory::priority(const ProjectExplorer::Target *parent
     return canHandle(parent) ? 0 : -1;
 }
 
-QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableBuilds(const ProjectExplorer::Target *parent) const
+QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableBuilds(
+        const ProjectExplorer::Target *parent) const
 {
     ProjectExplorer::BuildInfo *info = new ProjectExplorer::BuildInfo(this);
     info->buildDirectory = parent->project()->projectDirectory();
@@ -120,32 +126,38 @@ QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableBuild
     return QList<ProjectExplorer::BuildInfo*>() << info;
 }
 
-int DubBuildConfigurationFactory::priority(const ProjectExplorer::Kit *k, const QString &projectPath) const
+int DubBuildConfigurationFactory::priority(const ProjectExplorer::Kit *k,
+                                           const QString &projectPath) const
 {
     auto mimeType = MimeDatabase().mimeTypeForFile(QFileInfo(projectPath));
-    return (k && (mimeType.matchesName(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_JSON))
-                  || mimeType.matchesName(QLatin1String(DubProjectManager::Constants::DUB_MIMETYPE_SDL)))) ? 0 : -1;
+    return (k &&
+            (mimeType.matchesName(QLatin1String(Constants::DUB_MIMETYPE_JSON))
+             || mimeType.matchesName(QLatin1String(Constants::DUB_MIMETYPE_SDL)))) ? 0 : -1;
 }
 
-QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableSetups(const ProjectExplorer::Kit *k, const QString &projectPath) const
+QList<ProjectExplorer::BuildInfo *> DubBuildConfigurationFactory::availableSetups(
+        const ProjectExplorer::Kit *k, const QString &projectPath) const
 {
     Q_UNUSED(k);
     Q_UNUSED(projectPath);
     return QList<ProjectExplorer::BuildInfo*>();
 }
 
-ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::create(ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const
+ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::create(
+        ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const
 {
     return new DubBuildConfiguration(parent, *info);
 }
 
-bool DubBuildConfigurationFactory::canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const
+bool DubBuildConfigurationFactory::canRestore(const ProjectExplorer::Target *parent,
+                                              const QVariantMap &map) const
 {
     Q_UNUSED(map);
     return canHandle(parent);
 }
 
-ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::restore(ProjectExplorer::Target *parent, const QVariantMap &map)
+ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::restore(
+        ProjectExplorer::Target *parent, const QVariantMap &map)
 {
     if (!canRestore(parent, map)) {
         return 0;
@@ -157,15 +169,18 @@ ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::restore(Proje
     return bc;
 }
 
-bool DubBuildConfigurationFactory::canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product) const
+bool DubBuildConfigurationFactory::canClone(const ProjectExplorer::Target *parent,
+                                            ProjectExplorer::BuildConfiguration *product) const
 {
     if (!parent->project()->supportsKit(parent->kit())) {
         return false;
     }
-    return product->id() == DubProjectManager::Constants::DUB_BC_ID && parent->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID;
+    return product->id() == DubProjectManager::Constants::DUB_BC_ID
+            && parent->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID;
 }
 
-ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product)
+ProjectExplorer::BuildConfiguration *DubBuildConfigurationFactory::clone(
+        ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product)
 {
     if (!canClone(parent, product)) {
         return 0;

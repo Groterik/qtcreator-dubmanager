@@ -20,15 +20,16 @@ public:
     explicit DubBuildStep(ProjectExplorer::BuildStepList *bsl, const Core::Id id);
     explicit DubBuildStep(ProjectExplorer::BuildStepList *bsl);
 
-    // pure ProjectExplorer::AbstractProcessStep (BuildStep)
+    // pure
 
     virtual bool init() Q_DECL_OVERRIDE;
-
     virtual void run(QFutureInterface<bool> &fi) Q_DECL_OVERRIDE;
-
     virtual ProjectExplorer::BuildStepConfigWidget *createConfigWidget() Q_DECL_OVERRIDE;
 
     // others
+
+    virtual QVariantMap toMap() const Q_DECL_OVERRIDE;
+    virtual bool fromMap(const QVariantMap &map) Q_DECL_OVERRIDE;
     
     const QString &additionalArguments() const;
     const QString &configuration() const;
@@ -37,10 +38,6 @@ public:
 
     QString commandString() const;
     QString command() const;
-
-
-    virtual QVariantMap toMap() const Q_DECL_OVERRIDE;
-    virtual bool fromMap(const QVariantMap &map) Q_DECL_OVERRIDE;
 
     const DubProject *dubProject() const;
 
@@ -76,15 +73,20 @@ class DubBuildStepFactory : public ProjectExplorer::IBuildStepFactory
 
 public:
     explicit DubBuildStepFactory(QObject *parent = 0);
-    virtual ~DubBuildStepFactory();
+    virtual ~DubBuildStepFactory() Q_DECL_OVERRIDE;
 
     // pure ProjectExplorer::IBuildStepFactory
     bool canCreate(ProjectExplorer::BuildStepList *parent, const Core::Id id) const Q_DECL_OVERRIDE;
-    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, const Core::Id id) Q_DECL_OVERRIDE;
-    bool canClone(ProjectExplorer::BuildStepList *parent, ProjectExplorer::BuildStep *source) const Q_DECL_OVERRIDE;
-    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent, ProjectExplorer::BuildStep *source) Q_DECL_OVERRIDE;
-    bool canRestore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) const Q_DECL_OVERRIDE;
-    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) Q_DECL_OVERRIDE;
+    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent,
+                                       const Core::Id id) Q_DECL_OVERRIDE;
+    bool canClone(ProjectExplorer::BuildStepList *parent,
+                  ProjectExplorer::BuildStep *source) const Q_DECL_OVERRIDE;
+    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent,
+                                      ProjectExplorer::BuildStep *source) Q_DECL_OVERRIDE;
+    bool canRestore(ProjectExplorer::BuildStepList *parent,
+                    const QVariantMap &map) const Q_DECL_OVERRIDE;
+    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent,
+                                        const QVariantMap &map) Q_DECL_OVERRIDE;
 
     QList<Core::Id> availableCreationIds(ProjectExplorer::BuildStepList *bc) const Q_DECL_OVERRIDE;
     QString displayNameForId(const Core::Id id) const Q_DECL_OVERRIDE;
@@ -122,6 +124,7 @@ class DubOutputDmdParser : public ProjectExplorer::IOutputParser
 
 public:
     explicit DubOutputDmdParser(const QString &workingDir);
+
     void stdError(const QString &line) Q_DECL_OVERRIDE;
 
 private:

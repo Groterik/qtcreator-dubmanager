@@ -16,8 +16,6 @@ public:
     // customize TextEditor::TextDocument
     virtual bool isSaveAsAllowed() const Q_DECL_OVERRIDE;
 
-    // others
-    
 signals:
     
 public slots:

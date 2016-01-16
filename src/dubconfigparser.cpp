@@ -29,7 +29,8 @@ void runDubProcess(QProcess& process, const QStringList& args, const QString& di
     }
     if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
         qWarning() << "Process failed: " << process.program() << args.join(' ');
-        throw DubException(QLatin1String("Dub process failed: ") + process.errorString() + "\n" + process.readAllStandardError());
+        throw DubException(QLatin1String("Dub process failed: ") + process.errorString()
+                           + "\n" + process.readAllStandardError());
     }
 }
 
@@ -154,9 +155,11 @@ QString DubConfigParser::parseDescribe(QByteArray array, const QString &projectN
             }
             QString depPath = CheckPresentation(packageObject.value("path")).toString();
             QStringList depImports;
-            QJsonArray importPathsArray = CheckPresentation(packageObject.value("importPaths"), QJsonValue::Array).toArray();
+            QJsonArray importPathsArray = CheckPresentation(packageObject.value("importPaths"),
+                                                            QJsonValue::Array).toArray();
             foreach (QJsonValue importPathValue, importPathsArray) {
-                depImports.append(QDir(depPath).absoluteFilePath(CheckPresentation(importPathValue).toString()));
+                depImports.append(QDir(depPath).absoluteFilePath(
+                                      CheckPresentation(importPathValue).toString()));
             }
             dependenciesImports[targetPackageName] = depImports;
         }
@@ -170,7 +173,8 @@ QString DubConfigParser::parseDescribe(QByteArray array, const QString &projectN
     state.m_targetPath = CheckPresentation(packageRoot.value("targetPath")).toString();
 
     QDir qpath(state.m_path);
-    QJsonArray srcArray = CheckPresentation(packageRoot.value("files"), QJsonValue::Array).toArray();
+    QJsonArray srcArray = CheckPresentation(packageRoot.value("files"),
+                                            QJsonValue::Array).toArray();
     foreach (QJsonValue src, srcArray) {
         QJsonObject srcObj = CheckPresentation(src, QJsonValue::Object).toObject();
         if (CheckPresentation(srcObj.value("type")).toString() == "source") {
@@ -181,9 +185,11 @@ QString DubConfigParser::parseDescribe(QByteArray array, const QString &projectN
     state.m_files.append(subPackagesFiles);
     state.m_files.removeDuplicates();
 
-    QJsonArray importPathsArray = CheckPresentation(packageRoot.value("importPaths"), QJsonValue::Array).toArray();
+    QJsonArray importPathsArray = CheckPresentation(packageRoot.value("importPaths"),
+                                                    QJsonValue::Array).toArray();
     foreach (QJsonValue importPathValue, importPathsArray) {
-        state.m_importPaths.push_back(qpath.absoluteFilePath(CheckPresentation(importPathValue).toString()));
+        state.m_importPaths.push_back(qpath.absoluteFilePath(
+                                          CheckPresentation(importPathValue).toString()));
     }
     foreach (const QStringList& di, dependenciesImports) {
         state.m_importPaths += di;
@@ -208,7 +214,8 @@ bool DubConfigParser::parse()
                 args << ("--config=" + conf);
             }
             runDubProcess(dub, args, m_directory);
-            m_projectName = parseDescribe(dub.readAllStandardOutput(), m_projectName, m_directory, map[conf]);
+            m_projectName = parseDescribe(dub.readAllStandardOutput(),m_projectName, m_directory,
+                                          map[conf]);
         }
         m_states.swap(map);
     } catch (const QException &ex) {

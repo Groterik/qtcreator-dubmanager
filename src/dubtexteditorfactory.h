@@ -9,7 +9,7 @@ class DubTextEditorFactory : public TextEditor::TextEditorFactory
 {
 public:
     DubTextEditorFactory();
-    ~DubTextEditorFactory();
+    virtual ~DubTextEditorFactory();
 };
 
 } // namespace DubProjectManager

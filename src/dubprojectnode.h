@@ -19,8 +19,9 @@ public:
 
     // others
 
+    virtual bool addFiles(const QStringList &filePaths, QStringList *notAdded) Q_DECL_OVERRIDE;
+
     bool addFilePath(const QString& path);
-    virtual bool addFiles(const QStringList &filePaths, QStringList *notAdded);
     void clear();
 };
 

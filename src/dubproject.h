@@ -32,7 +32,6 @@ public:
     // others
 
     const QString& buildDirectory() const;
-
     const QStringList &configurationList() const;
     const QStringList &buildTypesList() const;
     const QString &sourceTreeConfiguration() const;

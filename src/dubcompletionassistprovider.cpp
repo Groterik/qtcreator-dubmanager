@@ -32,18 +32,21 @@ TextEditor::IAssistProcessor *DubCompletionAssistProvider::createProcessor() con
 
 void DubCompletionAssistProvider::initKeywords()
 {
-    m_keywords = TextEditor::Keywords(DubFormatCache::instance().keywords(), QStringList(), QMap<QString, QStringList>());
+    m_keywords = TextEditor::Keywords(DubFormatCache::instance().keywords(),
+                                      QStringList(), QMap<QString, QStringList>());
 }
 
 
 
-KeywordsWithDetailsCompletionAssistProcessor::KeywordsWithDetailsCompletionAssistProcessor(TextEditor::Keywords keywords)
+KeywordsWithDetailsCompletionAssistProcessor::KeywordsWithDetailsCompletionAssistProcessor(
+        TextEditor::Keywords keywords)
     : TextEditor::KeywordsCompletionAssistProcessor(keywords)
 {
 
 }
 
-TextEditor::IAssistProposal *KeywordsWithDetailsCompletionAssistProcessor::perform(const TextEditor::AssistInterface *interface)
+TextEditor::IAssistProposal *KeywordsWithDetailsCompletionAssistProcessor::perform(
+        const TextEditor::AssistInterface *interface)
 {
     TextEditor::IAssistProposal* proposal = KeywordsCompletionAssistProcessor::perform(interface);
     if (proposal) {

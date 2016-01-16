@@ -16,7 +16,8 @@ using namespace DubProjectManager;
 DubManager::DubManager(DubOptionsPage *page, const QString &mimeType)
     : optionsPage(page), m_mimeType(mimeType)
 {
-    connect(ProjectExplorer::ProjectTree::instance(), &ProjectExplorer::ProjectTree::aboutToShowContextMenu,
+    connect(ProjectExplorer::ProjectTree::instance(),
+            &ProjectExplorer::ProjectTree::aboutToShowContextMenu,
             this, &DubManager::updateContextMenu);
 
     Core::ActionContainer *mproject =
@@ -27,8 +28,8 @@ DubManager::DubManager(DubOptionsPage *page, const QString &mimeType)
     const Core::Context projectContext(DubProjectManager::Constants::PROJECTCONTEXT);
 
     QAction *m_updateAction = new QAction(QIcon(), tr("Update Project"), this);
-    Core::Command *command = Core::ActionManager::registerAction(m_updateAction,
-                                                                 DubProjectManager::Constants::DUBUPDATECONTEXTMENU, projectContext);
+    Core::Command *command = Core::ActionManager::registerAction(
+                m_updateAction, DubProjectManager::Constants::DUBUPDATECONTEXTMENU, projectContext);
     command->setAttribute(Core::Command::CA_Hide);
     mproject->addAction(command, ProjectExplorer::Constants::G_PROJECT_BUILD);
     msubproject->addAction(command, ProjectExplorer::Constants::G_PROJECT_BUILD);
@@ -65,7 +66,8 @@ void DubManager::updateProject(ProjectExplorer::Project *project)
     if (dubProject) dubProject->update();
 }
 
-void DubManager::updateContextMenu(ProjectExplorer::Project *project, ProjectExplorer::Node */*node*/)
+void DubManager::updateContextMenu(ProjectExplorer::Project *project,
+                                   ProjectExplorer::Node */*node*/)
 {
     m_contextProject = project;
 }

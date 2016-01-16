@@ -91,7 +91,7 @@ void DubBuildStep::updatePackage(const QString &package)
 
 void DubBuildStep::construct()
 {
-    Q_ASSERT(buildConfiguration()->target()->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID);
+    Q_ASSERT(buildConfiguration()->target()->project()->id() == Constants::DUBPROJECT_ID);
     m_project = qobject_cast<DubProject*>(buildConfiguration()->target()->project());
 
     m_buildType = m_project->buildTypesList().front();
@@ -182,16 +182,19 @@ DubBuildStepConfigWidget::DubBuildStepConfigWidget(DubBuildStep *step)
     m_configuration = new QComboBox(this);
     fl->addRow(tr("Configuration:"), m_configuration);
     m_configuration->setCurrentText(m_step->configuration());
-    connect(m_configuration, SIGNAL(currentTextChanged(QString)), m_step, SLOT(updateConfiguration(QString)));
+    connect(m_configuration, SIGNAL(currentTextChanged(QString)),
+            m_step, SLOT(updateConfiguration(QString)));
 
     m_buildTargetsList = new QComboBox(this);
     fl->addRow(tr("Build type:"), m_buildTargetsList);
-    connect(m_buildTargetsList, SIGNAL(currentTextChanged(QString)), m_step, SLOT(updateBuildType(QString)));
+    connect(m_buildTargetsList, SIGNAL(currentTextChanged(QString)),
+            m_step, SLOT(updateBuildType(QString)));
 
     m_additionalArguments = new QLineEdit(this);
     fl->addRow(tr("Additional arguments:"), m_additionalArguments);
     m_additionalArguments->setText(m_step->additionalArguments());
-    connect(m_additionalArguments, SIGNAL(textChanged(QString)), m_step, SLOT(updateAdditionalArguments(QString)));
+    connect(m_additionalArguments, SIGNAL(textChanged(QString)),
+            m_step, SLOT(updateAdditionalArguments(QString)));
 
     connect(m_step, SIGNAL(updated()), this, SIGNAL(updateSummary()));
     connect(m_step->dubProject(), SIGNAL(updated()), this, SLOT(update()));
@@ -242,31 +245,36 @@ bool DubBuildStepFactory::canCreate(ProjectExplorer::BuildStepList *parent, cons
     return false;
 }
 
-ProjectExplorer::BuildStep *DubBuildStepFactory::create(ProjectExplorer::BuildStepList *parent, const Core::Id id)
+ProjectExplorer::BuildStep *DubBuildStepFactory::create(ProjectExplorer::BuildStepList *parent,
+                                                        const Core::Id id)
 {
     if (!canCreate(parent, id))
         return 0;
     return new DubBuildStep(parent);
 }
 
-bool DubBuildStepFactory::canClone(ProjectExplorer::BuildStepList *parent, ProjectExplorer::BuildStep *source) const
+bool DubBuildStepFactory::canClone(ProjectExplorer::BuildStepList *parent,
+                                   ProjectExplorer::BuildStep *source) const
 {
     return canCreate(parent, source->id());
 }
 
-ProjectExplorer::BuildStep *DubBuildStepFactory::clone(ProjectExplorer::BuildStepList *parent, ProjectExplorer::BuildStep *source)
+ProjectExplorer::BuildStep *DubBuildStepFactory::clone(ProjectExplorer::BuildStepList *parent,
+                                                       ProjectExplorer::BuildStep *source)
 {
     if (!canClone(parent, source))
         return 0;
     return new DubBuildStep(parent, source->id());
 }
 
-bool DubBuildStepFactory::canRestore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) const
+bool DubBuildStepFactory::canRestore(ProjectExplorer::BuildStepList *parent,
+                                     const QVariantMap &map) const
 {
     return canCreate(parent, ProjectExplorer::idFromMap(map));
 }
 
-ProjectExplorer::BuildStep *DubBuildStepFactory::restore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map)
+ProjectExplorer::BuildStep *DubBuildStepFactory::restore(ProjectExplorer::BuildStepList *parent,
+                                                         const QVariantMap &map)
 {
     if (!canRestore(parent, map)) {
         return 0;
@@ -321,8 +329,10 @@ void DubOutputDmdParser::stdError(const QString &line)
         ProjectExplorer::Task::TaskType type = m_commonDmdError.cap(4) == "Error" ?
                     ProjectExplorer::Task::Error : ProjectExplorer::Task::Warning;
         QDir path = m_commonDmdError.cap(1);
-        QString filePath = path.isAbsolute() ? path.path() : QDir(m_workingDir).filePath(path.path());
-        auto task = ProjectExplorer::Task(type, m_commonDmdError.cap(5), Utils::FileName::fromString(filePath),
+        QString filePath = path.isAbsolute() ? path.path()
+                                             : QDir(m_workingDir).filePath(path.path());
+        auto task = ProjectExplorer::Task(type, m_commonDmdError.cap(5),
+                                          Utils::FileName::fromString(filePath),
                                           m_commonDmdError.cap(2).toInt(),
                                           ProjectExplorer::Constants::TASK_CATEGORY_BUILDSYSTEM);
         emit addTask(task, 1);

@@ -97,7 +97,8 @@ DubOptionsPage::DubOptionsPage()
     setCategory(ProjectExplorer::Constants::PROJECTEXPLORER_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("ProjectExplorer",
        ProjectExplorer::Constants::PROJECTEXPLORER_SETTINGS_TR_CATEGORY));
-    setCategoryIcon(QLatin1String(ProjectExplorer::Constants::PROJECTEXPLORER_SETTINGS_CATEGORY_ICON));
+    setCategoryIcon(
+                QLatin1String(ProjectExplorer::Constants::PROJECTEXPLORER_SETTINGS_CATEGORY_ICON));
 
     m_dubValidatorForSystem = new DubValidator;
     m_dubValidatorForUser = new DubValidator;
@@ -150,7 +151,8 @@ QString DubOptionsPage::executable()
 {
     QSettings *settings = Core::ICore::settings();
     settings->beginGroup(tr("DubSettings"));
-    QString result = settings->value(QLatin1String(S_DUB_EXECUTABLE), QLatin1String("dub")).toString();
+    QString result = settings->value(QLatin1String(S_DUB_EXECUTABLE),
+                                     QLatin1String("dub")).toString();
     settings->endGroup();
     return result;
 }

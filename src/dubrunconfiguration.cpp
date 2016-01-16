@@ -29,7 +29,8 @@ const char S_CONFIGURATION_KEY[] = "DubProjectManager.DubRunConfiguration.Config
 
 using AppMode = ProjectExplorer::ApplicationLauncher::Mode;
 
-DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id, DubProject *project)
+DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id,
+                                         DubProject *project)
     : ProjectExplorer::LocalApplicationRunConfiguration(parent, id),
       m_project(project),
       m_runMode(AppMode::Gui)
@@ -38,7 +39,8 @@ DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::
     init();
 }
 
-DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, DubRunConfiguration *source)
+DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent,
+                                         DubRunConfiguration *source)
     : ProjectExplorer::LocalApplicationRunConfiguration(parent, source),
       m_project(source->m_project),
       m_configuration(source->m_configuration),
@@ -126,7 +128,8 @@ void DubRunConfiguration::update()
     m_title = m_project->displayName();
     const ConfigurationInfo &info = m_project->info(m_configuration);
     QDir dpath(info.path());
-    m_executable = QDir(dpath.absoluteFilePath(info.targetPath())).absoluteFilePath(info.targetFilename());
+    m_executable = QDir(dpath.absoluteFilePath(
+                            info.targetPath())).absoluteFilePath(info.targetFilename());
     m_workingDirectory = dpath.absoluteFilePath(info.workingDirectory());
 
     setDefaultDisplayName(displayName());
@@ -142,7 +145,8 @@ void DubRunConfiguration::init()
 }
 
 
-DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRunConfiguration, QWidget *parent)
+DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRunConfiguration,
+                                                     QWidget *parent)
     : QWidget(parent),
       m_dubRunConfiguration(dubRunConfiguration)
 {
@@ -164,7 +168,8 @@ DubRunConfigurationWidget::DubRunConfigurationWidget(DubRunConfiguration *dubRun
 
     m_argumentsLineEdit = new QLineEdit();
     m_argumentsLineEdit->setText(m_dubRunConfiguration->commandLineArguments());
-    connect(m_argumentsLineEdit, SIGNAL(textChanged(QString)), m_dubRunConfiguration, SLOT(setArguments(QString)));
+    connect(m_argumentsLineEdit, SIGNAL(textChanged(QString)),
+            m_dubRunConfiguration, SLOT(setArguments(QString)));
     fl->addRow(tr("Arguments:"), m_argumentsLineEdit);
 
     ProjectExplorer::EnvironmentAspect *aspect
@@ -215,7 +220,8 @@ void DubRunConfigurationWidget::runConfigurationUpdated()
     if (m_runInTerminal->isChecked() != (m_dubRunConfiguration->runMode() != AppMode::Gui)) {
         m_runInTerminal->setChecked(m_dubRunConfiguration->runMode() != AppMode::Gui);
     }
-    m_summary->setText(m_dubRunConfiguration->executable() + " " + m_dubRunConfiguration->commandLineArguments());
+    m_summary->setText(m_dubRunConfiguration->executable() + " "
+                       + m_dubRunConfiguration->commandLineArguments());
     m_workingDirectory->setText(m_dubRunConfiguration->workingDirectory());
 }
 
@@ -231,7 +237,8 @@ DubRunConfigurationFactory::~DubRunConfigurationFactory()
 
 }
 
-bool DubRunConfigurationFactory::canCreate(ProjectExplorer::Target *parent, const Core::Id id) const
+bool DubRunConfigurationFactory::canCreate(ProjectExplorer::Target *parent,
+                                           const Core::Id id) const
 {
     Q_UNUSED(id);
     if (!canHandle(parent)) {
@@ -240,7 +247,8 @@ bool DubRunConfigurationFactory::canCreate(ProjectExplorer::Target *parent, cons
     return true;
 }
 
-bool DubRunConfigurationFactory::canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const
+bool DubRunConfigurationFactory::canRestore(ProjectExplorer::Target *parent,
+                                            const QVariantMap &map) const
 {
     if (!canHandle(parent)) {
         return false;
@@ -248,7 +256,8 @@ bool DubRunConfigurationFactory::canRestore(ProjectExplorer::Target *parent, con
     return ProjectExplorer::idFromMap(map).name().startsWith(RUNCONFIGURATION_ID);
 }
 
-bool DubRunConfigurationFactory::canClone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product) const
+bool DubRunConfigurationFactory::canClone(ProjectExplorer::Target *parent,
+                                          ProjectExplorer::RunConfiguration *product) const
 {
     if (!canHandle(parent)) {
         return false;
@@ -256,7 +265,8 @@ bool DubRunConfigurationFactory::canClone(ProjectExplorer::Target *parent, Proje
     return product->id().name().startsWith(RUNCONFIGURATION_ID);
 }
 
-ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::clone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product)
+ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::clone(
+        ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product)
 {
     if (!canClone(parent, product)) {
         return 0;
@@ -268,7 +278,8 @@ ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::clone(ProjectExpl
     return new DubRunConfiguration(parent, w);
 }
 
-QList<Core::Id> DubRunConfigurationFactory::availableCreationIds(ProjectExplorer::Target *parent, CreationMode) const
+QList<Core::Id> DubRunConfigurationFactory::availableCreationIds(ProjectExplorer::Target *parent,
+                                                                 CreationMode) const
 {
     if (!canHandle(parent))
         return QList<Core::Id>();
@@ -303,16 +314,20 @@ bool DubRunConfigurationFactory::canHandle(ProjectExplorer::Target *target) cons
     return target->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID;
 }
 
-ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::doCreate(ProjectExplorer::Target *parent, const Core::Id id)
+ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::doCreate(
+        ProjectExplorer::Target *parent, const Core::Id id)
 {
     const QString title(buildTargetFromId(id));
     DubProject* project = qobject_cast<DubProject*>(parent->project());
     return new DubRunConfiguration(parent, id, project);
 }
 
-ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::doRestore(ProjectExplorer::Target *parent, const QVariantMap &map)
+ProjectExplorer::RunConfiguration *DubRunConfigurationFactory::doRestore(
+        ProjectExplorer::Target *parent, const QVariantMap &map)
 {
     Q_UNUSED(map);
-    return new DubRunConfiguration(parent, DubRunConfigurationFactory::idFromBuildTarget(parent->project()->displayName()),
-                                   qobject_cast<DubProject*>(parent->project()));
+    return new DubRunConfiguration(
+                parent,
+                DubRunConfigurationFactory::idFromBuildTarget(parent->project()->displayName()),
+                qobject_cast<DubProject*>(parent->project()));
 }

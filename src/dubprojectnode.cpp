@@ -55,7 +55,8 @@ bool DubProjectNode::addFilePath(const QString &path)
         SubFolders::iterator it = std::find_if(nodes.begin(), nodes.end(), pred);
         if (it == nodes.end()) {
             SubFolders list;
-            ProjectExplorer::FolderNode* added = new ProjectExplorer::FolderNode(Utils::FileName::fromString(s));
+            ProjectExplorer::FolderNode* added = new ProjectExplorer::FolderNode(
+                        Utils::FileName::fromString(s));
             list.push_back(added);
             node->addFolderNodes(list);
             node = added;
@@ -64,7 +65,8 @@ bool DubProjectNode::addFilePath(const QString &path)
         }
     }
     node->addFileNodes(QList<ProjectExplorer::FileNode*>()
-                       << new ProjectExplorer::FileNode(Utils::FileName::fromString(path), ProjectExplorer::SourceType, false));
+                       << new ProjectExplorer::FileNode(Utils::FileName::fromString(path),
+                                                        ProjectExplorer::SourceType, false));
 
     return true;
 }

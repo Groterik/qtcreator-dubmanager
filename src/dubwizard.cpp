@@ -49,19 +49,26 @@ Utils::Wizard *DubWizard::runWizardImpl(const QString &path, QWidget *parent,
         QDir dir(widget->directory());
         const QString ERROR = tr("Error");
         if (!dir.exists()) {
-            QMessageBox::critical(parent, ERROR, tr("Directory %1 does not exist").arg(dir.absolutePath()));
+            QMessageBox::critical(parent, ERROR,
+                                  tr("Directory %1 does not exist").arg(dir.absolutePath()));
             return widget.take();
         }
-        auto entries = dir.entryList(QStringList() << QLatin1String("dub.sdl") << QLatin1String("dub.json"), QDir::Files);
+        auto entries = dir.entryList(QStringList() << QLatin1String("dub.sdl")
+                                     << QLatin1String("dub.json"), QDir::Files);
         if (entries.isEmpty()) {
-            QMessageBox::critical(parent, ERROR, tr("File dub.(sdl|json) does not exist in %1").arg(dir.absolutePath()));
+            QMessageBox::critical(parent, ERROR,
+                                  tr("File dub.(sdl|json) does not exist in %1").arg(
+                                      dir.absolutePath()));
             return widget.take();
         }
         QFileInfo dubFile(dir, entries.front());
         QString errorMessage;
-        auto openProjectResult = ProjectExplorer::ProjectExplorerPlugin::instance()->openProject(dubFile.absoluteFilePath());
+        auto openProjectResult = ProjectExplorer::ProjectExplorerPlugin::instance()->openProject(
+                    dubFile.absoluteFilePath());
         if (!openProjectResult) {
-            QMessageBox::critical(parent, ERROR, tr("Failed to open project: ") + openProjectResult.errorMessage());
+            QMessageBox::critical(parent, ERROR,
+                                  tr("Failed to open project: ")
+                                  + openProjectResult.errorMessage());
             return widget.take();
         }
     }
@@ -115,8 +122,10 @@ DubInitSettingsPage::DubInitSettingsPage(DubWizardWidget *parent)
 
     QLabel *description = new QLabel;
     description->setWordWrap(true);
-    description->setText(tr("Please enter the directory in which you want to build your DUB project. \n"
-                          "Qt Creator will execute DUB with the following arguments to initialize the project."));
+    description->setText(
+                tr("Please enter the directory in which you want to build your DUB project. \n"
+                   "Qt Creator will execute DUB with the following arguments "
+                   "to initialize the project."));
     description->setSizeIncrement(0, 100);
     layout->addRow(description);
 
@@ -160,7 +169,8 @@ bool DubInitSettingsPage::validatePage()
     QDir dir(path);
     if (dir.exists()) {
         return QMessageBox::warning(this, tr("Warning"),
-                                    tr("Path %1 already exists.\nPress OK to continue creating project or CANCEL to cancel.").arg(dir.absolutePath()),
+                                    tr("Path %1 already exists.\nPress OK to continue creating "
+                                       "project or CANCEL to cancel.").arg(dir.absolutePath()),
                                     QMessageBox::Ok, QMessageBox::Cancel) == QMessageBox::Ok;
     }
     return true;
@@ -231,8 +241,10 @@ void DubInitResultsPage::initializePage()
     m_dubProcess = QSharedPointer<QProcess>(new QProcess);
     m_dubProcess->setProgram(m_wizardWidget->dubCommand());
     m_dubProcess->setArguments(m_wizardWidget->dubArguments());
-    connect(m_dubProcess.data(), SIGNAL(readyReadStandardOutput()), this, SLOT(dubReadyReadStandardOutput()));
-    connect(m_dubProcess.data(), SIGNAL(readyReadStandardError()), this, SLOT(dubReadyReadStandardError()));
+    connect(m_dubProcess.data(), SIGNAL(readyReadStandardOutput()),
+            this, SLOT(dubReadyReadStandardOutput()));
+    connect(m_dubProcess.data(), SIGNAL(readyReadStandardError()),
+            this, SLOT(dubReadyReadStandardError()));
     connect(m_dubProcess.data(), SIGNAL(finished(int)), this, SLOT(dubFinished()));
 
     m_dubProcess->start(QProcess::ReadOnly);

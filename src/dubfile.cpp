@@ -6,8 +6,8 @@
 
 using namespace DubProjectManager;
 
-DubFile::DubFile(const QString &filePath, DubProject *parent) :
-    TextEditor::TextDocument(Constants::DUB_EDITOR_ID), m_project(parent)
+DubFile::DubFile(const QString &filePath, DubProject *parent)
+    : TextEditor::TextDocument(Constants::DUB_EDITOR_ID), m_project(parent)
 {
     setMimeType(DubProjectManager::Constants::DUB_MIMETYPE_JSON);
     setSuggestedFileName(QLatin1String("dub.json"));

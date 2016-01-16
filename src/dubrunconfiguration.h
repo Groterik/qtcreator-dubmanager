@@ -73,7 +73,8 @@ class DubRunConfigurationWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit DubRunConfigurationWidget(DubRunConfiguration *dubRunConfiguration, QWidget *parent = 0);
+    explicit DubRunConfigurationWidget(DubRunConfiguration *dubRunConfiguration,
+                                       QWidget *parent = 0);
 
 private slots:
     void environmentWasChanged();
@@ -100,12 +101,15 @@ public:
     ~DubRunConfigurationFactory();
 
     // pure ProjectExplorer::IRunConfigurationFactory
-    bool canCreate(ProjectExplorer::Target *parent, const Core::Id id) const;
-    bool canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const;
-    bool canClone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product) const;
-    ProjectExplorer::RunConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product);
-    virtual QList<Core::Id> availableCreationIds(ProjectExplorer::Target *parent, CreationMode mode) const;
-    QString displayNameForId(const Core::Id id) const;
+    bool canCreate(ProjectExplorer::Target *parent, const Core::Id id) const Q_DECL_OVERRIDE;
+    bool canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const Q_DECL_OVERRIDE;
+    bool canClone(ProjectExplorer::Target *parent,
+                  ProjectExplorer::RunConfiguration *product) const Q_DECL_OVERRIDE;
+    ProjectExplorer::RunConfiguration *clone(
+            ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *product) Q_DECL_OVERRIDE;
+    virtual QList<Core::Id> availableCreationIds(ProjectExplorer::Target *parent,
+                                                 CreationMode mode) const Q_DECL_OVERRIDE;
+    QString displayNameForId(const Core::Id id) const Q_DECL_OVERRIDE;
 
     static Core::Id idFromBuildTarget(const QString &target);
     static QString buildTargetFromId(Core::Id id);
@@ -113,9 +117,10 @@ public:
 private:
     bool canHandle(ProjectExplorer::Target *target) const;
 
-    ProjectExplorer::RunConfiguration *doCreate(ProjectExplorer::Target *parent, const Core::Id id);
+    ProjectExplorer::RunConfiguration *doCreate(ProjectExplorer::Target *parent,
+                                                const Core::Id id) Q_DECL_OVERRIDE;
     ProjectExplorer::RunConfiguration *doRestore(ProjectExplorer::Target *parent,
-                                                 const QVariantMap &map);
+                                                 const QVariantMap &map) Q_DECL_OVERRIDE;
 };
 
 } // namespace DubProjectManager

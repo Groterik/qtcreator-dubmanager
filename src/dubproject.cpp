@@ -34,7 +34,7 @@ DubProject::DubProject(DubManager *manager, const QString &filePath)
 {
     setId(DubProjectManager::Constants::DUBPROJECT_ID);
     setProjectContext(Core::Context(DubProjectManager::Constants::PROJECTCONTEXT));
-    setProjectLanguages(Core::Context(ProjectExplorer::Constants::LANG_CXX));
+    setProjectLanguages(Core::Context(DubProjectManager::Constants::LANG_DLANG));
 
     if (!QFileInfo(filePath).isFile()) {
         throw DubException(tr("Failed opening project '%1': Project is not a file").arg(filePath));

@@ -9,4 +9,6 @@ else
   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90 
 
   . /opt/qt55/bin/qt55-env.sh
+
+  cd qtc_build/3.6.0/ && ln -s ./ bin
 fi

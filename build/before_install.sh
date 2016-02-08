@@ -1,12 +1,14 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "${DIR}/setup-env.sh"
 
-if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+if [[ "$BUILD_OS_NAME" == "osx" ]]; then
   brew install p7zip
   brew install wget
 
   QT_BIN_LINK="http://download.qt.io/official_releases/qtcreator/3.6/3.6.0/installer_source/mac_x64/qtcreator.7z"
 
-else
+elif [[ $CI == "true" && "$BUILD_OS_NAME" == "linux" ]]; then
   sudo add-apt-repository -y ppa:beineri/opt-qt551
   # GCC 4.8
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
@@ -19,9 +21,13 @@ else
 
 fi
 
-
+mkdir -p "${DOWNLOAD_DIR}" && cd "${DOWNLOAD_DIR}"
 wget "http://download.qt-project.org/official_releases/qtcreator/3.6/3.6.0/qt-creator-opensource-src-3.6.0.tar.gz"
 tar xzf qt-creator-opensource-src-3.6.0.tar.gz
 wget "${QT_BIN_LINK}"
-7zr x -o./qtc_build/3.6.0/ qtcreator.7z
+7zr x -oqtcbuild/3.6.0/ qtcreator.7z
+
+if [[ "$BUILD_OS_NAME" == "osx" ]]; then
+  cd qtcbuild/3.6.0/ && ln -s ./ bin
+fi
 

@@ -5,10 +5,10 @@ matrix:
     - os: linux
       sudo: required
       compiler: gcc
-      env: ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-opensource-src-3.6.0" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/qtc_build/3.6.0/lib/qtcreator/" ENV_QTC_VERSION="3.6.0" ENV_QTC_MV="6" ENV_QMAKE_PARAMS="-spec linux-g++"
+      env: ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/build/downloads/qt-creator-opensource-src-3.6.0" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/build/downloads/qtcbuild/3.6.0/lib/qtcreator/" ENV_QTC_VERSION="3.6.0" ENV_QTC_MV="6" ENV_QMAKE_PARAMS="-spec linux-g++"
     - os: osx
       compiler: clang
-      env: ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/qt-creator-opensource-src-3.6.0" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/qtc_build/3.6.0/" ENV_QTC_VERSION="3.6.0" ENV_QTC_MV="6" ENV_QMAKE_PARAMS=""
+      env: ENV_QTC_SOURCE="$TRAVIS_BUILD_DIR/build/downloads/qt-creator-opensource-src-3.6.0" ENV_QTC_BUILD="$TRAVIS_BUILD_DIR/build/downloads/qtcbuild/3.6.0/" ENV_QTC_VERSION="3.6.0" ENV_QTC_MV="6" ENV_QMAKE_PARAMS=""
 
 env:
   global:
@@ -24,12 +24,7 @@ before_script:
   - git submodule update --init
 
 script:
-  - if [[ $TRAVIS_OS_NAME != 'osx' ]]; then . /opt/qt55/bin/qt55-env.sh ; fi
-  - mkdir -p build && cd build
-  - export PLUGIN_OUT_PATH="$(pwd)/plugins/${ENV_QTC_VERSION}/"
-  - mkdir -p "${PLUGIN_OUT_PATH}"
-  - qmake ../dubprojectmanager.pro -r ${ENV_QMAKE_PARAMS} CONFIG+=release QTC_SOURCE="${ENV_QTC_SOURCE}" QTC_BUILD="${ENV_QTC_BUILD}" OUTPUT_PATH="${PLUGIN_OUT_PATH}" SET_VERSION_MINOR="${ENV_QTC_MV}"
-  - make
+  - build/script.sh
   - find "$TRAVIS_BUILD_DIR/build/plugins"
 
 addons:

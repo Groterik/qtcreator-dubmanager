@@ -58,13 +58,14 @@ TextEditor::IAssistProposal *KeywordsWithDetailsCompletionAssistProcessor::perfo
         if (!model) {
             return 0;
         }
-        const int size = model->size();
-        for (int i = 0; i < size; ++i) {
-            auto details = DubFormatCache::instance().getKeywordDetails(model->text(i));
-            if (!details.isEmpty()) {
-                model->proposalItem(i)->setDetail(details);
-            }
-        }
+        // TODO: set details (doc info for each proposal item).
+//        const int size = model->size();
+//        for (int i = 0; i < size; ++i) {
+//            auto details = DubFormatCache::instance().getKeywordDetails(model->text(i));
+//            if (!details.isEmpty()) {
+//                model->proposalItem(i)->setDetail(details);
+//            }
+//        }
     }
     return proposal;
 }

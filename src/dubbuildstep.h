@@ -22,7 +22,7 @@ public:
 
     // pure
 
-    virtual bool init() Q_DECL_OVERRIDE;
+    virtual bool init(QList<const BuildStep *> &earlierSteps) Q_DECL_OVERRIDE;
     virtual void run(QFutureInterface<bool> &fi) Q_DECL_OVERRIDE;
     virtual ProjectExplorer::BuildStepConfigWidget *createConfigWidget() Q_DECL_OVERRIDE;
 

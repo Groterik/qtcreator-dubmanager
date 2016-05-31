@@ -23,7 +23,6 @@
 using namespace DubProjectManager::Internal;
 
 using namespace Core;
-using MimeDatabase = ::Utils::MimeDatabase;
 
 DubProjectManagerPlugin::DubProjectManagerPlugin()
 {
@@ -38,16 +37,16 @@ DubProjectManagerPlugin::~DubProjectManagerPlugin()
 
 bool DubProjectManagerPlugin::initialize(const QStringList &arguments, QString *errorString)
 {
-    // Register objects in the plugin manager's object pool
-    MimeDatabase::addMimeTypes(QLatin1String(":resources/DubProject.mimetypes.xml"));
-    
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
+    // Register objects in the plugin manager's object pool
+    Utils::MimeDatabase::addMimeTypes(QLatin1String(":resources/DubProject.mimetypes.xml"));
     
-    DubOptionsPage *optionsPage = new DubOptionsPage;
-    addAutoReleasedObject(optionsPage);
-    addAutoReleasedObject(new DubManager(optionsPage, Constants::DUB_MIMETYPE_JSON));
-    addAutoReleasedObject(new DubManager(optionsPage, Constants::DUB_MIMETYPE_SDL));
+    addAutoReleasedObject(new DubOptionsPage);
+    addAutoReleasedObject(DubManagerFactory::instance().createProjectManager(
+                              Constants::DUB_MIMETYPE_JSON));
+    addAutoReleasedObject(DubManagerFactory::instance().createProjectManager(
+                              Constants::DUB_MIMETYPE_SDL));
     addAutoReleasedObject(new DubBuildStepFactory);
     addAutoReleasedObject(new DubBuildConfigurationFactory);
     addAutoReleasedObject(new DubRunConfigurationFactory);

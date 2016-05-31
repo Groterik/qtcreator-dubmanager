@@ -22,7 +22,6 @@ public:
 
     // pure ProjectExplorer::Project
     virtual QString displayName() const Q_DECL_OVERRIDE;
-    virtual Core::IDocument *document() const Q_DECL_OVERRIDE;
     virtual ProjectExplorer::IProjectManager *projectManager() const Q_DECL_OVERRIDE;
 
     virtual ProjectExplorer::ProjectNode *rootProjectNode() const Q_DECL_OVERRIDE;
@@ -65,7 +64,6 @@ private:
 
     DubManager* m_manager;
     QString m_filename;
-    DubFile* m_file;
     QStringList m_files;
     QStringList m_directories;
     QStringList m_configurations;

@@ -2,7 +2,7 @@
 #define DUBRUNCONFIGURATION_H
 
 #include <projectexplorer/target.h>
-#include <projectexplorer/localapplicationrunconfiguration.h>
+#include <projectexplorer/runconfiguration.h>
 
 QT_FORWARD_DECLARE_CLASS(QLineEdit)
 QT_FORWARD_DECLARE_CLASS(QCheckBox)
@@ -18,26 +18,26 @@ namespace DubProjectManager {
 
 class DubProject;
 
-class DubRunConfiguration : public ProjectExplorer::LocalApplicationRunConfiguration
+class DubRunConfiguration : public ProjectExplorer::RunConfiguration
 {
     Q_OBJECT
 public:
     DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id, DubProject* project);
     DubRunConfiguration(ProjectExplorer::Target *parent, DubRunConfiguration *source);
 
-    // pure ProjectExplorer::LocalApplicationRunConfiguration
-
-    typedef ProjectExplorer::ApplicationLauncher::Mode RunMode;
-
-    virtual QString executable() const Q_DECL_OVERRIDE;
-    virtual RunMode runMode() const Q_DECL_OVERRIDE;
-    virtual QString workingDirectory() const Q_DECL_OVERRIDE;
-    virtual QString commandLineArguments() const Q_DECL_OVERRIDE;
+    // ProjectExplorer::RunConfiguration
 
     virtual QWidget *createConfigurationWidget() Q_DECL_OVERRIDE;
+    virtual ProjectExplorer::Runnable runnable() const Q_DECL_OVERRIDE;
 
     // others
 
+    using RunMode = ProjectExplorer::ApplicationLauncher::Mode;
+
+    QString executable() const;
+    RunMode runMode() const;
+    QString workingDirectory() const;
+    QString commandLineArguments() const;
     QString configuration() const;
     QStringList configurationsList() const;
 

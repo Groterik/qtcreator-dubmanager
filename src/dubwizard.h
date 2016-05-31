@@ -26,7 +26,7 @@ public:
     DubWizard();
 
     virtual Utils::Wizard *runWizardImpl(const QString &path, QWidget *parent,
-                                         const QString &platform,
+                                         Core::Id platform,
                                          const QVariantMap &variables) Q_DECL_OVERRIDE;
 
     QString buildDirectory() const;

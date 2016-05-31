@@ -4,8 +4,9 @@
 #include "dubproject.h"
 #include "dubconfigparser.h"
 
-#include <projectexplorer/project.h>
 #include <projectexplorer/localenvironmentaspect.h>
+#include <projectexplorer/project.h>
+#include <projectexplorer/runnables.h>
 #include <utils/pathchooser.h>
 #include <utils/detailswidget.h>
 #include <coreplugin/coreconstants.h>
@@ -31,7 +32,7 @@ using AppMode = ProjectExplorer::ApplicationLauncher::Mode;
 
 DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::Id id,
                                          DubProject *project)
-    : ProjectExplorer::LocalApplicationRunConfiguration(parent, id),
+    : ProjectExplorer::RunConfiguration(parent, id),
       m_project(project),
       m_runMode(AppMode::Gui)
 {
@@ -41,7 +42,7 @@ DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent, Core::
 
 DubRunConfiguration::DubRunConfiguration(ProjectExplorer::Target *parent,
                                          DubRunConfiguration *source)
-    : ProjectExplorer::LocalApplicationRunConfiguration(parent, source),
+    : ProjectExplorer::RunConfiguration(parent, source),
       m_project(source->m_project),
       m_configuration(source->m_configuration),
       m_runMode(source->runMode())
@@ -72,6 +73,16 @@ QString DubRunConfiguration::commandLineArguments() const
 QWidget *DubRunConfiguration::createConfigurationWidget()
 {
     return new DubRunConfigurationWidget(this);
+}
+
+ProjectExplorer::Runnable DubRunConfiguration::runnable() const
+{
+    ProjectExplorer::StandardRunnable r;
+    r.commandLineArguments = commandLineArguments();
+    r.executable = executable();
+    r.runMode = runMode();
+    r.workingDirectory = workingDirectory();
+    return r;
 }
 
 QString DubRunConfiguration::configuration() const
@@ -140,7 +151,8 @@ void DubRunConfiguration::update()
 void DubRunConfiguration::init()
 {
     connect(m_project, SIGNAL(updated()), this, SLOT(update()));
-    addExtraAspect(new ProjectExplorer::LocalEnvironmentAspect(this));
+    addExtraAspect(new ProjectExplorer::LocalEnvironmentAspect(
+                       this, ProjectExplorer::LocalEnvironmentAspect::BaseEnvironmentModifier()));
     update();
 }
 

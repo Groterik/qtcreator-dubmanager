@@ -13,6 +13,7 @@ DubTextEditorFactory::DubTextEditorFactory()
     setId(Constants::DUB_EDITOR_ID);
     setDisplayName(tr(Constants::DUB_EDITOR_DISPLAY_NAME));
     addMimeType(Constants::DUB_MIMETYPE_JSON);
+    addMimeType(Constants::DUB_MIMETYPE_SDL);
 
     setDocumentCreator([]() { return new DubProjectManager::DubFile; });
     setEditorWidgetCreator([]() { return new TextEditor::TextEditorWidget; });

@@ -34,7 +34,7 @@ public:
     NodeEqualPred(const QString& a) : a(a) {}
     bool operator()(ProjectExplorer::FolderNode* b)
     {
-        return a == b->path().toString();
+        return a == b->filePath().toString();
     }
 private:
     const QString& a;
@@ -42,7 +42,7 @@ private:
 
 bool DubProjectNode::addFilePath(const QString &path)
 {
-    QString relativePath = QDir(QFileInfo(this->path().toString()).path()).relativeFilePath(path);
+    QString relativePath = QDir(QFileInfo(this->filePath().toString()).path()).relativeFilePath(path);
     QStringList subpaths = relativePath.split(QLatin1Char('/'), QString::SkipEmptyParts);
     subpaths.pop_back();
 

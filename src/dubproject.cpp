@@ -45,7 +45,7 @@ DubProject::DubProject(DubManager *manager, const QString &filePath)
 
     m_parser = new DubConfigParser(m_buildDirectory);
 
-    m_file = new DubFile(filePath, this);
+    setDocument(new DubFile(filePath, this));
     m_watcher = new QFileSystemWatcher(this);
     m_watcher->addPath(filePath);
 
@@ -62,11 +62,6 @@ DubProject::~DubProject()
 QString DubProject::displayName() const
 {
     return m_projectName;
-}
-
-Core::IDocument *DubProject::document() const
-{
-    return m_file;
 }
 
 ProjectExplorer::IProjectManager *DubProject::projectManager() const
@@ -183,11 +178,7 @@ DubProject::RestoreResult DubProject::fromMap(const QVariantMap &map, QString *e
     } else {
         ProjectExplorer::Kit *defaultKit = ProjectExplorer::KitManager::defaultKit();
         if (defaultKit) {
-            ProjectExplorer::Target *t = new ProjectExplorer::Target(this, defaultKit);
-            t->updateDefaultBuildConfigurations();
-            t->updateDefaultDeployConfigurations();
-            t->updateDefaultRunConfigurations();
-            addTarget(t);
+            addTarget(createTarget(defaultKit));
             setupTargets();
         }
     }
@@ -258,8 +249,8 @@ void DubProject::appendIncludePaths(const ConfigurationInfo& info)
         auto includePaths = info.importPaths();
         includePaths.append(projectDirectory().toString());
         for (const auto& path : includePaths) {
-            part->headerPaths.append(CppTools::ProjectPart::HeaderPath(
-                                        path, CppTools::ProjectPart::HeaderPath::IncludePath));
+            part->headerPaths.append(CppTools::ProjectPartHeaderPath(
+                                        path, CppTools::ProjectPartHeaderPath::IncludePath));
         }
         pInfo.appendProjectPart(part);
         pInfo.finish();

@@ -1,4 +1,5 @@
 #include "dubwizard.h"
+#include "dubprojectmanagerconstants.h"
 
 #include "duboptionspage.h"
 
@@ -28,7 +29,7 @@ using namespace DubProjectManager;
 
 DubWizard::DubWizard()
 {
-    setWizardKind(ProjectWizard);
+    setSupportedProjectTypes(supportedProjectTypes() << DubProjectManager::Constants::DUBPROJECT_ID);
     setCategory(CATEGORY);
     setDisplayCategory(DISPLAY_CATEGORY);
     setDescription("Create empty DUB project");
@@ -38,7 +39,8 @@ DubWizard::DubWizard()
 }
 
 Utils::Wizard *DubWizard::runWizardImpl(const QString &path, QWidget *parent,
-                          const QString &platform, const QVariantMap &variables)
+                                        Core::Id platform,
+                                        const QVariantMap &variables)
 {
     Q_UNUSED(path)
     Q_UNUSED(platform)

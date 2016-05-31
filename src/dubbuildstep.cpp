@@ -37,7 +37,7 @@ DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl)
     setDisplayName(tr("Dub"));
 }
 
-bool DubBuildStep::init()
+bool DubBuildStep::init(QList<const BuildStep *> &earlierSteps)
 {
 
     ProjectExplorer::BuildConfiguration *bc = buildConfiguration();
@@ -53,7 +53,7 @@ bool DubBuildStep::init()
 
     setOutputParser(new DubOutputDmdParser(params->workingDirectory()));
 
-    return AbstractProcessStep::init();
+    return AbstractProcessStep::init(earlierSteps);
 }
 
 void DubBuildStep::run(QFutureInterface<bool> &fi)

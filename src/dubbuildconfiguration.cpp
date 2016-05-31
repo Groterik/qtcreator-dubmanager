@@ -3,6 +3,7 @@
 #include "dubbuildstep.h"
 #include "dubprojectmanagerconstants.h"
 
+#include <coreplugin/coreicons.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/target.h>
@@ -10,7 +11,6 @@
 #include <projectexplorer/kit.h>
 #include <projectexplorer/kitmanager.h>
 #include <utils/mimetypes/mimedatabase.h>
-#include <coreplugin/coreconstants.h>
 
 #include <QFormLayout>
 #include <QHBoxLayout>
@@ -85,7 +85,7 @@ DubBuildConfigurationWidget::DubBuildConfigurationWidget(DubBuildConfiguration* 
 
     QToolButton *resetButton = new QToolButton();
     resetButton->setToolTip(tr("Update project"));
-    resetButton->setIcon(QIcon(QLatin1String(Core::Constants::ICON_RESET)));
+    resetButton->setIcon(Core::Icons::RESET.icon());
     connect(resetButton, SIGNAL(clicked()), &(m_configuration->dubPoject()), SLOT(update()));
     fl->addRow(tr("Update project:"), resetButton);
 

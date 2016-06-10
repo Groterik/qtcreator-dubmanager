@@ -204,6 +204,7 @@ QStringList DubInitSettingsPage::getArguments() const
     if (!args.isEmpty()) {
         result << m_dubInitExtraArguments->text();
     }
+    result << QLatin1String("-n");
     return result;
 }
 

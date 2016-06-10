@@ -34,7 +34,7 @@ before_build:
   - cmd: '%APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\lib\qtcreator\plugins %APPVEYOR_BUILD_FOLDER%\qt-libs'
 
 build_script:
-  - cmd: qmake %APPVEYOR_BUILD_FOLDER%/dubprojectmanager.pro -r "CONFIG+=%configuration%" "QTC_SOURCE=%APPVEYOR_BUILD_FOLDER%\qt-src\qt-creator-opensource-src-3.6.0" "QTC_BUILD=%APPVEYOR_BUILD_FOLDER%\qt-bin\bin" "LIBS+=-L%APPVEYOR_BUILD_FOLDER%\qt-libs" "OUTPUT_PATH=%APPVEYOR_BUILD_FOLDER%\artifacts\4.0.0"
+  - cmd: qmake %APPVEYOR_BUILD_FOLDER%/dubprojectmanager.pro -r "CONFIG+=%configuration%" "QTC_SOURCE=%APPVEYOR_BUILD_FOLDER%\qt-src\qt-creator-opensource-src-4.0.0" "QTC_BUILD=%APPVEYOR_BUILD_FOLDER%\qt-bin\bin" "LIBS+=-L%APPVEYOR_BUILD_FOLDER%\qt-libs" "OUTPUT_PATH=%APPVEYOR_BUILD_FOLDER%\artifacts\4.0.0"
   - cmd: nmake.exe
 
 after_build:

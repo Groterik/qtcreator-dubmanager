@@ -16,7 +16,7 @@ public:
     virtual DubException *clone() const Q_DECL_OVERRIDE;
 
     virtual const QString &description() const;
-    virtual const char *what() const Q_DECL_NOEXCEPT;
+    virtual const char *what() const Q_DECL_NOEXCEPT Q_DECL_OVERRIDE;
 
     virtual ~DubException() throw();
 

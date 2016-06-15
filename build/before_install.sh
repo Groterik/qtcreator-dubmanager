@@ -3,6 +3,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${DIR}/setup-env.sh"
 
 if [[ "$BUILD_OS_NAME" == "osx" ]]; then
+  brew update
   brew install p7zip
   brew install wget
 

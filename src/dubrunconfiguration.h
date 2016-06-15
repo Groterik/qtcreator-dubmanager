@@ -41,8 +41,8 @@ public:
     QString configuration() const;
     QStringList configurationsList() const;
 
-    virtual bool fromMap(const QVariantMap &map);
-    virtual QVariantMap toMap() const;
+    virtual bool fromMap(const QVariantMap &map) Q_DECL_OVERRIDE;
+    virtual QVariantMap toMap() const Q_DECL_OVERRIDE;
 
 signals:
     void updated();

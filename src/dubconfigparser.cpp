@@ -93,12 +93,29 @@ QStringList DubConfigParser::readList(const QStringList &args)
     return parseList(array);
 }
 
-const QJsonValue& CheckPresentation(const QJsonValue& v, QJsonValue::Type type = QJsonValue::String)
+const QJsonValue &checkPresentation(const QJsonValue& v, QJsonValue::Type type = QJsonValue::String)
 {
     if (v.isNull() || v.isUndefined() || v.type() != type) {
-        throw DubException(QObject::tr("Bad value in json"));
+        throw DubException(QObject::tr("Bad value in json."));
     }
     return v;
+}
+
+const QJsonValue getValue(const QJsonObject &obj, const QStringList& names,
+                          QJsonValue::Type type = QJsonValue::String) {
+    for (const auto &name : names) {
+        QJsonValue result = obj.value(name);
+        if (result.isNull() || result.isUndefined()) {
+            continue;
+        }
+        if (result.type() != type) {
+            throw DubException(QObject::tr(
+                "Value \"%1\" found but type mismathed.").arg(name));
+        }
+        return result;
+    }
+    throw DubException(QObject::tr(
+        "Values \"%1\" not found.").arg(names.join(", ")));
 }
 
 QJsonDocument parseOutput(QByteArray array)
@@ -119,25 +136,25 @@ QString DubConfigParser::parseDescribe(QByteArray array, const QString &projectN
     QJsonDocument doc = parseOutput(array);
 
     QJsonObject root = doc.object();
-    QJsonValue nameValue = root.value(QString::fromUtf8("mainPackage"));
-    CheckPresentation(nameValue);
+    QJsonValue nameValue = getValue(root, {QLatin1String("rootPackage"),
+                                          QLatin1String("mainPackage")});
     if (!projectName.isEmpty() && projectName != nameValue.toString()) {
-        throw DubException("main package is mutable");
+        throw DubException("Project name mismatched!");
     }
     QString realProjectName = nameValue.toString();
 
-    QJsonValue packages = root.value(QString::fromUtf8("packages"));
-    CheckPresentation(packages, QJsonValue::Array);
-
+    QJsonValue packages = getValue(root, {QLatin1String("packages")},
+                                   QJsonValue::Array);
     QJsonArray packageArray = packages.toArray();
     QJsonObject packageRoot;
     QMap<QString, QStringList> dependenciesImports;
     QStringList subPackagesFiles;
     foreach (QJsonValue package, packageArray) {
-        CheckPresentation(package, QJsonValue::Object);
+        checkPresentation(package, QJsonValue::Object);
 
         QJsonObject packageObject = package.toObject();
-        QString targetPackageName = CheckPresentation(packageObject.value("name")).toString();
+        QString targetPackageName =
+                getValue(packageObject, {QLatin1String("name")}).toString();
 
         if (targetPackageName == realProjectName) {
             if (!packageRoot.isEmpty()) {
@@ -146,50 +163,54 @@ QString DubConfigParser::parseDescribe(QByteArray array, const QString &projectN
             packageRoot = packageObject;
         } else {
             if (targetPackageName.startsWith(realProjectName + QLatin1Char(':'))) {
-                // this is subPackage
+                // this is a subPackage
                 QProcess dubSp;
                 runDubProcess(dubSp, QStringList() << "describe" << targetPackageName, projectDir);
                 ConfigurationInfo infoSp;
                 parseDescribe(dubSp.readAllStandardOutput(), targetPackageName, projectDir, infoSp);
                 subPackagesFiles.append(infoSp.files());
             }
-            QString depPath = CheckPresentation(packageObject.value("path")).toString();
+            QString depPath =
+                    getValue(packageObject, {QLatin1String("path")}).toString();
             QStringList depImports;
-            QJsonArray importPathsArray = CheckPresentation(packageObject.value("importPaths"),
-                                                            QJsonValue::Array).toArray();
+            QJsonArray importPathsArray =
+                    getValue(packageObject, {QLatin1String("importPaths")},
+                             QJsonValue::Array).toArray();
             foreach (QJsonValue importPathValue, importPathsArray) {
                 depImports.append(QDir(depPath).absoluteFilePath(
-                                      CheckPresentation(importPathValue).toString()));
+                                      checkPresentation(importPathValue).toString()));
             }
             dependenciesImports[targetPackageName] = depImports;
         }
     }
 
-    state.m_path = CheckPresentation(packageRoot.value("path")).toString();
-    state.m_targetName = CheckPresentation(packageRoot.value("targetName")).toString();
-    state.m_workingDirectory = CheckPresentation(packageRoot.value("workingDirectory")).toString();
-    state.m_targetFilename = CheckPresentation(packageRoot.value("targetFileName")).toString();
-    state.m_targetType = CheckPresentation(packageRoot.value("targetType")).toString();
-    state.m_targetPath = CheckPresentation(packageRoot.value("targetPath")).toString();
+    state.m_path = getValue(packageRoot, {"path"}).toString();
+    state.m_targetName = getValue(packageRoot, {"targetName"}).toString();
+    state.m_workingDirectory =
+            getValue(packageRoot, {"workingDirectory"}).toString();
+    state.m_targetFilename =
+            getValue(packageRoot, {"targetFileName"}).toString();
+    state.m_targetType = getValue(packageRoot, {"targetType"}).toString();
+    state.m_targetPath = getValue(packageRoot, {"targetPath"}).toString();
 
     QDir qpath(state.m_path);
-    QJsonArray srcArray = CheckPresentation(packageRoot.value("files"),
-                                            QJsonValue::Array).toArray();
+    QJsonArray srcArray = getValue(packageRoot, {"files"},
+                                   QJsonValue::Array).toArray();
     foreach (QJsonValue src, srcArray) {
-        QJsonObject srcObj = CheckPresentation(src, QJsonValue::Object).toObject();
-        if (CheckPresentation(srcObj.value("type")).toString() == "source") {
-            state.m_files.push_back(CheckPresentation(srcObj.value("path")).toString());
+        QJsonObject srcObj = checkPresentation(src, QJsonValue::Object).toObject();
+        if (getValue(srcObj, {"type", "role"}).toString() == "source") {
+            state.m_files.push_back(getValue(srcObj, {"path"}).toString());
             state.m_files.back() = qpath.absoluteFilePath(state.m_files.back());
         }
     }
     state.m_files.append(subPackagesFiles);
     state.m_files.removeDuplicates();
 
-    QJsonArray importPathsArray = CheckPresentation(packageRoot.value("importPaths"),
-                                                    QJsonValue::Array).toArray();
+    QJsonArray importPathsArray =
+            getValue(packageRoot, {"importPaths"}, QJsonValue::Array).toArray();
     foreach (QJsonValue importPathValue, importPathsArray) {
         state.m_importPaths.push_back(qpath.absoluteFilePath(
-                                          CheckPresentation(importPathValue).toString()));
+            checkPresentation(importPathValue).toString()));
     }
     foreach (const QStringList& di, dependenciesImports) {
         state.m_importPaths += di;

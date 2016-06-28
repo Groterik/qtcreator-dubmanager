@@ -4,24 +4,27 @@
 #include "dubproject.h"
 #include "duboptionspage.h"
 
+#include <projectexplorer/buildconfiguration.h>
+#include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/target.h>
-#include <projectexplorer/buildsteplist.h>
-#include <projectexplorer/buildconfiguration.h>
 
+#include <QCheckBox>
+#include <QComboBox>
 #include <QFormLayout>
 #include <QLineEdit>
-#include <QComboBox>
 
 using namespace DubProjectManager;
 
 namespace {
-const char BUILDSTEP_ID[] = "DubProjectManager.BuildStep";
+const char BUILDSTEP_BUILD_ID[] = "DubProjectManager.BuildStep";
+const char BUILDSTEP_CLEAN_ID[] = "DubProjectManager.CleanStep";
 
 const char S_PACKAGE_KEY[] = "DubProjectManager.BuildStep.Package";
 const char S_BUILD_TYPE_KEY[] = "DubProjectManager.BuildStep.BuildType";
 const char S_CONFIGURATION_KEY[] = "DubProjectManager.BuildStep.Configuration";
 const char S_ADDITIONAL_ARGUMENTS_KEY[] = "DubProjectManager.BuildStep.AdditionalArguments";
+const char S_IS_CLEAN_STEP[] = "DubProjectManager.BuildStep.IsCleanStep";
 } // namespace
 
 DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl, const Core::Id id) :
@@ -31,7 +34,7 @@ DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl, const Core::Id i
 }
 
 DubBuildStep::DubBuildStep(ProjectExplorer::BuildStepList *bsl)
-    : ProjectExplorer::AbstractProcessStep(bsl, BUILDSTEP_ID)
+    : ProjectExplorer::AbstractProcessStep(bsl, BUILDSTEP_BUILD_ID)
 {
     construct();
     setDisplayName(tr("Dub"));
@@ -89,6 +92,12 @@ void DubBuildStep::updatePackage(const QString &package)
     emit updated();
 }
 
+void DubBuildStep::makeCleanStep(bool cleanStep)
+{
+    m_isCleanStep = cleanStep;
+    emit updated();
+}
+
 void DubBuildStep::construct()
 {
     Q_ASSERT(buildConfiguration()->target()->project()->id() == Constants::DUBPROJECT_ID);
@@ -100,11 +109,16 @@ void DubBuildStep::construct()
 
 QString DubBuildStep::generateArguments() const
 {
-    QString result = "build " + m_package;
-    if (!m_configuration.isEmpty() && m_configuration != Constants::DUB_NO_CONFIG) {
-        result += QLatin1String(" --config=\"") + m_configuration + QLatin1String("\"");
+    QString result;
+    if (m_isCleanStep) {
+        result = QLatin1String("clean");
+    } else {
+        result = QLatin1String("build ") + m_package;
+        if (!m_configuration.isEmpty() && m_configuration != Constants::DUB_NO_CONFIG) {
+            result += QLatin1String(" --config=\"") + m_configuration + QLatin1String("\"");
+        }
+        result += QLatin1String(" --build=") + m_buildType;
     }
-    result += QLatin1String(" --build=") + m_buildType;
     result += QLatin1String(" ") + m_additionalArguments;
     return result;
 }
@@ -124,6 +138,11 @@ const QString &DubBuildStep::buildType() const
     return m_buildType;
 }
 
+bool DubBuildStep::isCleanStep() const
+{
+    return m_isCleanStep;
+}
+
 QString DubBuildStep::commandString() const
 {
     return command() + " " + generateArguments();
@@ -141,6 +160,7 @@ QVariantMap DubBuildStep::toMap() const
     map.insert(QString::fromLatin1(S_CONFIGURATION_KEY), m_configuration);
     map.insert(QString::fromLatin1(S_BUILD_TYPE_KEY), m_buildType);
     map.insert(QString::fromLatin1(S_ADDITIONAL_ARGUMENTS_KEY), m_additionalArguments);
+    map.insert(QString::fromLatin1(S_IS_CLEAN_STEP), m_isCleanStep);
     return map;
 }
 
@@ -155,6 +175,7 @@ bool DubBuildStep::fromMap(const QVariantMap &map)
     m_configuration = map.value(QString::fromLatin1(S_CONFIGURATION_KEY)).toString();
     m_buildType = map.value(QString::fromLatin1(S_BUILD_TYPE_KEY)).toString();
     m_additionalArguments = map.value(QString::fromLatin1(S_ADDITIONAL_ARGUMENTS_KEY)).toString();
+    m_isCleanStep = map.value(QString::fromLatin1(S_IS_CLEAN_STEP)).toBool();
     emit updated();
     return ProjectExplorer::AbstractProcessStep::fromMap(map);
 }
@@ -173,6 +194,11 @@ DubBuildStepConfigWidget::DubBuildStepConfigWidget(DubBuildStep *step)
     fl->setMargin(0);
     fl->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
     setLayout(fl);
+
+    m_isCleanStep = new QCheckBox(this);
+    fl->addRow(tr("Clean step:"), m_isCleanStep);
+    m_isCleanStep->setChecked(m_step->isCleanStep());
+    connect(m_isCleanStep, SIGNAL(toggled(bool)), m_step, SLOT(makeCleanStep(bool)));
 
     m_package = new QLineEdit(this);
     fl->addRow(tr("Package:"), m_package);
@@ -196,10 +222,12 @@ DubBuildStepConfigWidget::DubBuildStepConfigWidget(DubBuildStep *step)
     connect(m_additionalArguments, SIGNAL(textChanged(QString)),
             m_step, SLOT(updateAdditionalArguments(QString)));
 
+    connect(m_step, SIGNAL(updated()), this, SLOT(onBuildStepUpdate()));
     connect(m_step, SIGNAL(updated()), this, SIGNAL(updateSummary()));
-    connect(m_step->dubProject(), SIGNAL(updated()), this, SLOT(update()));
+    connect(m_step->dubProject(), SIGNAL(updated()), this, SLOT(onProjectUpdate()));
 
-    update();
+    onBuildStepUpdate();
+    onProjectUpdate();
 }
 
 QString DubBuildStepConfigWidget::summaryText() const
@@ -212,7 +240,15 @@ QString DubBuildStepConfigWidget::displayName() const
     return QString::fromLatin1("WowDisplayName");
 }
 
-void DubBuildStepConfigWidget::update()
+void DubBuildStepConfigWidget::onBuildStepUpdate()
+{
+    const bool enableElements = !m_isCleanStep->isChecked();
+    m_configuration->setEnabled(enableElements);
+    m_package->setEnabled(enableElements);
+    m_buildTargetsList->setEnabled(enableElements);
+}
+
+void DubBuildStepConfigWidget::onProjectUpdate()
 {
     m_buildTargetsList->blockSignals(true);
     m_buildTargetsList->clear();
@@ -240,9 +276,9 @@ DubBuildStepFactory::~DubBuildStepFactory()
 
 bool DubBuildStepFactory::canCreate(ProjectExplorer::BuildStepList *parent, const Core::Id id) const
 {
-    if (canHandle(parent))
-        return id == BUILDSTEP_ID;
-    return false;
+    return canHandle(parent) &&
+            (id == Core::Id(BUILDSTEP_BUILD_ID) ||
+             id == Core::Id(BUILDSTEP_CLEAN_ID));
 }
 
 ProjectExplorer::BuildStep *DubBuildStepFactory::create(ProjectExplorer::BuildStepList *parent,
@@ -250,7 +286,11 @@ ProjectExplorer::BuildStep *DubBuildStepFactory::create(ProjectExplorer::BuildSt
 {
     if (!canCreate(parent, id))
         return 0;
-    return new DubBuildStep(parent);
+    auto *step = new DubBuildStep(parent);
+    if (id == Core::Id(BUILDSTEP_CLEAN_ID)) {
+        step->makeCleanStep(true);
+    }
+    return step;
 }
 
 bool DubBuildStepFactory::canClone(ProjectExplorer::BuildStepList *parent,
@@ -288,16 +328,24 @@ ProjectExplorer::BuildStep *DubBuildStepFactory::restore(ProjectExplorer::BuildS
 
 QList<Core::Id> DubBuildStepFactory::availableCreationIds(ProjectExplorer::BuildStepList *bc) const
 {
-    if (bc->target()->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID
-            && bc->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD)
-        return QList<Core::Id>() << Core::Id(BUILDSTEP_ID);
+    if (bc->target()->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID) {
+        if (bc->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD) {
+            return QList<Core::Id>() << Core::Id(BUILDSTEP_BUILD_ID);
+        }
+        if (bc->id() == ProjectExplorer::Constants::BUILDSTEPS_CLEAN) {
+            return QList<Core::Id>() << Core::Id(BUILDSTEP_CLEAN_ID);
+        }
+    }
     return QList<Core::Id>();
 }
 
 QString DubBuildStepFactory::displayNameForId(const Core::Id id) const
 {
-    if (id == BUILDSTEP_ID) {
-        return tr("Dub build step id");
+    if (id == BUILDSTEP_BUILD_ID) {
+        return tr("Dub Build Step");
+    }
+    if (id == BUILDSTEP_CLEAN_ID) {
+        return tr("Dub Clean Step");
     }
     return QString();
 }
@@ -305,7 +353,8 @@ QString DubBuildStepFactory::displayNameForId(const Core::Id id) const
 bool DubBuildStepFactory::canHandle(ProjectExplorer::BuildStepList *parent) const
 {
     return parent->target()->project()->id() == DubProjectManager::Constants::DUBPROJECT_ID
-           && parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD;
+           && (parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD ||
+               parent->id() == ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
 }
 
 const char COMMON_DMD_PATTERN[] = "^(.*)\\((.*),(.*)\\): (\\w*):(.*)$";

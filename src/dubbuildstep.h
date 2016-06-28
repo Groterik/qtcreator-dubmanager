@@ -6,8 +6,9 @@
 #include <projectexplorer/ioutputparser.h>
 #include <projectexplorer/task.h>
 
-QT_FORWARD_DECLARE_CLASS(QLineEdit)
+QT_FORWARD_DECLARE_CLASS(QCheckBox)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QLineEdit)
 
 namespace DubProjectManager {
 
@@ -35,6 +36,7 @@ public:
     const QString &configuration() const;
     const QString &package() const;
     const QString &buildType() const;
+    bool isCleanStep() const;
 
     QString commandString() const;
     QString command() const;
@@ -53,9 +55,11 @@ public slots:
     void updateConfiguration(const QString& conf);
     void updateAdditionalArguments(const QString& args);
     void updatePackage(const QString& package);
+    void makeCleanStep(bool cleanStep);
 
 private:
     void construct();
+    QString generateArguments() const;
 
     DubProject* m_project;
 
@@ -63,8 +67,7 @@ private:
     QString m_additionalArguments;
     QString m_buildType;
     QString m_configuration;
-
-    QString generateArguments() const;
+    bool m_isCleanStep = false;
 };
 
 class DubBuildStepFactory : public ProjectExplorer::IBuildStepFactory
@@ -108,10 +111,12 @@ public:
     // others
 
 public slots:
-    void update();
+    void onProjectUpdate();
+    void onBuildStepUpdate();
 
 private:
     DubBuildStep *m_step;
+    QCheckBox *m_isCleanStep;
     QComboBox *m_configuration;
     QLineEdit *m_package;
     QLineEdit *m_additionalArguments;

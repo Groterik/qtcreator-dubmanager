@@ -54,8 +54,14 @@ DubBuildConfiguration::DubBuildConfiguration(ProjectExplorer::Target *target,
             stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
     
     DubBuildStep *build = new DubBuildStep(buildSteps);
-
     buildSteps->insertStep(0, build);
+
+    ProjectExplorer::BuildStepList* cleanSteps =
+            stepList(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
+
+    DubBuildStep *clean = new DubBuildStep(cleanSteps);
+    clean->makeCleanStep(true);
+    cleanSteps->insertStep(0, clean);
 }
 
 ProjectExplorer::NamedWidget *DubBuildConfiguration::createConfigWidget()
